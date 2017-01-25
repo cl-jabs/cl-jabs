@@ -52,6 +52,10 @@
   * deb - packaging
   * rpm - packaging
 
+## Wrappers:
+* jab
+* jabslime
+
 ## Longterm:
 * port to clisp/cmucl/ccl
 * artifacts repository for (like nexus)
@@ -60,7 +64,7 @@
 BUG:
 CURRENT: loading plugin dependencies from 'root' directory of project. Not from plugin root directory' (or using main project's skelethon).
 REQUIRED: load plugin dependencies, using current project's skelethon
-
+```
 2017-01-23 19:58:56 [DEBUG]: Registering plugin ``FIVEAM@TEST@PLUGIN@JABS''
 2017-01-23 19:58:56 [INFO]: Plugin ``FIVEAM@TEST@PLUGIN@JABS'', type ``TEST'' registered
 2017-01-23 19:58:56 [DEBUG]: Creating project ``FIVEAM@TEST@PLUGIN@JABS''
@@ -82,7 +86,7 @@ Unhandled SB-INT:SIMPLE-READER-PACKAGE-ERROR in thread #<SB-THREAD:THREAD
     Stream: #<SB-SYS:FD-STREAM
               for "file /home/cosmonaut/dev/cl-phinan/cache/quicklisp/cl-phinan/quicklisp/quicklisp.asd"
               {100706B6D3}>
-
+```
 
 FEATURE:
 REQUIRED: make plugin dependencies (like: :depends-on `(alexandria fiveam@test@plugin@jabs)` or smth).
