@@ -1,0 +1,9 @@
+[submodule "lib/asdf"]
+	path = lib/asdf
+	url = https://gitlab.common-lisp.net/asdf/asdf.git
+[submodule "lib/clunit"]
+	path = lib/clunit
+	url = https://github.com/tgutu/clunit.git
+[submodule "lib/quicklisp-bootstrap"]
+	path = lib/quicklisp-bootstrap
+	url = https://github.com/quicklisp/quicklisp-bootstrap.git

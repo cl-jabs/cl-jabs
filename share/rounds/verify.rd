@@ -1,0 +1,3 @@
+;; -*- mode: lisp -*-
+(:verify
+ :verify)

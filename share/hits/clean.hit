@@ -1,0 +1,36 @@
+;; -*- mode: lisp -*-
+(clean :depends-on ()
+ (jlog:err "clean NOT IMPLEMENTED"))
+
+;; (defvar *build-recursively-exclusions*
+;;   '(".bzr" ".cdv"
+;;     ;; "~.dep" "~.dot" "~.nib" "~.plst" ; we don't support ack wildcards
+;;     ".git" ".hg" ".pc" ".svn" "CVS" "RCS" "SCCS" "_darcs"
+;;     "_sgbak" "autom4te.cache" "cover_db" "_build"
+;;     "debian")) ;; debian often builds stuff under the debian directory... BAD.
+
+;;  (labels (
+;;           (member-exclude (list)
+;;                           (labels ((member-p (list1 list2)
+;;                                              (cond ((null list1) nil)
+;;                                                    ((member (car list1) list2 :test 'equal) t)
+;;                                                    (t (member-p (cdr list1) list2)))))
+;;                             (member-p *build-recursively-exclusions* (pathname-directory list))))
+;;           (finddirs (path)
+;;                     "find all directories recursively"
+;;                     (let ((dirs
+;;                            (remove-if #'member-exclude
+;;                                       (remove nil
+;;                                               (mapcar #'directory-pathname-p
+;;                                                       (directory (make-pathname :directory (princ-to-string path)
+;;                                                                                 :name :wild :type nil)))))))
+;;                       (cond ((null dirs) nil)
+;;                             ;;(t (append dirs (flatten (mapcar #'finddirs dirs)))))))
+;;                             (t (dolist (v dirs)
+;;                                  ;; (push v dirs)
+;;                                  (setf dirs (append dirs (finddirs v))))))
+;;                       dirs)))
+
+;;    (dolist (dir (finddirs (os-pwd)))
+;;      (when (probe-file (make-pathname :directory (princ-to-string dir) :name :wild :type "fasl"))
+;;        (delete-file (make-pathname :directory (princ-to-string dir) :name :wild :type "fasl"))))))

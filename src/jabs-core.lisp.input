@@ -1,0 +1,119 @@
+;;; -*- Mode: Lisp -*-
+
+(in-package :jabs)
+
+#+sbcl(require 'sb-posix)
+
+;; define jabs version
+(defconstant +jabs-version+ "0.0.0")
+
+(defconstant +jabs-run-directory+ (os-pwd))
+
+;; (defvar *jabs-core-directory* (parse-namestring "@DATADIR@"))
+;; ;; local direcotry names:
+(defvar *jabs-local-share-directory* (make-pathname :directory '(:relative "share")))
+(defvar *jabs-local-config-directory* (make-pathname :directory '(:relative "etc")))
+(defvar *jabs-local-lib-directory* (make-pathname :directory '(:relative "lib")))
+(defvar *jabs-local-src-directory* (make-pathname :directory '(:relative "src")))
+(defvar *jabs-local-directory* (make-pathname :directory '(:relative ".jabs")))
+
+;; system directories
+(defvar *jabs-source-directory* (parse-namestring "@SRCDIR@"))
+(defvar *jabs-lib-directory* (parse-namestring "@LIBDIR@"))
+(defvar *jabs-share-directory* (parse-namestring "@DATAROOTDIR@"))
+(defvar *jabs-config-directory* (parse-namestring "@SYSCONFIGDIR@"))
+(defvar *jabs-user-directory* (merge-pathnames
+                               (make-pathname :directory
+                                              '(:relative ".jabs"))
+                               (user-homedir-pathname)))
+
+;; (defvar *jabs-source-registry* nil)
+(defvar *jabs-buildfile* (make-pathname :name "build" :type "jab"))
+
+(defconstant +jabs-configfile+ (make-pathname :name "jabs" :type "conf"))
+
+;; (defvar *jabs-no-bout* nil) ; run hits without bout (dependency-based running)
+
+(defvar *jabs-output-log* nil)
+(defvar *jabs-error-log* nil)
+
+;; verbosity/debug level
+(defvar *jabs-quiet* nil)
+(defvar *jabs-verbose* nil)
+(defvar *jabs-debug* nil)
+
+(defvar *jabs-universal-delimiter* "@")
+
+;; ;; environment variables
+;; (defvar *jabs-current-pathname* nil)
+;; (defvar *jabs-current-bout* nil)
+;; ;;
+;; (defvar *current-sources* nil)
+;; (defvar *current-repositories* nil)
+
+;; ;; hooks
+;; (defvar *register-source-hook* nil)
+(defvar *post-init-hook* nil)
+(defvar *pre-run-project-hook* nil)
+(defvar *post-run-project-hook* nil)
+
+(defvar *fail-on-error* nil)
+
+;; ;;CLI
+;; (defvar *jabs-projects-to-run* nil)
+;; (defvar *jabs-projects-force-to-run* nil)
+;; (defvar *jabs-use-hit-deps* t) ; do not use dependencies for hits (working only with no-lcs
+;; (defvar *jabs-use-bouts* t) ; do not use bouts
+
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defmacro run-hook (hook &body args)
+  "Run hook with arguments"
+  `(when ,hook
+     (jlog:dbg "Running ``~a'' hook" ,(symbol-name hook))
+     (dolist (run (reverse ,hook))
+       (funcall run ,@args))))
+
+(defmacro add-hook (hook &body body)
+  "Add lambda or function symbol to hook variable"
+  `(push ,@body ,hook))
+
+(defun load-build-jab (dir)
+  "loading build file" ;; TODO: move to jabs-loader as part of loading (not used at other places)
+  (let ((dirname (pathname-as-directory dir)))
+    (if (probe-file (merge-pathnames dirname *jabs-buildfile*))
+        (progn
+          (jlog:dbg "Loading buildfile ``~a'' in ``~a''" *jabs-buildfile* dirname)
+          ;; (os-cd dirname) ;; TODO: is it needed??
+          (load (merge-pathnames dirname *jabs-buildfile*))))))
+
+(defun make-jabs-symbol (symbol &optional (package :keyword))
+  ;; FIXME: Deprecated
+  (tosymbol symbol package))
+
+(defun concatenate-symbol (delimiter &rest symbols)
+  ;; FIXME: Deprecated
+  (eval `(concat-keywords-w-delimiter ,delimiter ,@symbols)))
+
+(defun get-option-suffix (name list &key (test 'eql) (nth 1))
+  (nth nth (member name list :test test)))
+
+(defun remove-with-arg (item list) ;; &key (test 'eql))
+  (cond ((null list) nil)
+        ((equal item (car list)) ;; TODO: make it with #'test
+         (remove-with-arg item (cddr list)))
+        (t (cons (car list) (remove-with-arg item (cdr list))))))
+
+(defmacro with-project-to-be-run (project &body body)
+  "Run code only if project is set to be run"
+  `(when (and (typep ,project 'jabs::project)
+              (member (get-project-name ,project) *jabs-projects-to-run*))
+     ,@body))
+
+;; read configfile
+(dolist (v (os-cat (merge-pathnames +jabs-configfile+ *jabs-config-directory*) :list))
+  (when (not (null (cadr v)))
+    (eval `(setf ,(tosymbol (car v) :jabs) ,(cadr v)))))
+
+;; setting version
+(push (intern (concatenate 'string "JABS" +jabs-version+) :keyword) *features*)

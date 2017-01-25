@@ -1,0 +1,176 @@
+;;; -*- Mode: Lisp -*-
+
+;; (defconstant +jabs-ext-deps+ '("cl-ppcre")) ;; "external-program"
+
+#+sbcl(require :sb-posix)
+
+;; load external dependencies
+;; (dolist (lib +jabs-ext-deps+)
+;;   (push
+;;    (merge-pathnames
+;;     (make-pathname :directory (list :relative lib)) ;; :name lib :type "asd")
+;;     (parse-namestring "@LIBDIR@"))
+;;    ;; asdf:*central-registry*
+;;    )
+;;   (require lib))
+
+(defpackage :logger@jabs
+  (:nicknames :jlog)
+  (:use :cl)
+  ;; (:shadow :warn :error)
+  (:export :crit
+           :err
+           :wrn
+           :info
+           :note
+           :dbg
+           :log-write-output
+           :*log-level*
+           :*log-string*
+           :*fail-on-critical*
+           :*fail-on-error*
+           :*log-disable-notes*
+           :get-log-level
+           :set-log-level
+           :define-output-type
+           :enable-output-type
+           :disable-output-type
+           :make-log-string
+           :get-stamp))
+
+(defpackage re@jabs
+  (:nicknames :jre)
+  (:use :cl)
+  (:export :get-before
+           :get-after
+           :get-first-n
+           :cut-first-n
+           :split
+           :replace-string
+           :replace-string-all
+           :replace-inside-string
+           :begin-scan
+           :end-scan
+           :middle-scan
+           :end-cut
+           :begin-cut
+           :scan
+           ;;
+           :concatenate-to-string-with-delimiter))
+
+(defpackage :tools@jabs
+  (:use :cl :logger@jabs :jre)
+  (:export :argv
+           :terminate
+           :maphash-keys
+           :maphash-values
+           :copy-hash-table
+           :if-let
+           :component-present-p
+           :directory-pathname-p
+           :pathname-as-directory
+           :pathname-as-file
+           :directory-wildcard
+           :list-directory
+           :file-exists-p
+           :directory-exists-p
+           :copy-file
+           :lisp-version-string
+           ;;
+           :os-hostname
+           :os-find
+           :os-mkdir
+           :os-cp
+           :os-mv
+           :os-rm
+           :os-touch
+           :os-cat
+           :os-cd
+           :os-pwd
+           :os-getenv
+           :os-realpath
+           ;; parser
+           :parse-args
+           :make-argument-parser
+           :add-argument
+           :get-parsed-argument-value
+           ;;
+           :flatten
+           :tolist
+           :tostr
+           :tosymbol
+           :tokeyword
+           ;; concatenation
+           :concat-strings
+           :concat-symbols
+           :concat-keywords
+           :concat-symbols-w-delimiter
+           :concat-keywords-w-delimiter
+           ;; from jabs-external-program
+           :start
+           :run
+           :signal-process
+           :process-id
+           :process-input-stream
+           :process-output-stream
+           :process-error-stream
+           :process-status
+           :process-p
+           ;; REST
+           :merge-n-directories
+           :get-cars
+           :scan-all-to-list
+           :list-files-recursively
+           ;; namespaces
+           :namespace-subtree-p
+           :add-namespace-subtree
+           :replace-namespace-subtree
+           ;;
+           :bind-jabs-cli-parameter
+           :process-jabs-cli-parameter
+           :option-set-bool
+           ;;
+           :find-file-from-list-by-filename
+					 ;;
+					 :implementation-signature
+					 :try
+           ;;
+           :defun*
+           :defgeneric*
+           :defmethod*
+           ))
+
+(defpackage :jabs
+  (:use :cl :tools@jabs :re@jabs)
+  (:export :*jabs-buildfile*
+           :*jabs-cli-actions*
+           :*jabs-currenct-compiler*
+           :*jabs-output-log*
+           :*jabs-error-log*
+           :*jabs-quiet*
+           :*jabs-verbose*
+           :*jabs-debug*
+           :*fail-on-error*
+           :*jabs-source-directory*
+           :*jabs-lib-directory*
+           :*jabs-share-directory*
+           :*jabs-config-directory*
+           :*jabs-local-directory*
+           :*jabs-local-share-directory*
+           :*jabs-local-config-directory*
+           :*jabs-local-lib-directory*
+           :*jabs-local-src-directory*
+           ;;
+           :tosymbol
+           :add-hook
+           ;;
+           :*post-init-hook*
+           :*pre-run-project-hook*
+           :*post-run-project-hook*
+           ;;
+           :insert-hit
+           :append-hit
+           ;;
+           :with-project-to-be-run
+           :share-plugin
+           ))

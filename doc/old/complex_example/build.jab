@@ -1,0 +1,63 @@
+;;; -*- Mode: Lisp -*-
+
+;;; moved to new build system, called JABS
+
+(defpackage :test-project-system
+  (:use :cl :jabs))
+
+(in-package :test-project-system)
+
+;; (defrepo mygit :git "https://github.com/cosmonaut-ok/cl-ghostcode.git")
+
+;; (defrepo :quicklisp :quicklisp "")
+
+(defproject :cl-phinan
+  :name "CL-PHINAN"
+  :author "Alexander Vynnyk <cosmonaut.ok@zoho.com>"
+  :version "0.0.0"
+  :maintainer "Alexander Vynnyk <cosmonaut.ok@zoho.com>"
+  :license "GNU General Public License version 3"
+  :description "some"
+  :serial t
+  :skelethon (:default :force)
+  :bout :default
+  ;; :sources ((make-pathname :directory '(:relative "lib"))
+  ;;           (make-pathname :directory '(:relative "src")))
+  ;; :repositories (:quicklisp) ;; :mygit (:mygit-2 :git "https://github.com/cosmonaut-ok/named-hash-tables.git"))
+  ;; :depends-on (:cl-actors (:cl-ghostcode :quicklisp "https://github.com/codmonaut-ok/cl-ghostcode.git" "lib"))
+  :depends-on (:cl-actors)
+  :pathname "zzz/qwe"
+  :hits ((:compile :depends-on (:verify) (format t "compilation"))
+      (:verify (format t "verification")))
+  )
+
+(defproject :cl-phinan-2
+  :name "CL-PHINAN-2"
+  :author "Alexander Vynnyk <cosmonaut.ok@zoho.com>"
+  :version "0.0.0"
+  :maintainer "Alexander Vynnyk <cosmonaut.ok@zoho.com>"
+  :license "GNU General Public License version 3"
+  :description "some"
+  :serial t
+  :skelethon (:default :force)
+  :bout :default
+  ;; :sources ((make-pathname :directory '(:relative "lib"))
+  ;;           (make-pathname :directory '(:relative "src")))
+  ;; :repositories (:quicklisp) ;; :mygit (:mygit-2 :git "https://github.com/cosmonaut-ok/named-hash-tables.git"))
+  ;; :depends-on (:cl-actors (:cl-ghostcode :quicklisp "https://github.com/codmonaut-ok/cl-ghostcode.git" "lib"))
+  :depends-on (:cl-actors)
+  :pathname "zzz/qwe"
+  :hits ((:compile :depends-on (:verify) (format t "compilation"))
+      (:verify (format t "verification")))
+  )
+
+
+;; (defhit :compile (:cl-project)
+;;   :depends-on (:verify)
+;;   (here is your code))
+
+
+;; (defbout :my (:cl-phinan)
+;;   (:phases :verify
+;;     :compile
+;;     :clean))

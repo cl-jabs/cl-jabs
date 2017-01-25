@@ -1,0 +1,701 @@
+;;; -*- Mode: Lisp -*-
+
+;; Copyright (C) 2013 Alexander aka CosmonauT Vynnyk
+;;
+;;  This file is part of dswm.
+;;
+;; dswm is free software; you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation; either version 2, or (at your option)
+;; any later version.
+
+;; dswm is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+
+;; You should have received a copy of the GNU General Public License
+;; along with this software; see the file COPYING.  If not, see
+;; <http://www.gnu.org/licenses/>.
+
+;; Commentary:
+;;
+;; Dynamically loads DSWM into CL virtualmachine
+;;
+;; Code:
+
+;; (load (make-pathname :directory '(:relative "src") :name "jabs-core" :type "lisp"))
+
+(load (merge-pathnames (make-pathname :name "jabs-packages" :type "lisp") (parse-namestring "@SRCDIR@")))
+(load (merge-pathnames (make-pathname :name "jabs-logger" :type "lisp") (parse-namestring "@SRCDIR@")))
+(load (merge-pathnames (make-pathname :name "jabs-re" :type "lisp") (parse-namestring "@SRCDIR@")))
+(load (merge-pathnames (make-pathname :name "jabs-tools" :type "lisp") (parse-namestring "@SRCDIR@")))
+(load (merge-pathnames (make-pathname :name "jabs-core" :type "lisp") (parse-namestring "@SRCDIR@")))
+(load (merge-pathnames (make-pathname :name "jabs-external-program" :type "lisp") (parse-namestring "@SRCDIR@")))
+;; (load (merge-pathnames (make-pathname :name "jabs-fileio" :type "lisp") (parse-namestring "@SRCDIR@")))
+
+;; (load (merge-pathnames (make-pathname :name "jabs-core" :type "lisp") (parse-namestring "@SRCDIR@")))
+
+(defpackage jab
+  (:use :cl :tools@jabs :core@jabs :regexp@jabs)
+  (:export :jab))
+
+(in-package :jab)
+
+(defvar +version+ "0.1.0")
+(defvar *lisp* "sbcl")
+(defvar *lisp-path*)
+(defvar *lisp-default-options*)
+(defvar *lisp-debug* nil)
+(defvar *lisp-quiet* nil)
+(defvar *lisp-eval* nil)
+(defvar *lisp-args* nil)
+(defvar *build-recursively* t)
+(defvar *build-recursively-exclusions*
+  '(".bzr" ".cdv"
+    ;; "~.dep" "~.dot" "~.nib" "~.plst" ; we don't support ack wildcards
+    ".git" ".hg" ".pc" ".svn" "CVS" "RCS" "SCCS" "_darcs"
+    "_sgbak" "autom4te.cache" "cover_db" "_build"
+    "debian")) ;; debian often builds stuff under the debian directory... BAD.
+
+(defvar *compilers* (make-hash-table :test 'equal))
+(defvar *compiler-arguments* nil)
+(defvar *jabs-hits* nil)
+(defvar *quit-compiler* t)
+
+(pushnew :jab *features*)
+;; load jab-adopted argparse after special jab declarations
+(load (merge-pathnames (make-pathname :name "jabs-argparse" :type "lisp") (parse-namestring "@SRCDIR@")))
+
+;; Initial JLOG variables setting
+;; (setf jlog:*log-level* "ERROR")
+;; (setf jlog:*fail-on-error* nil)
+
+(defun load-from-pathname (pathname name &optional (type "lisp"))
+  (compile-file (merge-pathnames pathname
+                                 (make-pathname :name name :type type)))
+  (load (merge-pathnames pathname
+                         (make-pathname :name name :type type)))
+  )
+
+(defparameter *usage*
+  (concatenate 'string
+               "USAGE: jab [OPTIONS]
+"
+               "Application options:
+ -h, --help-jabs              Show this help
+ --help                       Show compiler toplevel help
+ -p, --projects               Build project, or comma-separated projects
+ --hit                        Build only selected hits from selected
+                              projects (not working, -p must be set)
+ -f, --buildfile=FILENAME     Use selected buildfile instead of default
+                              default build.jab
+ -c, --compiler               Use selected compiled, instead of default
+                              supported compilers: sbcl, clisp, ccl, cmucl
+ -o, --options                Additional compiler options
+ --no-recursive               Do not build all projects recursively
+ -e, --eval                   Eval expression before of after build
+ -d, --debug                  Enable debugger
+ -q, --quiet                  Quiet mode
+ --logfile=FILENAME           Use logfile as standard output
+ --error-logfile=FILENAME     Use logfile as standard error output
+ --exclude=dir1,dir2          Comma separated directories, excluded from
+                              recursive build (inactive with --non-recursive)
+ -V, --version                Show version
+
+ --sbcl=PATH-TO-SBCL          Use PATH-TO-SBCL instead of the sbcl program
+                              found in your PATH environment variable
+ --ccl=PATH-TO-CCL            Use PATH-TO-CCL instead of the ccl program
+                              found in your PATH environment variable
+ --clisp=PATH-TO-CLISP        Use PATH-TO-CLISP instead of the clisp program
+                              found in your PATH environment variable
+ --cmucl=PATH-TO-CMUCL        Use PATH-TO-CMUCL instead of the cmucl program
+                              found in your PATH environment variable
+ -b, --bout                   Run selected bouts instead default for project
+ --nodeps                     Do not use hit dependencies resolution (working
+                              only with --deps-strategy)
+ --no-bouts                   Use bout-based hit running strategy
+ --fail-on-error              Do not skip application errors
+ -v, --verbose                Use verbose output
+
+ -D<some-parameter>           Give direct parameter to JABS (ex. jab -Dversion returns JABS version, but not JAB)
+
+ --self-install               Install JABS to specified location
+ --prefix                     Set PREFIX to install JABS (working only with --self-install) [/usr/local/ by default]
+ --bindir                     Set binary directory for JABS installation (working only with --self-install)  [PREFIX/bin/ by default]
+ --libdir                     Set directory with libraries for JABS installation (working only with --self-install) [PREFIX/lib/ by default]
+ --sysconfigdir               Set directory with configfiles for JABS installation (working only with --self-install) [PREFIX/etc/ by default]
+ --datarootdir                Set data directory for JABS installation (working only with --self-install) [PREFIX/share/ by default]
+ --docdir                     Set documentation directory for JABS installation (working only with --self-install) [PREFIX/doc/ by default]
+ --mandir                     Set manuals directory for JABS installation (working only with --self-install) [PREFIX/man/ by default]
+
+ --generate-buildfile         Generates simple buildfile (build.jab by default. See -f option)
+"
+;; --no-quit                    Don`t exit after perform all operations
+               ))
+
+(defun build-jab-tmpl ()
+  (let ((name (car (reverse (pathname-directory (os-pwd)))))
+        (list-files (list-directory (merge-pathnames "src/" (os-pwd))))
+        (list-names))
+
+    (if list-files
+        (dolist (f list-files)
+          (when (or (string-equal (pathname-type f) "lisp")
+                    (string-equal (pathname-type f) "cl"))
+            (setf list-names
+                  (concatenate 'string list-names
+                               (format nil "~15t(:file \"~a\")~%" (pathname-name f))))))
+      (setf list-names (format nil "~15t(:file \"fixture\")~%")))
+
+    (format nil ";;; -*- Mode: Lisp -*-
+
+(defpackage :~a-system
+  (:use :cl :jabs))
+
+(in-package :~a-system)
+
+(defproject :~a
+  :name \"~a\"
+  :author \"John Doe <john@doe.local>\"
+  :version \"0.0.1\"
+  :maintainer \"\"
+  :license \"Public Domain\"
+  :description \"Personal use project\"
+  :serial t
+  :skelethon (:default) ;; will be w/o '(' ')' in v.0.2+
+  :bout :default
+  ;;;; Additional sources
+  ;; :sources ((make-pathname :directory '(:relative \"another-lib\")))
+  ;; :repositories (:quicklisp) ;; define some repositories here
+  ;;;; Dependencies
+  ;; :depends-on (:alexandria :cl-ppcre)
+  ;; :pathname \"some/relative/path\" ;; relative name to your project root directory (where skelethon located)
+  ;;;; Add files, mobules etc
+  :components (
+~a))
+" name name name name list-names)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defvar *jabs-install-prefix* (make-pathname :directory '(:absolute "usr" "local")))
+(defvar *jabs-install-bindir* (merge-pathnames (make-pathname :directory '(:relative "bin")) *jabs-install-prefix*))
+(defvar *jabs-install-sysconfdir* (merge-pathnames (make-pathname :directory '(:relative "etc")) *jabs-install-prefix*))
+(defvar *jabs-install-libdir* (merge-pathnames (make-pathname :directory '(:relative "lib")) *jabs-install-prefix*))
+(defvar *jabs-install-datarootdir* (merge-pathnames (make-pathname :directory '(:relative "share")) *jabs-install-prefix*))
+(defvar *jabs-install-docdir* (merge-pathnames (make-pathname :directory '(:relative "doc")) *jabs-install-prefix*))
+(defvar *jabs-install-mandir* (merge-pathnames (make-pathname :directory '(:relative "man")) *jabs-install-prefix*))
+(defvar *jabs-install-local-dirname* (make-pathname :directory '(:relative "jabs"))) ; set JABS local installation direcotry (ex. real LIBDIR will be /usr/local/lib/jabs by default
+
+(defvar *jabs-install-files* '("asdf.lisp"
+			       "jabs-asdf.lisp"
+                               "jabs-artifact.lisp"
+                               ;; "jabs-classes.lisp"
+                               "jabs-cli.lisp"
+
+                               "jabs-core.lisp"
+                               ;; "jabs-deployment.lisp"
+                               "jabs-bout.lisp"
+			       "jabs-round.lisp"
+
+                               "jabs-loader.lisp"
+                               ;; "jabs-package.lisp"
+                               "jabs-packages.lisp"
+
+                               ;; "jabs-plugin-deployment-api.lisp"
+                               "jabs-plugin.lisp"
+                               ;; "jabs-plugin-package-api.lisp"
+
+                               ;; "jabs-plugin-repository-api.lisp"
+                               ;; "jabs-plugin-scm-api.lisp"
+                               ;; "jabs-plugin-test-api.lisp"
+
+                               "jabs-project.lisp"
+                               ;; "jabs-repository.lisp"
+                               "jabs-source.lisp"
+                               "jabs-hit.lisp"
+
+                               "jabs-skelethon.lisp"
+                               "jabs-test.lisp"
+                               "jabs-logger.lisp"
+                               "jabs-re.lisp"
+                               "jabs-external-program.lisp"
+                               "jabs-tools.lisp"
+                               ;; "jabs-argparse.lisp"
+			       ))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defvar *alias* (make-hash-table :test 'equal))
+
+;;;;
+;;;; preprocessor
+;;;;
+(defconstant +variables-configfile+ (make-pathname :name "variables" :type "conf"))
+
+(defvar *dynamic-variables* (make-hash-table :test 'equal)) ;; TODO: make it!
+;; (defvar *jabs-local-config-directory*
+
+(defun member-exclude (list)
+  (labels ((member-p (list1 list2)
+                     (cond ((null list1) nil)
+                           ((member (car list1) list2 :test 'equal) t)
+                           (t (member-p (cdr list1) list2)))))
+    (member-p *build-recursively-exclusions* (pathname-directory list))))
+
+(defun finddirs (path)
+  "find all directories recursively"
+  (let ((dirs
+         (remove-if #'member-exclude
+                    (remove nil
+                            (mapcar #'directory-pathname-p
+                                    (directory (make-pathname :directory (princ-to-string path)
+                                                              :name :wild :type nil)))))))
+    (cond ((null dirs) nil)
+          (t (dolist (v dirs)
+               (setf dirs (append dirs (finddirs v))))))
+    dirs))
+
+(defun push-compiler-argument (argument &optional value)
+  (if (not (null value))
+      (push (concatenate 'string
+                         "-D" (princ-to-string argument)
+                         "=" (princ-to-string value))
+            *compiler-arguments*)
+    (push (concatenate 'string
+                       "-D" (princ-to-string argument))
+          *compiler-arguments*)))
+
+(defun preprocessor ()
+  (let ((configfile (merge-pathnames +variables-configfile+
+                                     (merge-pathnames *jabs-local-config-directory* *jabs-local-directory*))))
+    (when (file-exists-p configfile)
+      (dolist (v (os-cat configfile :list))
+        (setf (gethash (princ-to-string (car v)) *dynamic-variables*) (eval (cadr v)))))) ;; TODO: is it correct behavior?
+
+  (dolist (input-file-name (os-find (pathname-as-directory (os-pwd)) :extension "input" :type :file))
+    (let ((output-file-name (make-pathname
+                             :directory (pathname-directory input-file-name)
+                             :name (pathname-name input-file-name)))
+          (tmp-string (os-cat input-file-name)))
+      (jlog:dbg "Processing file ~a" input-file-name)
+      (with-open-file
+       (f output-file-name :direction :output :if-exists :supersede)
+       (dolist (var (scan-all-to-list #\@ #\@ tmp-string))
+         (let ((var-value (gethash var *dynamic-variables*)))
+           (when (not (null var-value))
+             (setf tmp-string
+                   (replace-string tmp-string (concatenate 'string "@" var "@") (princ-to-string var-value))
+                   ))))
+       (format f "~a" tmp-string)))))
+
+(defun self-install ()
+  ;; hack. We need to update all prefix-related directories, when prefix changing
+  (setf *jabs-install-bindir* (merge-pathnames (make-pathname :directory '(:relative "bin")) *jabs-install-prefix*))
+  (setf *jabs-install-sysconfdir* (merge-pathnames (make-pathname :directory '(:relative "etc")) *jabs-install-prefix*))
+  (setf *jabs-install-libdir* (merge-pathnames (make-pathname :directory '(:relative "lib")) *jabs-install-prefix*))
+  (setf *jabs-install-datarootdir* (merge-pathnames (make-pathname :directory '(:relative "share")) *jabs-install-prefix*))
+  (setf *jabs-install-docdir* (merge-pathnames (make-pathname :directory '(:relative "doc")) *jabs-install-prefix*))
+  (setf *jabs-install-mandir* (merge-pathnames (make-pathname :directory '(:relative "man")) *jabs-install-prefix*))
+  ;;
+  (flet ((dsetf (var val)
+                (setf (gethash (princ-to-string var) *dynamic-variables*) (eval val))))
+    (let* ((bindir *jabs-install-bindir*)
+           (libdir (merge-pathnames *jabs-install-local-dirname* *jabs-install-libdir*))
+           (sysconfigdir (merge-pathnames *jabs-install-local-dirname* *jabs-install-sysconfdir*))
+           (datarootdir (merge-pathnames *jabs-install-local-dirname* *jabs-install-datarootdir*))
+           (srcdir (merge-pathnames (make-pathname :directory '(:relative "src"))
+                                    (merge-pathnames *jabs-install-local-dirname* *jabs-install-datarootdir*)))
+           (docdir (merge-pathnames *jabs-install-local-dirname* *jabs-install-docdir*))
+           ;; (mandir (merge-pathnames *jabs-install-local-dirname* *jabs-install-mandir*))
+           ;;
+           (compiler (gethash *lisp* *jabs-compilers*))
+           (collector)
+           )
+      (dsetf "SYSCONFIGDIR" sysconfigdir)
+      (dsetf "LIBDIR" libdir)
+      (dsetf "SRCDIR" (merge-pathnames (make-pathname :directory '(:relative "src"))
+                                       datarootdir))
+      (dsetf "DATAROOTDIR" datarootdir)
+      (dsetf "DATADIR" datarootdir)
+      ;; Launch preprocessor
+      (preprocessor)
+      ;; install src
+      (jlog:note "Installing JABS files to ``~a''..." datarootdir)
+      (os-mkdir (merge-pathnames (make-pathname :directory '(:relative "src")) datarootdir))
+      (dolist (file *jabs-install-files*)
+        (os-cp (merge-pathnames *jabs-source-directory* file) srcdir :force t))
+      ;; install plugins directory
+      (os-cp (make-pathname :directory '(:relative "share" "plugins")) (merge-pathnames (make-pathname :directory '(:relative "plugins")) datarootdir) :recursive t :force t)
+      ;; install libraries
+      (jlog:note "Installing libraries to ``~a''..." libdir)
+      (os-cp *jabs-lib-directory* libdir :recursive t :force t)
+      ;; install share directory
+      (jlog:note "Installing share files to ``~a''..." datarootdir)
+      (os-cp *jabs-share-directory* datarootdir :recursive t :force t)
+      ;; install documentation
+      (jlog:note "Installing documentation to ``~a''..." docdir)
+      (os-mkdir docdir)
+      (dolist (document (os-find (merge-pathnames (make-pathname :directory '(:relative "doc")) (os-pwd)) :extension "^md$"))
+        ;; (os-cp document (merge-pathnames *jabs-install-local-dirname* *jabs-install-docdir*)) :force t)
+        (os-cp document docdir :force t))
+      ;; install configfiles
+      (jlog:note "Installing system configfiles to ``~a''..." sysconfigdir)
+      (os-mkdir sysconfigdir)
+      (os-cp (merge-pathnames *jabs-config-directory* (make-pathname :name "jabs" :type "conf")) sysconfigdir :force t)
+      (os-cp (merge-pathnames *jabs-config-directory* (make-pathname :name "alias" :type "conf")) sysconfigdir :force t)
+      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      (dolist (v (flatten (list
+                           (get-compiler-path compiler)
+                           ;;
+                           (get-compiler-default-opts compiler)
+                           (when (not (null (get-compiler-pre-eval compiler)))
+                             (get-compiler-eval-opt compiler)
+                             (get-compiler-pre-eval compiler))
+                           ;;
+                           (if (not *lisp-quiet*)
+                               (if (null *lisp-debug*)
+                                   (get-compiler-no-debug-opt compiler)
+                                 (get-compiler-debug-opt compiler))
+                             (list
+                              (get-compiler-quiet-opt compiler)
+                              (get-compiler-no-debug-opt compiler)))
+                           ;;
+                           (get-compiler-load-opt compiler)
+                           ;;
+                           (princ-to-string
+                            (merge-pathnames *jabs-core-directory* (make-pathname :name "make-jab" :type "lisp")))
+                           ;;
+                           ;; (get-compiler-eval-opt compiler)
+                           ;; "'(require :cl-jabs)'"
+                           ;;
+                           (when (not (null (get-compiler-post-eval compiler)))
+                             (get-compiler-eval-opt compiler)
+                             (get-compiler-post-eval compiler))
+                           (when *quit-compiler* (get-compiler-quit compiler))
+                           *lisp-args*)))
+        (push (format nil "~a" v) collector))
+        ;; add arguments
+        (dolist (args *compiler-arguments*)
+          (push (format nil "~a" args) collector))
+        (jlog:info "Rebuilding jab for working with new path")
+        (let ((processed-collector (remove "NIL" (remove nil (reverse collector)) :test 'equal)))
+          (run (car processed-collector)
+               (cdr processed-collector)
+               :output t ;; TODO: a little temporary hack
+               :error (or *lisp-debug* (not *lisp-quiet*))))
+
+      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      ;; install binary
+      (if (probe-file "jab")
+          (progn
+            (jlog:note "Installing ``jab'' binary to ``~a''" bindir)
+            (os-mkdir bindir)
+            (os-cp "jab" bindir :force t)
+            (run "chmod"                ; unfortunately, CL is not working with chown/chmod w/o osicat library
+                 (list "a+x" (princ-to-string (merge-pathnames
+                                               (make-pathname :name "jab")
+                                               bindir)))
+                 :output t ;; TODO: a little temporary hack
+                 :error t))
+        (jlog:crit "There is no file ./jab. Nothing to install"))
+      (jlog:note "Clearing...")
+      (dolist (file (os-find (pathname-as-directory (os-pwd)) :extension "input" :type :file))
+        (os-rm (parse-namestring (end-cut ".input" (princ-to-string file)))))
+      (os-rm "jab")
+      ;;
+      (jlog:note "...[ installation ] [ DONE ]")
+      )))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;;
+;;;; argv section
+;;;;
+(defvar *jabs-argv-symbols* (make-hash-table :test 'equal))
+(defvar *jabs-default-argument-parser* (tools@jabs:make-argument-parser :description "Default argument parser"))
+
+(defmacro bind-argv (key symbol &key (action :store) (type :string) default help)
+  `(labels ((rm-first-minuses (list)
+                             (if (char-equal #\- (car list))
+                                 (rm-first-minuses (cdr list))
+                               list)))
+     (let ((dest (concatenate 'string (rm-first-minuses (tolist ,key)))))
+       (add-argument *jabs-default-argument-parser*
+                     :keys '(,key) :help ,help :destination dest
+                     :type ,type :action ,action :DEFAULT ,default)
+       (setf (gethash dest *jabs-argv-symbols*) ,symbol))))
+
+(defmacro process-argv (destination)
+  `(let ((argvalue (get-parsed-argument-value ,destination (parse-args *jabs-default-argument-parser*)))
+         (argsymbol (gethash ,destination *jabs-argv-symbols*)))
+     (if (and argsymbol argvalue)
+         (progn
+           (jlog:dbg "Processing argv ~a" ,destination)
+           (funcall argsymbol argvalue) t))))
+
+(defun print-help (&rest args)
+  (declare (ignore args))
+  (format t "~a" *usage*))
+
+;;; process bind-process quiet/verbose/debug level
+(bind-argv "--fail-on-error"
+           #'(lambda (x)
+               (declare (ignore x))
+               (push-compiler-argument "fail-on-error" "t")
+               (setf jlog:*fail-on-error* t)) :action :store-t)
+(bind-argv "-v"
+           #'(lambda (x)
+               (declare (ignore x))
+               (progn
+                 (push-compiler-argument "verbose" "t")
+                 (setf *jabs-verbose* t)
+                 (setf jlog:*log-level* "INFO"))) :action :store-t)
+(bind-argv "-q"
+           #'(lambda (x)
+               (declare (ignore x))
+               (progn
+                 (setf *lisp-quiet* t)
+                 (setf *lisp-debug* nil)
+                 (setf jlog:*log-level* "CRITICAL")
+                 (setf jlog:*log-disable-notes* t))
+               (push-compiler-argument "quiet" "t")) :action :store-t)
+(bind-argv "-d"
+           #'(lambda (x)
+               (declare (ignore x))
+               (progn
+                 (setf *lisp-quiet* nil)
+                 (setf *lisp-debug* t) ;; do not drop to debug console
+                 (setf jlog:*log-level* "DEBUG")
+                 (setf jlog:*log-disable-notes* nil)
+		 (push-compiler-argument "debug" "t")
+                 (setf *jabs-verbose* t))) :action :store-t)
+;;;
+(bind-argv "-h" #'print-help :action :store-t)
+(bind-argv "-p" #'(lambda (x) (push-compiler-argument "projects" x)))
+(bind-argv "-b" #'(lambda (x) (push-compiler-argument "bout" x)))
+(bind-argv "-f"
+           #'(lambda (x)
+               (let ((buildfile x))
+                 (when (not (file-exists-p buildfile))
+                   (jlog:info "buildfile ~a does not exists" buildfile))
+                 (setf *jabs-buildfile* (parse-namestring buildfile))
+                 (push-compiler-argument "buildfile" buildfile))))
+(bind-argv "-c"
+           #'(lambda (x)
+               (push-compiler-argument "compiler" x)
+               (if (gethash x *jabs-compilers*)
+                   (setf *lisp* x)
+                 (jlog:crit "Lisp processor/compiler ~a is not supported" x))))
+;; (bind-argv "-o" #'print-help)
+;;
+(bind-argv "--logfile" #'(lambda (x) (push-compiler-argument "logfile" x)))
+(bind-argv "--errlogfile" #'(lambda (x) (push-compiler-argument "error-logfile" x)))
+;;
+(bind-argv "--no-recursive" #'(lambda (x) (declare (ignore x)) (setf *build-recursively* nil)) :action :store-t)
+
+(bind-argv "--no-bouts" #'(lambda (x) (declare (ignore x)) (push-compiler-argument "use-bouts" "nil")) :action :store-t)
+(bind-argv "--nodeps" #'(lambda (x) (declare (ignore x)) (push-compiler-argument "use-hitdeps" "nil")) :action :store-t)
+(bind-argv "--generate-skelethon"
+           #'(lambda (x)
+               (declare (ignore x))
+               (push-compiler-argument "generate-skelethon" "t")) :action :store-t)
+(bind-argv "-V"
+           #'(lambda (x)
+               (declare (ignore x))
+               (format t "(Just (Another (Builder :version ~a)))~%" +version+))
+           :action :store-t)
+
+;;;;
+;;;; Bind installation arguments (active only with --self-install option)
+;;;;
+(bind-argv "--prefix"
+           #'(lambda (x)
+               (format t "~a~%" x)
+               (when (not (null x))
+                 (setf *jabs-install-prefix* (pathname-as-directory (parse-namestring (princ-to-string x)))))))
+
+
+(bind-argv "--bindir"
+           #'(lambda (x)
+               (if (not (null x))
+                   (setf *jabs-install-bindir* (pathname-as-directory (parse-namestring (princ-to-string x)))))))
+
+
+(bind-argv "--libdir"
+           #'(lambda (x)
+               (if (not (null x))
+                   (setf *jabs-install-libdir* (pathname-as-directory (parse-namestring (princ-to-string x))))
+                 (setf *jabs-install-libdir* (merge-pathnames (make-pathname :directory '(:relative "lib"))
+                                                              *jabs-install-prefix*)))))
+
+(bind-argv "--sysconfigdir"
+           #'(lambda (x)
+               (if (not (null x))
+                   (setf *jabs-install-sysconfdir* (pathname-as-directory (parse-namestring (princ-to-string x))))
+                 (setf *jabs-install-sysconfdir* (merge-pathnames (make-pathname :directory '(:relative "etc"))
+                                                                  *jabs-install-prefix*)))))
+
+(bind-argv "--datarootdir"
+           #'(lambda (x)
+               (if (not (null x))
+                   (setf *jabs-install-datarootdir* (pathname-as-directory (parse-namestring (princ-to-string x))))
+                 (setf *jabs-install-datarootdir* (merge-pathnames (make-pathname :directory '(:relative "share"))
+                                                                   *jabs-install-prefix*)))))
+
+(bind-argv "--docdir"
+           #'(lambda (x)
+                          (if (not (null x))
+                              (setf *jabs-install-docdir* (pathname-as-directory (parse-namestring (princ-to-string x))))
+                            (setf *jabs-install-docdir* (merge-pathnames (make-pathname :directory '(:relative "doc"))
+                                                                         *jabs-install-prefix*)))))
+
+(bind-argv "--mandir"
+           #'(lambda (x)
+                          (if (not (null x))
+                              (setf *jabs-install-mandir* (pathname-as-directory (parse-namestring (princ-to-string x))))
+                            (setf *jabs-install-mandir* (merge-pathnames (make-pathname :directory '(:relative "man"))
+                                                                         *jabs-install-prefix*)))))
+
+(bind-argv "--self-install"
+           #'(lambda (x)
+               (declare (ignore x))
+               (dolist (param '("prefix" "bindir" "libdir" "sysconfigdir" "datarootdir" "docdir" "mandir"))
+                 (process-argv param))
+;;;;
+               (jlog:note "PREFIX:      ~a" *jabs-install-prefix*)
+               (jlog:note "BINDIR:      ~a" *jabs-install-bindir*)
+               (jlog:note "SYSCONFIGDIR:~a" *jabs-install-sysconfdir*)
+               (jlog:note "LIBDIR:      ~a" *jabs-install-libdir*)
+               (jlog:note "DATAROOTDIR: ~a" *jabs-install-datarootdir*)
+               (jlog:note "DOCRID:      ~a" *jabs-install-docdir*)
+               (jlog:note "MANDIR:      ~a" *jabs-install-mandir*)
+;;;;
+               (self-install) t) :action :store-t)
+
+(bind-argv "--generate-buildfile"
+           #'(lambda (x)
+               (declare (ignore x))
+               (let ((buildfile (or (progn (process-argv "f") *jabs-buildfile*)
+                                    (make-pathname :name "build" :type "jab"))))
+                 (jlog:note "Buildfile is ``~a''" buildfile)
+                 (setf *jabs-buildfile* buildfile) ; TODO: strange behavior
+                 (os-touch buildfile)
+                 (jlog:note "Generating buildfile ``~a''..." buildfile)
+                 (with-open-file
+                  (bf buildfile :direction :output :if-exists :overwrite :if-does-not-exist :create)
+                  (format bf (build-jab-tmpl))))) :action :store-t)
+
+;;;;
+;;;; Process direct compiler arguments
+;;;;
+(defun process-direct-jabs-arguments ()
+  (dolist (v (argv))
+    (when (not (null (begin-scan "-D" v)))
+      (progn
+        (jlog:dbg "Pushing compiler argument ~a" v)
+        (push v *compiler-arguments*)))))
+
+;;;;
+;;;; top-level function
+;;;;
+(defun jab ()
+  (process-argv "q")
+  (process-argv "d")
+  (process-argv "v")
+
+  (when (not (or (process-argv "h")
+                 (process-argv "V")
+                 (process-argv "self-install")
+                 (process-argv "generate-buildfile")
+                 ;; (process-argv "generate-skelethon")
+                 ))
+    (progn
+      (process-argv "fail-on-error")
+
+      ;; process direct arguments initially. Will be at the end of argument list
+      (process-direct-jabs-arguments)
+
+      ;; process regular arguments
+      (dolist (v '("c" "f" "p" "b" "hit" "logfile" "errlogfile" "no-recursive" "no-bouts" "nodeps"))
+        (process-argv v))
+      ;;
+      (let* ((compiler (gethash *lisp* *jabs-compilers*))
+             (collector))
+        ;; Making compiler string
+        (dolist (v (flatten (list
+                             (get-compiler-path compiler)
+                             ;;
+                             (get-compiler-default-opts compiler)
+                             (when (not (null (get-compiler-pre-eval compiler)))
+                               (get-compiler-eval-opt compiler)
+                               (get-compiler-pre-eval compiler))
+                             ;;
+                             (if (not *lisp-quiet*)
+                                 (if (null *lisp-debug*)
+                                     (get-compiler-no-debug-opt compiler)
+                                   (get-compiler-debug-opt compiler))
+                               (list (get-compiler-quiet-opt compiler)
+                                     (get-compiler-no-debug-opt compiler)))
+                             ;;
+                             (get-compiler-load-opt compiler)
+                             ;;
+                             (princ-to-string
+                              (merge-pathnames *jabs-source-directory* (make-pathname :name "jabs-loader" :type "lisp")))
+                             ;;
+                             (when (not (null (get-compiler-post-eval compiler)))
+                               (get-compiler-eval-opt compiler)
+                               (get-compiler-post-eval compiler))
+                             (when *quit-compiler* (get-compiler-quit compiler))
+                             *lisp-args*)))
+          (push (format nil "~a" v) collector))
+        ;; add arguments
+        (when *jabs-hits*
+          (push-compiler-argument "hits" (apply #'(lambda (&rest x) (eval `(jre:concatenate-to-string-with-delimiter "," ,@x))) *jabs-hits*)))
+        (jlog:dbg "Compiler arguments are ~a" *compiler-arguments*)
+        (dolist (args *compiler-arguments*)
+          (push (format nil "~a" args) collector))
+
+        (jlog:dbg "JABS buildfile is: ~a" (merge-pathnames (os-pwd) (parse-namestring *jabs-buildfile*)))
+        ;; Launching preprocessor
+        (jlog:info "Launching preprocessor...")
+        (preprocessor)
+        (jlog:info "...[ Launching preprocessor ] [ DONE ]")
+        ;; Checking for build.jab after preprocessor launched
+        (when (not (file-exists-p (merge-pathnames (os-pwd) (parse-namestring *jabs-buildfile*))))
+          (jlog:crit "Build file ~a does not exists" (merge-pathnames (os-pwd) (parse-namestring *jabs-buildfile*))))
+
+        ;; exec subprojects
+        (let ((current-directory (os-pwd))
+              (processed-collector (remove "NIL" (remove nil (reverse collector)) :test 'equal)))
+          ;; checking if direct parameter ``version'' given
+          (when (and *build-recursively* (null (member "-Dversion" (argv) :test 'equal))) ;; TODO: rewrite
+            (jlog:note "Scanning for subprojects...")
+            (dolist (dir (finddirs (os-pwd)))
+              (progn
+                (jlog:dbg "Scanning directory ~a" dir)
+                (jlog:dbg "Searching for build file ~a" (make-pathname :directory (princ-to-string dir) :name "build" :type "jab"))
+                (when (probe-file (make-pathname :directory (princ-to-string dir) :name "build" :type "jab"))
+                  ;; print collector
+                  (progn
+                    (jlog:dbg "Launching JABS: ")
+                    (dolist (v processed-collector)
+                      (format t "~a~%~%" v))
+                    (format t "~%"))
+                  (progn (os-cd dir)
+                         (run (car processed-collector)
+                              (cdr processed-collector)
+                              :output t ;; TODO: a little temporary hack
+                              :error (or *lisp-debug* (not *lisp-quiet*)))
+                         ))))
+            (jlog:note "...[ Scanning for subprojects ] [ DONE ]"))
+          ;; exec main project
+          (os-cd current-directory)
+          (labels ((make-spaced-string (list)
+                             (if (null list) nil
+                               (concatenate 'string (car list) " " (make-spaced-string (cdr list))))))
+            (jlog:dbg "Launching JABS: ``~a``" (make-spaced-string processed-collector)))
+
+          (run (car processed-collector)
+               (cdr processed-collector)
+               :output t                 ;; TODO: a little temporary hack
+               :error t                  ;; (or *lisp-debug* (not *lisp-quiet*))
+               ))))))

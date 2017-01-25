@@ -1,0 +1,35 @@
+;; -*- mode: lisp -*-
+(:default
+    :validate
+    :initialize
+    :compile
+    :test
+    :package
+    :integration-test
+    :verify
+    :install
+    :deploy
+  )
+;; :validate
+;; :initialize - initialize skelethon, make source preprocessing etc
+;; :generate-sources
+;; :process-sources
+;; :generate-resources
+;; :process-resources
+;; :compile
+;; :process-classes
+;; :generate-test-sources
+;; :process-test-sources
+;; :generate-test-resources
+;; :process-test-resources
+;; :test-compile
+;; :process-test-classes
+;; :test
+;; :prepare-package
+;; :package
+;; :pre-integration-test
+;; :integration-test
+;; :post-integration-test
+;; :verify
+;; :install
+;; :deploy

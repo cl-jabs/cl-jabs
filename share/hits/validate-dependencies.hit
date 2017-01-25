@@ -1,0 +1,4 @@
+;; -*- mode: lisp -*-
+(validate-dependencies :depends-on ()
+                       (jlog:info "Validating dependencies for project ``~a''" (get-project-name *jabs-current-project*))
+                       (make-project-depencencies-list *jabs-current-project*))

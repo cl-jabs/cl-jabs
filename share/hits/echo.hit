@@ -1,0 +1,6 @@
+;; -*- mode: lisp -*-
+; (example :project proj1 ;; here is project name, that we uses
+; 	 :depends-on (hit1 hit2 etc) ;; dependencies
+; 	 (here will be your code))
+(echo :depends-on ()
+      (format t "Hello World~%"))

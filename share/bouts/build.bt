@@ -1,0 +1,10 @@
+;; -*- mode: lisp -*-
+(:build
+ :validate
+ :compile
+ ;; :test
+ ;; :package
+ ;; :verify
+ ;; :install
+ ;; :deploy
+ )

@@ -1,0 +1,3 @@
+;; -*- mode: lisp -*-
+(verify :depends-on ()
+        (jlog:err "NOT IMPLEMENTED"))

@@ -1,3 +1,17 @@
 *.FASL
 *.fasl
 *.lisp-temp
+
+./jab
+*~
+*#
+#*
+src/core/jabs-asdf/asdf.lisp
+src/jabs-core.lisp
+src/jabs-loader.lisp
+src/jabs-packages.lisp
+src/wrappers/jab/jab.lisp
+doc/complex_example/test.lisp
+tmp/*
+.markdown-preview.html
+share/plugins/repository/quicklisp/quicklisp.lisp

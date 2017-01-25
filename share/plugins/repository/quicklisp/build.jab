@@ -1,0 +1,25 @@
+;;; -*- Mode: Lisp -*-
+
+(defpackage :quicklisp@repository@plugin@jabs
+  (:use :cl :tools@jabs :jabs)
+  )
+
+
+(defplugin :quicklisp :repository "0.1"
+  :author "Alexander Vynnyk <cosmonaut.ok@zoho.com>"
+  :maintainer ""
+  :license "Public Domain"
+  :description "Here is my project"
+  ;; :serial t
+  :skelethon (:flat) ;; (nil) ;; will be w/o '(' ')' in v.0.2+
+  :bout :default
+;;; Additional sources
+  ;; :sources ((make-pathname :directory '(:relative "another-lib")))
+  ;; :repositories (:quicklisp) ;; v.0.2+
+;;; Dependencies
+  ;; :depends-on (:alexandria :cl-ppcre)
+  ;; :pathname "the/relative/path/name/to/your/project/root/directory"
+;;; Add files, mobules etc
+  :components ((:file "quicklisp")
+               (:file "quicklisp-repository")
+               (:file "quicklisp-api" :depends-on ("quicklisp-repository"))))

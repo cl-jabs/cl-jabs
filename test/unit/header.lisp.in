@@ -1,0 +1,26 @@
+;;; -*- Mode: Lisp -*-
+
+(require 'asdf)
+(push (make-pathname :directory '(:relative "lib" "clunit")) asdf:*central-registry*)
+(require 'clunit)
+
+(setf clunit:*clunit-report-format* :tap)
+
+(defpackage test-engine
+  (:use :cl)
+  (:export :string-contain-p))
+
+(in-package :test-engine)
+
+(defun string-contain-p (string match)
+  (labels ((contain-list (list list-match)
+                         (cond ((null list-match) t)
+                               ((null list) nil)
+                               ((char= (car list) (car list-match))
+                                (contain-list (cdr list) (cdr list-match)))
+                               (t (contain-list (cdr list) list-match)))))
+    (contain-list (concatenate 'list string) (concatenate 'list match))))
+
+;; load basic system
+(load (make-pathname :directory '(:relative "src") :name "jabs-packages" :type "lisp"))
+(load (make-pathname :directory '(:relative "src") :name "jabs-logger" :type "lisp"))

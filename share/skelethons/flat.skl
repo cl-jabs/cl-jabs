@@ -1,0 +1,11 @@
+(flat
+  :src "."
+  :lib "."
+  :doc "."
+  :conf "."
+  :test "."
+  :share "."
+  :contrib "."
+  :readme-file "README"
+  :license-file "LICENSE"
+  :install-file "INSTALL")

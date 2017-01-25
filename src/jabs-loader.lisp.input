@@ -1,0 +1,58 @@
+;;; -*- Mode: Lisp -*-
+
+;;;;
+;;;; Eraly system bootstrap
+;;;;
+
+(in-package :cl-user)
+
+;; load basic JABS components
+(dolist (v '("jabs-packages"
+             "jabs-logger"
+             "jabs-re"
+             "jabs-tools"
+             "jabs-core"
+             "jabs-cli"
+             "jabs-project"
+             "jabs-plugin"))
+  (load
+   (merge-pathnames
+    (make-pathname :name v :type "lisp") (parse-namestring "@SRCDIR@"))))
+
+(in-package :jabs)
+
+;;load core plugins
+(jlog:info "Loading core plugins")
+(dolist (v '("jabs-skelethon"
+             "jabs-asdf"
+             "jabs-depmanager"
+             "jabs-hit"
+             "jabs-round"
+             "jabs-bout"
+             "jabs-test"
+             "jabs-operations"
+	     "jabs-doc"
+             ))
+  (load-plugin-file v :type :core :filename v :filetype "lisp"))
+(jlog:info "...Loading core plugins [ DONE ]")
+
+;; change directory to run-dir
+(os-cd +jabs-run-directory+)
+
+;;;; loading build file
+(load-build-jab (os-pwd))
+
+;; load plugin(s) defined in command line interface
+(process-jabs-cli-parameter "plugins")
+
+(when *post-init-hook*
+  (dolist (run (reverse *post-init-hook*))
+    (funcall run)))
+
+;; run project(s)
+(dolist (proj *jabs-projects-to-run*)
+  ;; run project
+  (let ((p (find-project proj)))
+    (if p
+        (run-project (find-project proj))
+        (jlog:crit "There is no project, named ``~a''" proj))))

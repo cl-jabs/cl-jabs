@@ -1,0 +1,20 @@
+;; -*- mode: lisp -*-
+(test :depends-on (compile)
+      (test-op *jabs-current-project*))
+      ;; (jlog:err "NOT IMPLEMENTED"))
+      ;; (jlog:info "Perform load testing...")
+      ;; (let ((pname (get-project-name *jabs-current-project*))
+      ;; 	    (testdir (merge-n-directories (os-pwd) (get-project-pathname *jabs-current-project*) (car (skelethon@core@plugin@jabs::get-skelethon-test *jabs-current-skelethon*)))))
+      ;;   (asdf:operate 'asdf:load-op pname)
+      ;;   (if (find-package pname)
+      ;;       (jlog:info "DONE")
+      ;;     (jlog:err "FAILED"))
+      ;;   (when (and (find-package pname) (not (null testdir)))
+      ;;     ;; load test dependency here
+      ;;     (jlog:info "DIR ~a" testdir)
+      ;;     (dolist (test (directory
+      ;;   		 (merge-pathnames
+      ;;   		  (make-pathname :name :wild :type "lisp")
+      ;;   		  testdir)))
+      ;;       (jlog:info "Launching test ~a" test)
+      ;;       (load test)))))

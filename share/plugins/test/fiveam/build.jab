@@ -1,0 +1,15 @@
+;;; -*- Mode: Lisp -*-
+(defpackage :fiveam-system
+  (:use :cl :jabs))
+
+(in-package :fiveam-system)
+
+(defplugin :fiveam :test "0.0.1"
+  :author "Alexander aka `Cosmonaut` Vynnyk <cosmonaut.ok@zoho.com>"
+  :maintainer "Alexander aka `Cosmonaut` Vynnyk <cosmonaut.ok@zoho.com>"
+  :license "Public Domain"
+  :description "Personal use project"
+  :serial t
+  :skelethon (:flat)
+  :depends-on (:fiveam)
+  :components ((:file "fiveam")))

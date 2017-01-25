@@ -1,0 +1,4 @@
+;; -*- mode: lisp -*-
+(load-dependencies :depends-on ()
+                   (jlog:dbg "Loading depencencies ``~a''" (make-project-depencencies-list *jabs-current-project*))
+                   (load-dependencies-op *jabs-current-project*))

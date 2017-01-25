@@ -1,0 +1,22 @@
+;;; -*- Mode: Lisp -*-
+
+(defpackage :swank@generic@plugin@jabs
+  (:use :cl :jabs :tools@jabs))
+
+(defplugin :swank :generic "0.1"
+  :author "John Doe <email@null>"
+  :maintainer ""
+  :license "Public Domain"
+  :description "Here is my project"
+  ;; :serial t
+  :skelethon (:flat) ;; (nil) ;; will be w/o '(' ')' in v.0.2+
+  ;; :bout :default
+;;; Additional sources
+  ;; :sources ((make-pathname :directory '(:relative "another-lib")))
+  ;; :repositories (:quicklisp) ;; v.0.2+
+;;; Dependencies
+  :depends-on (:swank)
+  ;; :plugins (:quicklisp@repository)
+  ;; :pathname "the/relative/path/name/to/your/project/root/directory"
+;;; Add files, mobules etc
+  :components ((:file "swank")))

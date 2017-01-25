@@ -1,0 +1,24 @@
+;;; -*- Mode: Lisp -*-
+
+(defpackage :tmpl@generic@plugin@jabs
+  (:use :cl :jabs :tools@jabs))
+
+(defplugin :tmpl :generic "0.1"
+  :author "John Doe <email@null>"
+  :maintainer ""
+  :license "Public Domain"
+  :description "Here is my project"
+  ;; :serial t
+  :skelethon (:flat) ;; (nil) ;; will be w/o '(' ')' in v.0.2+
+  ;; :bout :default
+;;; Additional sources
+  ;; :sources ((make-pathname :directory '(:relative "another-lib")))
+  ;; :repositories (:quicklisp) ;; v.0.2+
+;;; Dependencies
+  ;; :depends-on (:alexandria :cl-ppcre)
+  ;; :pathname "the/relative/path/name/to/your/project/root/directory"
+;;; Add files, mobules etc
+  :components ((:file "project")
+               (:file "plugin")
+               (:file "runner")
+               ))

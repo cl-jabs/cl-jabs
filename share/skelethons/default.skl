@@ -1,0 +1,13 @@
+(default
+  :src ("src" :required) ;; TODO: add working mode definition
+  :lib "lib"
+  :doc ("doc" :required)
+  :conf "conf"
+  :test ("test" :required)
+  :share "share"
+  :contrib "contrib"
+  :cache "cache"
+  :target "target"
+  :readme-file "README"
+  :license-file "LICENSE"
+  :install-file "INSTALL")

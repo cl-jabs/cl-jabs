@@ -1,0 +1,5 @@
+;; -*- mode: lisp -*-
+(load :depends-on ()
+      (load-op *jabs-current-project*)
+      (jlog:info "DONE")
+      )

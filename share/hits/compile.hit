@@ -1,0 +1,3 @@
+;; -*- mode: lisp -*-
+(compile :depends-on ()
+         (compile-op *jabs-current-project*))

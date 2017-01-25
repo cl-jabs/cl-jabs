@@ -1,0 +1,3 @@
+;; -*- mode: lisp -*-
+(load-plugins :depends-on ()
+              (load-project-plugins *jabs-current-project*))
