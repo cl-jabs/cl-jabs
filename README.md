@@ -1,5 +1,10 @@
 # cl-jabs
-(**J**ust (**A**nother (**B**uild (**S**ystem **:**for "Common Lisp"))))
+```lisp
+(Just
+  (Another
+    (Build
+      (System :for "Common Lisp"))))
+```
 
 ![](https://github.com/cl-jabs/cl-jabs/blob/master/share/images/JABS_128x128.png)
 
