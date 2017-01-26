@@ -4,9 +4,7 @@
 * insert/append-hit/round - FIX
 * preprocessor
 * jab
-  * компілятори для jab
-* port to ccl
-* port to clisp
+  * compilers for `jab`
 * зробити можливість логування у файл (?)
 * виставити нормально рівні логування (0-5)
 * make tests for JABS
@@ -16,7 +14,7 @@
 
 ## Plugins:
 * Core:
-  * test-launcher - core 
+  * test-launcher - core **[PARTLY]**
   * deployment-manager - core
   * documentation(reporting?) - core
 
