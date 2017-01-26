@@ -3,7 +3,9 @@
 
 ![](https://github.com/cl-jabs/cl-jabs/blob/master/share/images/JABS_128x128.png)
 
-JABS is a maven-like build system for common lisp. Code is under active development and still not ready for production usage. Please, find some documentation [here](wiki/Home.md).
+JABS is a maven-like build system for common lisp. Code is under active development and still not ready for production usage. Please, find some documentation [here](https://github.com/cl-jabs/cl-jabs/wiki).
+
+## [Quickstart](https://github.com/cl-jabs/cl-jabs/wiki/quickstart)
 
 ## Generate project template
 
