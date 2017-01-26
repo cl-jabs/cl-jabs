@@ -6,9 +6,8 @@
       (System :for "Common Lisp"))))
 ```
 
-![](https://github.com/cl-jabs/cl-jabs/blob/master/share/images/JABS_128x128.png)
-
-JABS is a maven-like build system for common lisp. Code is under active development and still not ready for production usage. Please, find some documentation [here](https://github.com/cl-jabs/cl-jabs/wiki).
+| JABS is a maven-like build system for common lisp. Code is under active development and still not ready for production usage. Please, find some documentation [here](https://github.com/cl-jabs/cl-jabs/wiki). | ![](https://github.com/cl-jabs/cl-jabs/blob/master/share/images/JABS_128x128.png) |
+|---|---|
 
 ## [Quickstart](https://github.com/cl-jabs/cl-jabs/wiki/quickstart)
 
