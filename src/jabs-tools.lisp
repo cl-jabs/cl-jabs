@@ -115,8 +115,8 @@
                ((stringp stuff)
                 stuff)
                (t
-                (jlog:err "Converting type ``~a'' of stuff ``~a'' to string not implemented"
-                          (type-of stuff) stuff)))))
+		(princ-to-string stuff)))))
+
     (if downcase
         (string-downcase string)
         string)))
