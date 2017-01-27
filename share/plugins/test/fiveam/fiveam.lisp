@@ -4,12 +4,13 @@
 
 (defvar *test-dribble* t) ;; should be an output stream. TODO: process it!
 
-(setf fiveam:*on-error* :debug)
-(setf fiveam:*debug-on-error* t)
-(setf fiveam:*debug-on-failure* t)
+(when *jabs-test-fail-on-error*
+  ;; (setf fiveam:*on-error* :debug)
+  (setf fiveam:*debug-on-error* t)
+  (setf fiveam:*debug-on-failure* t))
 
 (let (suite suite-file)
-  
+
   (defun get-def-suite-file-from-list (name list)
     (cond ((null list) nil)
 	  ((and
@@ -38,7 +39,9 @@
   (format t "~%``run-single-test`` IS NOT IMPLEMENTED~%~%"))
 
 (defun run-single-suite (name)
-  (let ((suite-file (get-def-suite-file name (get-project-test-files *jabs-current-project* (find-plugin :fiveam :test)))))
+  (let ((suite-file (get-def-suite-file name
+                                        (get-project-test-files *jabs-current-project*
+                                                                (find-plugin :fiveam :test)))))
     (jlog:info "Running suite: ``~a'' in file ``~a''" name suite-file)
     (load suite-file)
     (fiveam:run! name)))

@@ -22,7 +22,7 @@
   (asdf:operate 'asdf:compile-op (get-project-name project)))
 
 (defmethod test-op ((project project))
-  (run-all-tests-with-plugins project))
+  (run-tests project))
 
 (defmethod lib-op ((project project))
   (jlog:err "lib-op Not implemented"))
