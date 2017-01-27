@@ -9,4 +9,4 @@
 	url = https://github.com/quicklisp/quicklisp-bootstrap.git
 [submodule "doc"]
 	path = doc
-	url = git@github.com:cl-jabs/cl-jabs.wiki.git
+	url = https://github.com/cl-jabs/cl-jabs.wiki.git

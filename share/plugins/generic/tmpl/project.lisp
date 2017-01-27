@@ -142,7 +142,7 @@
 (bind-jabs-cli-parameter
  "tmpl-skelethon"
  #'(lambda (&rest x)
-     (setf *tmpl-skelethon-name* (car x))))
+     (setf *tmpl-skelethon-name* (tokeyword (car x)))))
 
 (bind-jabs-cli-parameter
  "tmpl-version"

@@ -137,6 +137,6 @@
 (bind-jabs-cli-parameter
  "tmpl-plugin-type"
  #'(lambda (&rest x)
-     (setf *tmpl-plugin-type* (car x))))
+     (setf *tmpl-plugin-type* (tokeyword (car x)))))
 
 (process-jabs-cli-parameter "tmpl-plugin-type")

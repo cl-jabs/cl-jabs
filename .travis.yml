@@ -5,8 +5,12 @@ env:
     - LISP=sbcl
     - LISP=ccl
 
+install:
+  - sudo apt-get -y install sbcl
+
 before_script:
   - git submodule update --init
+  - /bin/sh ./bootstrap.sh
 
 script:
-  - /bin/sh ./bootstrap.sh
+  - test/e2e.sh

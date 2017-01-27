@@ -13,4 +13,4 @@
           (load-skelethon (list *tmpl-skelethon-name*))
           ;;
           (let ((project-name (car (reverse (pathname-directory (os-pwd))))))
-            (run-project (find-project (tools@jabs:tostr project-name))))))))
+            (run-project (find-project (tokeyword project-name))))))))
