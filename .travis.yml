@@ -6,7 +6,7 @@ env:
     - LISP=ccl
 
 install:
-  - sudo apt-get -y install sbcl
+  - sudo apt-get -y install sbcl realpath
 
 before_script:
   - git submodule update --init
