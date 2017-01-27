@@ -1,0 +1,12 @@
+language: lisp
+
+env:
+  matrix:
+    - LISP=sbcl
+    - LISP=ccl
+
+before_script:
+  - git submodule update --init
+
+script:
+  - /bin/sh ./bootstrap.sh
