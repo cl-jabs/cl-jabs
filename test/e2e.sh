@@ -2,7 +2,7 @@
 
 set -e
 
-ROOT=$(dirname $(dirname $(realpath -L $0)))
+ROOT=$(dirname $(dirname $(realpath $0)))
 DIR=`mktemp -d /tmp/cl-jabs-XXXX`
 
 cd ${DIR}
