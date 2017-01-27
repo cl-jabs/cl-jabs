@@ -3,8 +3,12 @@
 				:skelethon@core@plugin@jabs))
 
 ;; TODO: revise https://common-lisp.net/project/asdf/asdf.html#The-defsystem-grammar
-
 (in-package :asdf@core@plugin@jabs)
+
+;; load local ASDF
+(load (merge-pathnames
+       (make-pathname :name "asdf" :type "lisp")
+       *load-truename*))
 
 (make-instance 'jabs::plugin :name :asdf :type :core :version jabs::+jabs-version+)
 
