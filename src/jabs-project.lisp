@@ -165,7 +165,7 @@
           (funcall bound-symbol maybe-bound-slot))))
     ;; post-run hook
     (when *run-project-hook*
-      (jlog:dbg "Running project ~a hooks" (get-project-name project))
+      (jlog:dbg "Running project ``~a'' hooks" (get-project-name project))
       (dolist (run (reverse *run-project-hook*))
         (funcall run project)))
     (jlog:note "[ DONE project ``~a'' ]" (get-project-name project))))

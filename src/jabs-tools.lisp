@@ -375,7 +375,7 @@ should have the same element type.  If CHECKP is true, the streams are
 checked for compatibility of their types."
   (when checkp
     (unless (subtypep (stream-element-type to) (stream-element-type from))
-      (jlog:crit "Incompatible streams ~A and ~A." from to)))
+      (jlog:crit "Incompatible streams ``~A'' and ``~A''" from to)))
   (let ((buf (make-array *stream-buffer-size*
                          :element-type (stream-element-type from))))
     (loop
@@ -445,7 +445,7 @@ might be removed instead!  This is currently fixed for SBCL and CCL."
                            #+:cmu (multiple-value-bind (ok err-number)
                                       (unix:unix-rmdir (namestring (truename file)))
                                     (unless ok
-                                      (jlog:crit "Error number ~A when trying to delete ~A"
+                                      (jlog:crit "Error number ``~A'' when trying to delete ``~A''"
                                              err-number file)))
                            #+:scl (multiple-value-bind (ok errno)
                                       (unix:unix-rmdir (ext:unix-namestring (truename file)))
@@ -1056,14 +1056,15 @@ suitable for use as a directory name to segregate Lisp FASLs, C dynamic librarie
   (let* ((stringlist (concatenate 'list target-string))
          (mml (concatenate 'list (middle-scan startsymbol endsymbol target-string)))
          (position (+ 2 (- (length stringlist) (length (member startsymbol stringlist))) (length mml))))
-    (format t "stringlist ~a~%mml ~a~%position ~a~%" stringlist mml position)
+    (jlog:dbg "stringlist ``~a''~%mml ``~a''~%position ``~a''" stringlist mml position)
     (if (null stringlist) (reverse collector)
-      (progn
-        (format t "position ~a~%rest ~a~%" position (cut-first-n position stringlist))
-        (when mml (push (concatenate 'string mml) collector))
-        (scan-all-to-list startsymbol endsymbol
-                          (concatenate 'string
-                                       (cut-first-n position stringlist)) collector)))))
+        (progn
+          (jlog:dbg "position ``~a''~%rest ``~a''"
+                    position (cut-first-n position stringlist))
+          (when mml (push (concatenate 'string mml) collector))
+          (scan-all-to-list startsymbol endsymbol
+                            (concatenate 'string
+                                         (cut-first-n position stringlist)) collector)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

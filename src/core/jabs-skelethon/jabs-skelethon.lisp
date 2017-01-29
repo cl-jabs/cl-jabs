@@ -339,7 +339,7 @@ not included to main schema (like socket or dev dir etc)"
 	     (find-skelethon-file (string-downcase (princ-to-string skelethon-name)))))
 	(if file-to-load
 	    (parse-skelethon-from-file file-to-load)
-	  (jlog:crit "There is no file for skelethon ~a" skelethon-name))))))
+	  (jlog:crit "There is no file for skelethon ``~a''" skelethon-name))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

@@ -42,7 +42,8 @@
                    (string-equal "T" (car ,argument))
                    (string-equal "nil" (car ,argument))
                    (string-equal "NIL" (car ,argument))))
-          (jlog:err "Incorrect <~a> option format defined from CLI: ~a (t or nil needed)" ,option-name (car ,argument)))
+          (jlog:err "Incorrect ``~a'' option format defined from CLI: ``~a'' (t or nil required)"
+                    ,option-name (car ,argument)))
          ((or (string-equal "T" (car ,argument)) (string-equal "t" (car ,argument)))
           (setf ,variable t))
          ((or (string-equal "NIL" (car ,argument)) (string-equal "nil" (car ,argument)))

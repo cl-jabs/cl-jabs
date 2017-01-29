@@ -62,7 +62,7 @@
 (defun parse-bout-from-file (file)
   "Read bout file and parse it as bout"
   (check-type file (or string pathname))
-  (jlog:dbg "Processing bout file: ~a" file)
+  (jlog:dbg "Processing bout file: ``~a''" file)
   (let* ((exp (car (os-cat file :list)))
          (name (car exp))
          (rounds (cdr exp)))

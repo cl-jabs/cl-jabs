@@ -196,13 +196,13 @@ by many projects w/o requirement to set it as plugin in
   (if (directory-exists-p path)
       (let ((plugdirs (reverse *jabs-plugin-directories*)))
         (and (push path plugdirs) (setf *jabs-plugin-directories* (reverse plugdirs))))
-      (jlog:wrn "Plugin directory ~a does not exist. Skipping" path)))
+      (jlog:wrn "Plugin directory ``~a'' does not exist. Skipping" path)))
 
 (defun add-plugin-dir (path)
   (check-type path pathname)
   (if (directory-exists-p path)
       (push path *jabs-plugin-directories*)
-      (jlog:err "Plugin directory ~a does not exist" path)))
+      (jlog:err "Plugin directory ``~a'' does not exist" path)))
 
 (defun load-plugin (name &optional (type :generic))
   (check-type name symbol)

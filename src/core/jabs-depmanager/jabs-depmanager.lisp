@@ -156,15 +156,14 @@ system file, than retry to find project"
           ;;
           (setf found-project (find-project name))
           ;;
-          (jlog:wrn "FOUND PROJECT ~a" (find-project name))
-          ;;
           (if (and (null found-project)
                    (or
                     found-project-file-jab
                     found-project-file-asd))
-              (jlog:crit "Incorrect format of project file ``~a''" (or
-                                                                    found-project-file-jab
-                                                                    found-project-file-asd))
+              (jlog:crit "Incorrect format of project file ``~a''"
+                         (or
+                          found-project-file-jab
+                          found-project-file-asd))
               found-project)))))
 
 (defmethod dependency-project-reachable-remotely-p (name (project project))
