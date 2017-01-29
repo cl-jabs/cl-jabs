@@ -6,6 +6,11 @@
 
 (in-package :cl-user)
 
+;; Just Quick Fix
+#-sbcl(progn
+        (format t "Your lisp implementation is not supported~%")
+        (quit))
+
 ;; load basic JABS components
 (dolist (v '("jabs-packages"
              "jabs-logger"
@@ -31,7 +36,7 @@
              "jabs-bout"
              "jabs-test"
              "jabs-operations"
-	     "jabs-doc"
+             "jabs-doc"
              ))
   (load-plugin-file v :type :core :filename v :filetype "lisp"))
 (jlog:info "...Loading core plugins [ DONE ]")
