@@ -17,6 +17,7 @@
 
 (defvar *jabs-round-template-type* "rd")
 (defvar *jabs-round-registry* (make-hash-table))
+(defvar *jabs-rounds-to-run* nil)
 
 (defun register-round (name &rest hits)
   (check-type name keyword)
@@ -124,4 +125,11 @@
         (setf (gethash roundname *jabs-round-registry*) (remove hitname round))
         (jlog:crit "No round ``~a'' found. Can not delete hit ``~a''" roundname hitname))))
 
+(bind-jabs-cli-parameter
+ "rounds"
+ #'(lambda (&rest x)
+     (dolist (bout (reverse x))
+       (pushnew (tosymbol bout) *jabs-rounds-to-run*))))
+
+(process-jabs-cli-parameter "rounds")
 ;; TODO: realise hit list view for projects

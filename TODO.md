@@ -13,6 +13,7 @@
 * add profiling
 * launch build process to round or hit
 * launch single round or hit
+* realise round list view for projects
 
 ## Plugins:
 * Core:

@@ -36,10 +36,10 @@
   (check-type name keyword)
   (gethash name *jabs-bout-registry*))
 
-(defun run-bout (name &key round hit)
+(defun run-bout (name &optional round)
   (check-type name keyword)
   (check-type round (or keyword null))
-  (check-type hit (or keyword null))
+  (jlog:crit "AAAA ~a ~a" name round)
   (let ((bout (find-bout name))
         (rounds-to-run))
     (if (not bout)
@@ -50,9 +50,7 @@
               (setf rounds-to-run (reverse (member round (reverse bout))))
               (setf rounds-to-run bout))
           (dolist (rnd rounds-to-run)
-            (if (eq round (last rounds-to-run))
-                (run-round rnd hit)
-                (run-round rnd)))
+            (run-round rnd))
           (jlog:note ".[ DONE bout ``~a'' for project ``~a'' ]" name (get-project-name *jabs-current-project*))
           ))))
 
@@ -147,19 +145,28 @@
 
 (defmethod run-project-bouts ((project project))
   "Run pre-defined bouts for project"
-  (if *jabs-bouts-to-run*
-      (dolist (b *jabs-bouts-to-run*)
-        (run-bout b))
-      (let ((bout-name (or
-                        (try (slot-value project 'bout))
-                        *jabs-default-bout-name*)))
-        (if bout-name
-            (run-bout bout-name)
-            (jlog:crit "You did not define bout for project ``~a'' in any way"
-                       (get-project-name project))))))
+  (labels ((pair-b-r (bouts rounds)
+             (cond ((null bouts) nil)
+                   ((or (null rounds) (null (car rounds)))
+                    (cons (cons (car bouts) nil)
+                          (pair-b-r (cdr bouts) (cdr rounds))))
+                   (t
+                    (cons (cons (car bouts) (car rounds))
+                          (pair-b-r (cdr bouts) (cdr rounds)))))))
+    (let* ((bouts (or *jabs-bouts-to-run*
+                      (list
+                       (or
+                        (project-slot-value project 'bout)
+                        *jabs-default-bout-name*))))
+           (rounds *jabs-rounds-to-run*)
+           (bout-round-pairs (pair-b-r bouts rounds)))
+
+      (if bouts
+          (dolist (br bout-round-pairs)
+            (run-bout (car br) (cdr br)))
+          (jlog:crit "You did not define bout for project ``~a'' in any way"
+                     (get-project-name project))))))
 
 (add-hook *run-project-hook* #'run-project-bouts)
-
-;; TODO: make run-bout or run-bout-to-round
 
 ;; TODO: realise round list view for projects
