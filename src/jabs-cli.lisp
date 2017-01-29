@@ -14,24 +14,27 @@
 (defun process-jabs-cli-parameter (parameter)
   (check-type parameter (or string symbol))
   (let ((parameter-symbol (tosymbol parameter))
-        (parameter-value))
+        (parameter-value)
+        (parameter-found-p))
     ;; get parameter value
     (dolist (x (argv))
-      (when (or (not (scan "=" x))
-                (not (scan "-D" x)))
-        (jlog:crit "Incorrect argument format ~a" x))
-      (when (scan (string-downcase (princ-to-string parameter-symbol)) x)
+      (when (not (scan "-D" x))
+        (jlog:crit "Incorrect argument format ``~a''" x))
+      (when (string-equal
+             (tostr parameter-symbol t)
+             (car (split #\= (begin-cut "-D" x))))
+        (setf parameter-found-p t)
         (setf parameter-value (cadr (split #\= (begin-cut "-D" x))))))
     ;; get parameter action
     (let ((func (gethash parameter-symbol *jabs-cli-actions*)))
       (if (functionp func)
           ;; apply action to parameter value
-          (when (and (not (null parameter-value))
-                     (not (string-equal "" parameter-value)))
+          (when parameter-found-p
             (if (stringp parameter-value)
                 (apply func (split #\, parameter-value))
                 (apply func parameter-value)))
-          (jlog:crit "Incorrect parameter ~a, options ~a" parameter-symbol parameter-value)))))
+          (jlog:crit "Incorrect parameter ``~a'', options ``~a''"
+                     parameter-symbol parameter-value)))))
 
 (defmacro option-set-bool (argument variable option-name)
   `(cond ((not (or (null (cdr ,argument))
@@ -122,7 +125,7 @@
 (bind-jabs-cli-parameter ;; we need to break init if "version" option found: special behavior
  "version"
  #'(lambda (&rest x)
-     (declare (ignore x))
+     (when x (jlog:crit "You can not call ``version'' with parameter(s) ``~a''" x))
      (format *error-output* "(Just (Another (Build (System :version ~a))))~%" +jabs-version+)
      (terminate 0)))
 

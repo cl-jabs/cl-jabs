@@ -12,6 +12,7 @@
 * clean
 * add profiling
 * launch build process to round or hit
+* launch single round or hit
 
 ## Plugins:
 * Core:
