@@ -39,7 +39,6 @@
 (defun run-bout (name &optional round)
   (check-type name keyword)
   (check-type round (or keyword null))
-  (jlog:crit "AAAA ~a ~a" name round)
   (let ((bout (find-bout name))
         (rounds-to-run))
     (if (not bout)
