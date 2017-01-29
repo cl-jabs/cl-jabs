@@ -6,7 +6,7 @@
 
 (in-package :cl-user)
 
-;; Just Quick Fix
+;; Emergency out on not implemented lisps
 #-sbcl(progn
         (format t "Your lisp implementation is not supported~%")
         (quit))
@@ -54,10 +54,8 @@
   (dolist (run (reverse *post-init-hook*))
     (funcall run)))
 
-;; run project(s)
-(dolist (proj *jabs-projects-to-run*)
-  ;; run project
-  (let ((p (find-project proj)))
-    (if p
-        (run-project (find-project proj))
-        (jlog:crit "There is no project, named ``~a''" proj))))
+;; run project
+(let ((p (find-project *jabs-project-to-run*)))
+  (if p
+      (run-project p)
+      (jlog:crit "There is no project, named ``~a''" *jabs-project-to-run*)))

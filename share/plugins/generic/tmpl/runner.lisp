@@ -1,7 +1,7 @@
 (in-package #:tmpl@generic@plugin@jabs)
 
 ;; fix, if some project selected
-(setf *jabs-projects-to-run* nil)
+(setf *jabs-project-to-run* nil)
 
 ;; no plugins to run, so run one
 (add-hook

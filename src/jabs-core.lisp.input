@@ -59,13 +59,7 @@
 
 (defvar *fail-on-error* nil)
 
-;; ;;CLI
-;; (defvar *jabs-projects-to-run* nil)
-;; (defvar *jabs-projects-force-to-run* nil)
-;; (defvar *jabs-use-hit-deps* t) ; do not use dependencies for hits (working only with no-lcs
-;; (defvar *jabs-use-bouts* t) ; do not use bouts
-
-;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defmacro run-hook (hook &body args)
   "Run hook with arguments"
@@ -107,7 +101,8 @@
 (defmacro with-project-to-be-run (project &body body)
   "Run code only if project is set to be run"
   `(when (and (typep ,project 'jabs::project)
-              (member (get-project-name ,project) *jabs-projects-to-run*))
+              (eq (tokeyword (get-project-name ,project))
+                             *jabs-project-to-run*))
      ,@body))
 
 ;; read configfile

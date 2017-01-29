@@ -19,15 +19,14 @@
           *jabs-current-project*
           ;;
           defproject
-          *jabs-projects-to-run*
+          *jabs-project-to-run*
           project-slot-value
           ))
 
 ;;;; variables
 ;; Projects
 (defvar *jabs-project-registry* (make-hash-table))
-(defvar *jabs-projects-to-run* nil) ;; when null, run all projects in registry
-(defvar *jabs-projects-force-to-run* nil)
+(defvar *jabs-project-to-run* nil) ;; when null, run all projects in registry
 (defvar *jabs-current-project* nil)
 
 ;; Hooks
@@ -39,13 +38,13 @@
 
 ;;;; bind CLI param to set project force
 (bind-jabs-cli-parameter
- "projects"
+ "project"
  #'(lambda (&rest x)
      (setf *jabs-projects-force-to-run* t) ; set force projects to run
      (dolist (proj x)
-       (pushnew (tosymbol proj) *jabs-projects-to-run*))))
+       (setf (tokeyword proj) *jabs-project-to-run*))))
 
-(process-jabs-cli-parameter "projects")
+(process-jabs-cli-parameter "project")
 
 ;;;;
 ;;;; load and process projects

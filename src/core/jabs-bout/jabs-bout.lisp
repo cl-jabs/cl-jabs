@@ -96,7 +96,8 @@
  #'(lambda (x)
      (declare (ignore x))))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (defun load-bouts-by-name (bout-names)
   (check-type bout-names list)
   (dolist (bout-name bout-names)
@@ -104,7 +105,9 @@
           (current-bout-file (find-bout-file bout-name)))
       (when (and
              (not current-bout)
-             (member (get-project-name *jabs-current-project*) *jabs-projects-to-run*))
+             (eq
+              (tokeyword (get-project-name *jabs-current-project*))
+              *jabs-project-to-run*))
         ;;
         (if current-bout-file
             (parse-bout-from-file current-bout-file)
