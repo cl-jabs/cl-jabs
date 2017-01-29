@@ -40,9 +40,9 @@
 (bind-jabs-cli-parameter
  "project"
  #'(lambda (&rest x)
-     (setf *jabs-projects-force-to-run* t) ; set force projects to run
+     ;; (setf *jabs-projects-force-to-run* t) ; set force projects to run
      (dolist (proj x)
-       (setf (tokeyword proj) *jabs-project-to-run*))))
+       (setf *jabs-project-to-run* (tokeyword proj)))))
 
 (process-jabs-cli-parameter "project")
 
