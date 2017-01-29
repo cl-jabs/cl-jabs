@@ -11,6 +11,7 @@
 * enable ASDF integration **[PARTLY]**
 * clean
 * add profiling
+* launch build process to round or hit
 
 ## Plugins:
 * Core:
