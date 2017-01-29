@@ -1,3 +1,3 @@
 ;; -*- mode: lisp -*-
 (:deploy
- :deploy)
+ :deploy-local)
