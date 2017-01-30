@@ -15,7 +15,7 @@ ${ROOT}/src/wrappers/jn/jn.sh -Dbouts=tmpl-mkproject -Dplugins=tmpl@generic -Dtm
 
 set +e
 
-${ROOT}/src/wrappers/jn/jn.sh -Dprojects=$(basename ${DIR}) 2>test
+${ROOT}/src/wrappers/jn/jn.sh -Dproject=$(basename ${DIR}) 2>test
 
 set -e
 
