@@ -148,7 +148,7 @@ do_build()
     # echo "You can operate now with ${CYAN}\`\`jab''${NO_COLOUR} utility from local directory, or do ${CYAN}\`\`./jab --self-install''${NO_COLOUR} to install it globally"
     # echo
     echo -n "${PURPLE}Generating${NO_COLOUR} documentation..."
-    echo "# JABS Tools" > doc/tools.md
+    echo "# JABS Tools" > doc/Tools.md
     grep -E '\(defun|\(defmacro|\(defvar' src/jabs-tools.lisp | grep -vE '^;' | sed 's|(defvar|var|g;s|(defmacro|macro|g;s|(defun|fun|g' | while read i; do printf "* \`$i\`\n\n"; done >> doc/tools.md
     echo "${PURPLE}DONE${NO_COLOUR}"
 }
