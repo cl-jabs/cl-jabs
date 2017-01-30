@@ -123,7 +123,9 @@
 
 (defun tosymbol (symbol &optional (package :keyword))
   (when (not (null symbol)) ;; don`t make symbol from NIL
-    (intern (string-upcase (princ-to-string symbol)) package)))
+    (if (and (stringp symbol) (string-equal "" symbol))
+	nil
+        (intern (string-upcase (princ-to-string symbol)) package))))
 
 (defun tokeyword (symbol)
   (tosymbol symbol :keyword))
