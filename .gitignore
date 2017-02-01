@@ -2,7 +2,7 @@
 *.fasl
 *.lisp-temp
 
-./jab
+jab
 *~
 *#
 #*
