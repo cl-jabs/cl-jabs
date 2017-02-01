@@ -36,7 +36,7 @@ check_sbcl()
 {
     echo -n ">> ${PURPLE}Checking${NO_COLOUR} for ${CYAN}sbcl${NO_COLOUR} binary present in system... "
     test -z $SBCL_BIN && echo "${CYAN}sbcl${NO_COLOUR} binary not found in system" && return 5
-    test -z "$SBCL" && SBCL="$SBCL_BIN --noinform --disable-ldb --disable-debugger --no-sysinit --no-userinit"
+    test -z "$SBCL" && SBCL="$SBCL_BIN --disable-debugger --no-sysinit --no-userinit"
     echo "${PURPLE}DONE${NO_COLOUR}"
 }
 
@@ -134,13 +134,13 @@ do_build()
 
 
     echo -n "${PURPLE}Generating${NO_COLOUR} files from templates..."
-    sed "s|@SRCDIR@|$PWD/src/|" src/wrappers/jab/jab.lisp.input > src/wrappers/jab/jab.lisp
+    sed "s|@SRCDIR@|$PWD/src/|;s|@SBCL_BIN@|$SBCL_BIN|;s|@SRCDIR@|$PWD/src/|" src/wrappers/jab/jab.lisp.input > src/wrappers/jab/jab.lisp
     sed "s|@SRCDIR@|$PWD/src/|" src/jabs-loader.lisp.input > src/jabs-loader.lisp
     sed "s|@LIBDIR@|$PWD/lib/|" src/jabs-packages.lisp.input > src/jabs-packages.lisp
     sed "s|@DATADIR@|$PWD/|;s|@SRCDIR@|$PWD/src/|;s|@LIBDIR@|$PWD/lib/|;s|@DATAROOTDIR@|$PWD/share/|;s|@SYSCONFIGDIR@|$PWD/etc/|" src/jabs-core.lisp.input > src/jabs-core.lisp
     echo "${PURPLE}DONE${NO_COLOUR}"
 
-    # $SBCL --load ./src/wrappers/jab/make-jab.lisp >/dev/null
+    $SBCL --no-sysinit --no-userinit --disable-debugger --load ./src/wrappers/jab/make-jab.lisp >/dev/null
     local ret=$?
     [ $ret != 0 ] && echo "${PURPLE}Build${NO_COLOUR} ${RED}FAILED${NO_COLOUR}">&2 && return $ret
 
@@ -149,7 +149,7 @@ do_build()
     # echo
     echo -n "${PURPLE}Generating${NO_COLOUR} documentation..."
     echo "# JABS Tools" > doc/Tools.md
-    grep -E '\(defun|\(defmacro|\(defvar' src/jabs-tools.lisp | grep -vE '^;' | sed 's|(defvar|var|g;s|(defmacro|macro|g;s|(defun|fun|g' | while read i; do printf "* \`$i\`\n\n"; done >> doc/tools.md
+    grep -E '\(defun|\(defmacro|\(defvar' src/jabs-tools.lisp | grep -vE '^;' | sed 's|(defvar|var|g;s|(defmacro|macro|g;s|(defun|fun|g' | while read i; do printf "* \`$i\`\n\n"; done >> doc/Tools.md
     echo "${PURPLE}DONE${NO_COLOUR}"
 }
 

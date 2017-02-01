@@ -14,6 +14,9 @@
 
 (in-package :tools@jabs)
 
+(export '(make-argument-parser
+          ))
+
 ;; (defun argv (&optional argnumber)
 ;;   (let ((argv
 ;;          (or
@@ -33,7 +36,7 @@
 
 (defun check-arg-integer (arg)
   (or (ignore-errors (parse-integer arg))
-      (jlog:crit "argument ~a is not an integer" arg)))
+      (jlog:crit "argument ``~a'' is not an integer" arg)))
 
 (defun check-arg-string (arg)
   arg)
@@ -42,7 +45,7 @@
   (if (or
        (null (cadr args))
        (eq #\- (car (concatenate 'list (cadr args)))))
-      (jlog:crit "Argument ~a expected one argument" (car args))
+      (jlog:crit "Argument ``~a'' expected one argument" (car args))
     t))
 
 (defmacro check-arg-type (name type)
@@ -112,52 +115,46 @@
          (arg-keys (flatten (mapcar #'(lambda (x) (arg-keys x)) args)))
          (k-a-list (get-parser-key-arguments parser)))
     (labels ((store-args (arguments)
-                         (cond ((null arguments) nil)
-                               ((not (member (car arguments) arg-keys :test 'equal))
-                                ;; !!!jabs ONLY!!! (for process direct arguments)
-                                #+jab
-                                (if (not (begin-scan "-D" (car arguments)))
-                                    ;; recognize it as hit!
-                                    (progn
-                                      (pushnew
-                                       (car arguments)
-                                       jab::*jabs-hits*
-                                       :test 'string-equal)
-                                      (store-args (cdr arguments)))
-                                  (jlog:crit "Unrecognized argument: ~a" (car arguments)))
-                                #-jab
-                                (jlog:crit "Unrecognized argument: ~a" (car arguments))
-                                )
-                               #+jab
-                               ((begin-scan "-D" (car arguments))
-                                (jlog:dbg "~a is direct argument. Skipping" (car arguments))
-                                (store-args (cdr arguments)))
-                               (t
-                                (let ((action (arg-action (get-argument-from-k-a-list (car arguments) k-a-list)))
-                                      (argtype (arg-type (get-argument-from-k-a-list (car arguments) k-a-list)))
-                                      (dest (arg-destination (get-argument-from-k-a-list (car arguments) k-a-list)))) ;; dest
-                                  ;; check argument type
-                                  (cond ((and (eq action :store) (check-store-syntax arguments))
-                                         (setf (gethash dest hash) (eval `(check-arg-type ,(cadr arguments) ,argtype)))
-                                         (store-args (cddr arguments)))
-                                        ((eq action :store-t)
-                                         (setf (gethash dest hash) t)
-                                         (store-args (cdr arguments)))
-                                        ((eq action :store-nil)
-                                         (setf (gethash dest hash) nil)
-                                         (store-args (cdr arguments)))
-                                        ((eq action :count)
-                                         (let ((num (gethash dest hash)))
-                                           (if (null num) (setf num 0))
-                                           (setf (gethash dest hash)
-                                                 (+ 1 num)))
-                                         (store-args (cdr arguments)))
-                                        ((eq action :append)
-                                         (let ((list (gethash dest hash)))
-                                           (setf (gethash dest hash)
-                                                 (cons (eval `(check-arg-type ,(cadr arguments) ,argtype)) list)))
-                                         (store-args (cddr arguments)))
-                                        (t (jlog:crit "Not supported action ~a" action))))))))
+               (cond ((null arguments) nil)
+                     #+jab
+                     ((begin-scan "-D" (car arguments))
+                      (jlog:dbg "``~a'' is direct argument. Skipping" (car arguments))
+                      (store-args (cdr arguments)))
+                     ((not (member (car arguments) arg-keys :test 'equal))
+                      ;; recognize it as hit for JAB!
+                      #+jab(if (not (begin-scan "-" (car arguments)))
+                               (progn
+                                 (jlog:err "DUMMY! It will be a round@bout ``~a''. Skipping now" (car arguments))
+                                 (store-args (cdr arguments)))
+                               (jlog:crit "Unrecognized argument: ``~a''" (car arguments)))
+                      #-jab(jlog:crit "Unrecognized argument: ``~a''" (car arguments))
+                      )
+                     (t
+                      (let ((action (arg-action (get-argument-from-k-a-list (car arguments) k-a-list)))
+                            (argtype (arg-type (get-argument-from-k-a-list (car arguments) k-a-list)))
+                            (dest (arg-destination (get-argument-from-k-a-list (car arguments) k-a-list)))) ;; dest
+                        ;; check argument type
+                        (cond ((and (eq action :store) (check-store-syntax arguments))
+                               (setf (gethash dest hash) (eval `(check-arg-type ,(cadr arguments) ,argtype)))
+                               (store-args (cddr arguments)))
+                              ((eq action :store-t)
+                               (setf (gethash dest hash) t)
+                               (store-args (cdr arguments)))
+                              ((eq action :store-nil)
+                               (setf (gethash dest hash) nil)
+                               (store-args (cdr arguments)))
+                              ((eq action :count)
+                               (let ((num (gethash dest hash)))
+                                 (if (null num) (setf num 0))
+                                 (setf (gethash dest hash)
+                                       (+ 1 num)))
+                               (store-args (cdr arguments)))
+                              ((eq action :append)
+                               (let ((list (gethash dest hash)))
+                                 (setf (gethash dest hash)
+                                       (cons (eval `(check-arg-type ,(cadr arguments) ,argtype)) list)))
+                               (store-args (cddr arguments)))
+                              (t (jlog:crit "Not supported action ``~a''" action))))))))
       ;; TODO: check for required arguments
       (store-args (argv)))
     (maphash #'(lambda (x y) (push (list x y) list)) hash)

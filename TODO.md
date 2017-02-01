@@ -14,6 +14,11 @@
 * launch build process to round or hit
 * launch single round or hit
 * realise round list view for projects
+* remove *jabs-verbose* variable as deprecated
+* remove *jabs-quiet* variable as deprecated
+* remove *jabs-debug* variable as deprecated
+* handle exception, when round does not exists in bout
+* make automatic detection, which project should be launched
 
 ## Plugins:
 * Core:
