@@ -29,11 +29,13 @@
 
 #+sbcl(require :sb-posix)
 
-(load #P"jab.lisp")
+(load #P"src/wrappers/jab/jab.lisp")
 
 #+sbcl
 (sb-ext:save-lisp-and-die
- "jab" :toplevel (lambda () (jab:jab) 0)
+ "jab"
+ :toplevel (lambda () (jab:jab) 0)
+ :compression t
  :executable t)
 
 ;; #+cmucl
