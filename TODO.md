@@ -1,17 +1,14 @@
 # TODO
 
 ## Main:
-* insert/append-hit/round - FIX
-* preprocessor
-* jab
+* preprocessor (?)
+* jab **[PARTLY]**
   * compilers for `jab`
 * зробити можливість логування у файл (?)
 * виставити нормально рівні логування (0-5)
 * make tests for JABS
-* enable ASDF integration **[PARTLY]**
 * clean
 * add profiling
-* launch build process to round or hit
 * launch single round or hit
 * realise round list view for projects
 * remove *jabs-verbose* variable as deprecated
@@ -19,6 +16,9 @@
 * remove *jabs-debug* variable as deprecated
 * handle exception, when round does not exists in bout
 * make automatic detection, which project should be launched
+* check for multiple directories to load libs/plugins/skelethons/bouts/rounds/hits etc
+* make possibility to add absolute pathnames to skelethon definition
+* make skelethon definition in project regular (now: `:skelethon (:default)` )
 
 ## Plugins:
 * Core:
