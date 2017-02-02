@@ -1,7 +1,6 @@
 # cl-jabs
 
-![](https://github.com/cl-jabs/cl-jabs/blob/master/share/images/JABS_64x64.png) [![Travis Build Status](https://api.travis-ci.org/cl-jabs/cl-jabs.svg?branch=master)](https://travis-ci.org/cl-jabs/cl-jabs)
-
+![](https://github.com/cl-jabs/cl-jabs/blob/master/share/images/JABS_64x64.png) [![Travis Build Status](https://api.travis-ci.org/cl-jabs/cl-jabs.svg?branch=master)](https://travis-ci.org/cl-jabs/cl-jabs) 
 ```lisp
 (Just
   (Another
