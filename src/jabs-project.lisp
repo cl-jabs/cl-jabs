@@ -28,6 +28,7 @@
 (defvar *jabs-project-registry* (make-hash-table))
 (defvar *jabs-project-to-run* nil) ;; when null, run all projects in registry
 (defvar *jabs-current-project* nil)
+(defvar *jabs-add-project* nil)
 
 ;; Hooks
 (defvar *define-project-hook* nil
@@ -132,7 +133,11 @@
 
 (defmacro defproject (name &body options)
   "Register project to jabs-project-registry"
-  `(register-project ,(tosymbol name) ',options))
+  `(progn 
+	  (when *jabs-add-project*
+	    (setf *jabs-project-to-run* ,(tokeyword name))
+	    (setf *jabs-add-project* nil))
+	  (register-project ,(tosymbol name) ',options)))
 
 (defgeneric run-project (project)
   )

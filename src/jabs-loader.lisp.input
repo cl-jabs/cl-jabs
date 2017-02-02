@@ -45,7 +45,8 @@
 (os-cd +jabs-run-directory+)
 
 ;;;; loading build file
-(load-build-jab (os-pwd))
+(let ((*jabs-add-project* t))
+  (load-build-jab (os-pwd)))
 
 ;; load plugin(s) defined in command line interface
 (process-jabs-cli-parameter "plugins")
