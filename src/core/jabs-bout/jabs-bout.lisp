@@ -36,7 +36,10 @@
   (check-type name keyword)
   (gethash name *jabs-bout-registry*))
 
-(defun run-bout (name &optional round)
+(defgeneric run-bout (project name &optional round)
+  )
+
+(defmethod run-bout ((project project) name &optional round)
   (check-type name keyword)
   (check-type round (or keyword null))
   (let ((bout (find-bout name))
@@ -44,13 +47,16 @@
     (if (not bout)
         (jlog:crit "There is no bout, named ``~a''" name)
         (progn
-          (jlog:note ".[ Launching bout ``~a'' for project ``~a'' ]" name (get-project-name *jabs-current-project*))
-          (if round
-              (setf rounds-to-run (reverse (member round (reverse bout))))
-              (setf rounds-to-run bout))
+          (jlog:note ".[ Launching bout ``~a'' for project ``~a'' ]" name (get-project-name project))
+          (cond ((and round (member round bout))
+		 (setf rounds-to-run (reverse (member round (reverse bout)))))
+		((and round (not (member round bout)))
+		 (jlog:crit "Bout ``~a'' requested to run to round ``~a'' for project ``~a''. But but bout does not contain this round. Exiting"
+			    name round (get-project-name project)))
+		(t (setf rounds-to-run bout)))
           (dolist (rnd rounds-to-run)
             (run-round rnd))
-          (jlog:note ".[ DONE bout ``~a'' for project ``~a'' ]" name (get-project-name *jabs-current-project*))
+          (jlog:note ".[ DONE bout ``~a'' for project ``~a'' ]" name (get-project-name project))
           ))))
 
 (defmacro defbout (name &body rounds)
@@ -95,7 +101,10 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defun load-bouts-by-name (bout-names)
+(defgeneric load-bouts-by-name (project bout-names)
+  )
+
+(defmethod load-bouts-by-name ((project project) bout-names)
   (check-type bout-names list)
   (dolist (bout-name bout-names)
     (let ((current-bout (find-bout bout-name))
@@ -103,7 +112,7 @@
       (when (and
              (not current-bout)
              (eq
-              (tokeyword (get-project-name *jabs-current-project*))
+              (tokeyword (get-project-name project))
               *jabs-project-to-run*))
         ;;
         (if current-bout-file
@@ -116,12 +125,12 @@
 (defmethod load-project-bouts ((project project))
   "Load defined, or set bouts for project"
   (if *jabs-bouts-to-run*
-      (load-bouts-by-name *jabs-bouts-to-run*)
+      (load-bouts-by-name project *jabs-bouts-to-run*)
       ;;
       (let ((bout-name (or
                         (try (slot-value project 'bout))
                         *jabs-default-bout-name*)))
-        (load-bouts-by-name (list bout-name)))))
+        (load-bouts-by-name project (list bout-name)))))
 
 (add-hook *define-project-hook* #'load-project-bouts)
 
@@ -162,7 +171,7 @@
 
       (if bouts
           (dolist (br bout-round-pairs)
-            (run-bout (car br) (cdr br)))
+            (run-bout project (car br) (cdr br)))
           (jlog:crit "You did not define bout for project ``~a'' in any way"
                      (get-project-name project))))))
 
