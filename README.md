@@ -1,17 +1,16 @@
 # cl-jabs
+
+![](https://github.com/cl-jabs/cl-jabs/blob/master/share/images/JABS_64x64.png) [![Travis Build Status](https://api.travis-ci.org/cl-jabs/cl-jabs.svg?branch=master)](https://travis-ci.org/cl-jabs/cl-jabs)
+
 ```lisp
 (Just
   (Another
     (Build
       (System :for "Common Lisp"))))
 ```
-![](https://github.com/cl-jabs/cl-jabs/blob/master/share/images/JABS_64x64.png) [![Travis Build Status](https://api.travis-ci.org/cl-jabs/cl-jabs.svg?branch=master)](https://travis-ci.org/cl-jabs/cl-jabs)
 
 ## WAT
 JABS is a maven-like build system for common lisp. Code is under active development and still not ready for production usage. Please, find some documentation [here](https://github.com/cl-jabs/cl-jabs/wiki).
-
-## Status
-
 
 ## [Quickstart](https://github.com/cl-jabs/cl-jabs/wiki/quickstart)
 
