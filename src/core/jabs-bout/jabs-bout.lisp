@@ -89,7 +89,8 @@
  "bouts"
  #'(lambda (&rest x)
      (dolist (bout (reverse x))
-       (pushnew (tosymbol bout) *jabs-bouts-to-run*))))
+       (when (tosymbol bout)
+	 (pushnew (tosymbol bout) *jabs-bouts-to-run*)))))
 
 (process-jabs-cli-parameter "bouts")
 
@@ -106,7 +107,7 @@
 
 (defmethod load-bouts-by-name ((project project) bout-names)
   (check-type bout-names list)
-  (dolist (bout-name bout-names)
+  (dolist (bout-name (or bout-names (list *jabs-default-bout-name*)))
     (let ((current-bout (find-bout bout-name))
           (current-bout-file (find-bout-file bout-name)))
       (when (and

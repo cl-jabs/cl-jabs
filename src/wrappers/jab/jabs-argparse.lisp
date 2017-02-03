@@ -123,9 +123,7 @@
                      ((not (member (car arguments) arg-keys :test 'equal))
                       ;; recognize it as hit for JAB!
                       #+jab(if (not (begin-scan "-" (car arguments)))
-                               (progn
-                                 (jlog:err "DUMMY! It will be a round@bout ``~a''. Skipping now" (car arguments))
-                                 (store-args (cdr arguments)))
+			       (store-args (cdr arguments))
                                (jlog:crit "Unrecognized argument: ``~a''" (car arguments)))
                       #-jab(jlog:crit "Unrecognized argument: ``~a''" (car arguments))
                       )

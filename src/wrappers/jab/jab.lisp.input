@@ -181,15 +181,14 @@
   (dolist (v (argv))
     (when (and (not (null v)) (not (begin-scan "-D" v)) (not (begin-scan "-" v)))
       (let ((round
-             (when (scan *jabs-universal-delimiter* v)
-               (car (split (car (concatenate 'list *jabs-universal-delimiter*)) v))))
-            (bout
              (if (scan *jabs-universal-delimiter* v)
-                 (cadr (split (car (concatenate 'list *jabs-universal-delimiter*)) v))
-                 v)))
+		 (car (split (car (concatenate 'list *jabs-universal-delimiter*)) v))
+	         v))
+            (bout
+             (when (scan *jabs-universal-delimiter* v)
+	       (cadr (split (car (concatenate 'list *jabs-universal-delimiter*)) v)))))
         ;;
         (jlog:dbg "Processing (round@)bout ``~a''" v)
-        (format t "round: ~a bout: ~a~%" round bout)
         (push round *rounds*)
         (push bout *bouts*)
         ))))

@@ -4,5 +4,5 @@
 	      (or
 	       (try (get-skelethon-target (find-skelethon (project-slot-value *jabs-current-project* 'skelethon))))
 	       (try (get-skelethon-target (find-skelethon (car (project-slot-value *jabs-current-project* 'skelethon))))))))
-	 ;; (when target-dir
-	 (os-rm target-dir :recursive t)))
+	 (when target-dir
+	   (os-rm target-dir :recursive t))))
