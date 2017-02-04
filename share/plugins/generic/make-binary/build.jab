@@ -5,20 +5,11 @@
 (in-package :make-binary-system)
 
 (defplugin :make-binary :generic "0.0.1"
-  :author "John Doe <john@doe.local>"
-  :maintainer "John Doe <john@doe.local>"
-  :license "Public Domain"
-  :description "Personal use project"
+  :author "Alexander Vynnyk <cosmonaut.ok@gmail.com>"
+  :maintainer "Alexander Vynnyk <cosmonaut.ok@gmail.com>"
+  :license "MIT"
+  :description "JABS plugin to make binary executable from project"
   :serial t
   :skelethon (:default)
-  ;; :bout :default
-  ;; :plugins NIL
-  ;;;; Additional sources
-  ;; :sources ((make-pathname :directory '(:relative "another-lib")))
-  ;;;; Dependencies
   :depends-on (:trivial-dump-core)
-  ;; :pathname "some/relative/path" ;; relative name to your plugin root directory (where skelethon located)
-  ;;;; Add files, mobules etc
-  :components (
-               (:file "make-binary")
-))
+  :components ((:file "make-binary")))
