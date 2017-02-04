@@ -17,44 +17,44 @@
 ;; (append-hit :make-binary :compile)
 
 (defhit make-binary () ()
-  (if *make-binary-toplevel-function*
-      (let* ((toplevel-list (re@jabs:split #\: *make-binary-toplevel-function*))
-	     (package (or (find-package (tools@jabs:tokeyword (first toplevel-list))) *package*))
-	     (function (find-symbol (string-upcase (car (last toplevel-list))) package))
-	     (name (or *make-binary-name*
-		       (tostr (get-project-name *jabs-current-project*) t)))
-	     (folder (or
-		      (pathname-as-directory
-		       (parse-namestring
-			(get-skelethon-bin
-			 (find-skelethon
-			  (car (jabs:project-slot-value *jabs-current-project* 'jabs::skelethon))))))
-		      "")))
-	;;
-	(when (not function)
-		     (jlog:crit "Can not find symbol, named ``~a'' for top-level function. Can not create binary" *make-binary-toplevel-function*))
-	;;
-	(tools@jabs:os-mkdir folder)
-	;;
-	(trivial-dump-core:save-executable
-	 (merge-pathnames
-	  (make-pathname :name name)
-	  folder)
-	 function)
-		   )
-    (jlog:crit "There is no toplevel function defined. Can not create binary")))
+        (if *make-binary-toplevel-function*
+            (let* ((toplevel-list (re@jabs:split #\: *make-binary-toplevel-function*))
+                   (package (or (find-package (tools@jabs:tokeyword (first toplevel-list))) *package*))
+                   (function (find-symbol (string-upcase (car (last toplevel-list))) package))
+                   (name (or *make-binary-name*
+                             (tostr (get-project-name *jabs-current-project*) t)))
+                   (folder (or
+                            (pathname-as-directory
+                             (parse-namestring
+                              (get-skelethon-bin
+                               (find-skelethon
+                                (car (jabs:project-slot-value *jabs-current-project* 'jabs::skelethon))))))
+                            "")))
+              ;;
+              (when (not function)
+                (jlog:crit "Can not find symbol, named ``~a'' for top-level function. Can not create binary" *make-binary-toplevel-function*))
+              ;;
+              (tools@jabs:os-mkdir folder)
+              ;;
+              (trivial-dump-core:save-executable
+               (merge-pathnames
+                (make-pathname :name name)
+                folder)
+               function)
+              )
+            (jlog:crit "There is no toplevel function defined. Can not create binary")))
 
 (bind-project-symbol
  :make-binary
  #'(lambda (x)
      (check-type x list)
      (let ((name (cadr (member :name x)))
-	   (toplevel-function (cadr (member :toplevel-function x))))
+           (toplevel-function (cadr (member :toplevel-function x))))
        ;;
        (when (not *make-binary-name*)
-	 (setf *make-binary-name* name))
+         (setf *make-binary-name* name))
        (when (not *make-binary-toplevel-function*)
-	 (setf *make-binary-toplevel-function* toplevel-function)))))
+         (setf *make-binary-toplevel-function* toplevel-function)))))
 
 (bind-jabs-cli-parameter
  "make-binary-name"
