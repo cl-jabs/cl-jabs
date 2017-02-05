@@ -16,6 +16,7 @@
 * check for multiple directories to load libs/plugins/skelethons/bouts/rounds/hits etc
 * make possibility to add absolute pathnames to skelethon definition
 * make skelethon definition in project regular (now: `:skelethon (:default)` )
+* add CLI option additional-plugins
 
 ## Plugins:
 * Core:
@@ -27,7 +28,6 @@
   * swank/slime
   * scm
   * patch(?)
-  * binary - make executable binary from your sources
   * simple http client
   * external program (core?, tools?) - run external program
 
