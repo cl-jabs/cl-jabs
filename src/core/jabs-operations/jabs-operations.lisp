@@ -1,6 +1,6 @@
 (defpackage operations@core@plugin@jabs
   (:use :cl :tools@jabs :re@jabs :jabs
-				:skelethon@core@plugin@jabs))
+				:skeleton@core@plugin@jabs))
 
 (in-package :operations@core@plugin@jabs)
 

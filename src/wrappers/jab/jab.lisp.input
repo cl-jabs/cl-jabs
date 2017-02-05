@@ -81,7 +81,7 @@
  --autogen-project            Generates simple buildfile (``build.jab'' by default. See -f option)
                               available options:
                                 -Dtmpl-version=<number>
-                                -Dtmpl-skelethon=<skelethon_name>
+                                -Dtmpl-skeleton=<skeleton_name>
  --serve                      Start swank server to work with app interactively
  -f, --buildfile=FILENAME     Use selected buildfile instead of default
 

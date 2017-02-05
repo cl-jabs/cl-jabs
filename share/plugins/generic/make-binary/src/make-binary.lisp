@@ -26,9 +26,9 @@
                    (folder (or
                             (pathname-as-directory
                              (parse-namestring
-                              (get-skelethon-bin
-                               (find-skelethon
-                                (car (jabs:project-slot-value *jabs-current-project* 'jabs::skelethon))))))
+                              (get-skeleton-bin
+                               (find-skeleton
+                                (car (jabs:project-slot-value *jabs-current-project* 'jabs::skeleton))))))
                             "")))
               ;;
               (when (not function)

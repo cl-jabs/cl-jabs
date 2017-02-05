@@ -297,7 +297,7 @@ by many projects w/o requirement to set it as plugin in
              (plugin-type (tosymbol (cadr (split #\@ (princ-to-string plugin))))))
          (load-plugin plugin-name plugin-type)))))
 
-;; adding run-project-hook to load and process skelethon
+;; adding run-project-hook to load and process skeleton
 (add-hook
     *define-project-hook*
   #'(lambda (x)

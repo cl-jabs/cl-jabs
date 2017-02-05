@@ -16,7 +16,7 @@
                                               (maintainer "John Doe <john@doe.local>")
                                               (license "Public Domain")
                                               (description "Personal use plugin")
-                                              (skelethon "(:default)")
+                                              (skeleton "(:default)")
                                               (bout "default")
                                               (plugins "(:quicklisp@repository)")
                                               (components (format nil "~15t(:file \"fixture\")~%")))
@@ -32,23 +32,23 @@
   :license \"~a\"
   :description \"~a\"
   :serial t
-  :skelethon ~a
+  :skeleton ~a
   ;; :bout :~a
   ;; :plugins ~a
   ;;;; Additional sources
   ;; :sources ((make-pathname :directory '(:relative \"another-lib\")))
   ;;;; Dependencies
   ;; :depends-on (:alexandria :cl-ppcre)
-  ;; :pathname \"some/relative/path\" ;; relative name to your plugin root directory (where skelethon located)
+  ;; :pathname \"some/relative/path\" ;; relative name to your plugin root directory (where skeleton located)
   ;;;; Add files, mobules etc
   :components (
 ~a))
-" name name name type version author maintainer license description skelethon bout plugins components))
+" name name name type version author maintainer license description skeleton bout plugins components))
 
 (defhit tmpl-mkplugin () ()
         (let* ((plugin-name (get-project-name *jabs-current-project*))
                (plugin-description (get-project-description *jabs-current-project*))
-               (plugin-skelethon-name (car (slot-value *jabs-current-project* 'jabs::skelethon)))
+               (plugin-skeleton-name (car (slot-value *jabs-current-project* 'jabs::skeleton)))
                (plugin-components (slot-value *jabs-current-project* 'jabs::components))
                (plugin-component-names)
                (plugin-template))
@@ -72,7 +72,7 @@
                  :license (ignore-errors (slot-value *jabs-current-project* 'jabs::license))
                  :description plugin-description
                  :plugins (ignore-errors (slot-value *jabs-current-project* 'jabs::plugins))
-                 :skelethon (concatenate 'string "(:" (string-downcase (princ-to-string plugin-skelethon-name)) ")")
+                 :skeleton (concatenate 'string "(:" (string-downcase (princ-to-string plugin-skeleton-name)) ")")
                  :components plugin-component-names
                  ))
           ;;
@@ -93,7 +93,7 @@
 	  (terminate 0))
         (progn
           (jlog:note "Plugin not exists. Going on")
-          (load-skelethon (list *tmpl-skelethon-name*))
+          (load-skeleton (list *tmpl-skeleton-name*))
           ;;
           (let* ((plugin-name (tools@jabs:tosymbol (car (reverse (pathname-directory (os-pwd))))))
                  (plugin-type (tools@jabs:tosymbol *tmpl-plugin-type*))
@@ -104,12 +104,12 @@
                  (plugin-description "Personal use plugin")
                  (plugin-serial t)
                  (plugin-plugins '(:quicklisp@repository))
-                 (plugin-skelethon (find-skelethon *tmpl-skelethon-name*))
+                 (plugin-skeleton (find-skeleton *tmpl-skeleton-name*))
                  (plugin-bout :default)
                  (plugin-src-dir
-                  (if (listp (get-skelethon-src plugin-skelethon))
-                      (merge-pathnames (make-pathname :directory (list :relative (car (get-skelethon-src plugin-skelethon)))) (os-pwd))
-                      (merge-pathnames (make-pathname :directory (list :relative (get-skelethon-src plugin-skelethon))) (os-pwd))))
+                  (if (listp (get-skeleton-src plugin-skeleton))
+                      (merge-pathnames (make-pathname :directory (list :relative (car (get-skeleton-src plugin-skeleton)))) (os-pwd))
+                      (merge-pathnames (make-pathname :directory (list :relative (get-skeleton-src plugin-skeleton))) (os-pwd))))
                  (plugin-components (list-directory (merge-pathnames
                                                      plugin-src-dir
                                                      (os-pwd))))
@@ -128,7 +128,7 @@
                 :license ,plugin-license
                 :description ,plugin-description
                 :serial t
-                :skelethon (,(get-skelethon-name plugin-skelethon))
+                :skeleton (,(get-skeleton-name plugin-skeleton))
                 :components ,(reverse plugin-component-names)))
             ;; (run-project (find-plugin (tools@jabs:tosymbol plugin-name)))
             )))))

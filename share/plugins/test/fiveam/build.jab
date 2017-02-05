@@ -10,6 +10,6 @@
   :license "Public Domain"
   :description "Personal use project"
   :serial t
-  :skelethon (:flat)
+  :skeleton (:flat)
   :depends-on (:fiveam)
   :components ((:file "fiveam")))

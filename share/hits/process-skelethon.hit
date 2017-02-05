@@ -1,3 +1,0 @@
-;; -*- mode: lisp -*-
-(process-skelethon :depends-on ()
-                   (process-project-skelethon *jabs-current-project*))

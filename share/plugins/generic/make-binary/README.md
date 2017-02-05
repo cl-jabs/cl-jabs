@@ -1,6 +1,6 @@
 # make-binary@generic
 
-Makes binary executable from current lisp program in skelethon binary directory
+Makes binary executable from current lisp program in skeleton binary directory
 
 ## Usage
 

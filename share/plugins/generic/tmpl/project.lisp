@@ -5,7 +5,7 @@
 
 (in-package #:tmpl@generic@plugin@jabs)
 
-(defvar *tmpl-skelethon-name* :default)
+(defvar *tmpl-skeleton-name* :default)
 (defvar *tmpl-author* :default)
 (defvar *tmpl-version* "0.0.1")
 
@@ -20,7 +20,7 @@
                                        (maintainer "John Doe <john@doe.local>")
                                        (license "Public Domain")
                                        (description "Personal use project")
-                                       (skelethon "(:default)")
+                                       (skeleton "(:default)")
                                        (bout ":default")
                                        (plugins "(:quicklisp@repository)")
                                        (components (format nil "~15t(:file \"fixture\")~%")))
@@ -38,7 +38,7 @@
   :license \"~a\"
   :description \"~a\"
   :serial t
-  :skelethon ~a
+  :skeleton ~a
   :bout ~a
   ;; :plugins ~a
   ;;;; Additional sources
@@ -46,16 +46,16 @@
   ;; :repositories (:quicklisp) ;; define some repositories here
   ;;;; Dependencies
   ;; :depends-on (:alexandria :cl-ppcre)
-  ;; :pathname \"some/relative/path\" ;; relative name to your project root directory (where skelethon located)
+  ;; :pathname \"some/relative/path\" ;; relative name to your project root directory (where skeleton located)
   ;;;; Add files, mobules etc
   :components (
 ~a))
-" name name name name author version maintainer license description skelethon bout plugins components))
+" name name name name author version maintainer license description skeleton bout plugins components))
 
 (defhit tmpl-mkproject () ()
         (let* ((project-name (get-project-name *jabs-current-project*))
                (project-description (get-project-description *jabs-current-project*))
-               (project-skelethon-name (car (slot-value *jabs-current-project* 'jabs::skelethon)))
+               (project-skeleton-name (car (slot-value *jabs-current-project* 'jabs::skeleton)))
                (project-components (slot-value *jabs-current-project* 'jabs::components))
                (project-component-names)
                (project-template))
@@ -78,7 +78,7 @@
                  :license (ignore-errors (slot-value *jabs-current-project* 'jabs::license))
                  :description project-description
                  :plugins (ignore-errors (slot-value *jabs-current-project* 'jabs::plugins))
-                 :skelethon (concatenate 'string "(:" (string-downcase (princ-to-string project-skelethon-name)) ")")
+                 :skeleton (concatenate 'string "(:" (string-downcase (princ-to-string project-skeleton-name)) ")")
                  :components project-component-names
                  ))
           ;;
@@ -98,7 +98,7 @@
 	  (jlog:note "Project already exists. Nothing to create")
 	  (terminate 0))
         (progn
-          (load-skelethon (list *tmpl-skelethon-name*))
+          (load-skeleton (list *tmpl-skeleton-name*))
           ;;
           (let* ((project-name (car (reverse (pathname-directory (os-pwd)))))
                  (project-author "John Doe <john@doe.local>")
@@ -108,12 +108,12 @@
                  (project-description "Personal use project")
                  (project-serial t)
                  (project-plugins '(:quicklisp@repository))
-                 (project-skelethon (find-skelethon *tmpl-skelethon-name*))
+                 (project-skeleton (find-skeleton *tmpl-skeleton-name*))
                  (project-bout :default)
                  (project-src-dir
-                  (if (listp (get-skelethon-src project-skelethon))
-                      (merge-pathnames (make-pathname :directory (list :relative (car (get-skelethon-src project-skelethon)))) (os-pwd))
-                      (merge-pathnames (make-pathname :directory (list :relative (get-skelethon-src project-skelethon))) (os-pwd))))
+                  (if (listp (get-skeleton-src project-skeleton))
+                      (merge-pathnames (make-pathname :directory (list :relative (car (get-skeleton-src project-skeleton)))) (os-pwd))
+                      (merge-pathnames (make-pathname :directory (list :relative (get-skeleton-src project-skeleton))) (os-pwd))))
                  (project-components (list-directory (merge-pathnames
                                                       project-src-dir
                                                       (os-pwd))))
@@ -134,20 +134,20 @@
                 :license ,project-license
                 :description ,project-description
                 :serial t
-                :skelethon (,(get-skelethon-name project-skelethon))
+                :skeleton (,(get-skeleton-name project-skeleton))
                 :components ,(reverse project-component-names)))
             ;; (run-project (find-project (tools@jabs:tostr project-name)))
             )))))
 
 (bind-jabs-cli-parameter
- "tmpl-skelethon"
+ "tmpl-skeleton"
  #'(lambda (&rest x)
-     (setf *tmpl-skelethon-name* (tokeyword (car x)))))
+     (setf *tmpl-skeleton-name* (tokeyword (car x)))))
 
 (bind-jabs-cli-parameter
  "tmpl-version"
  #'(lambda (&rest x)
      (setf *tmpl-version* (car x))))
 
-(process-jabs-cli-parameter "tmpl-skelethon")
+(process-jabs-cli-parameter "tmpl-skeleton")
 (process-jabs-cli-parameter "tmpl-version")
