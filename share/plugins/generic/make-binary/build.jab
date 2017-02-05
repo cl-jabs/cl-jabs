@@ -1,0 +1,15 @@
+;;; -*- Mode: Lisp -*-
+(defpackage :make-binary-system
+  (:use :cl :jabs))
+
+(in-package :make-binary-system)
+
+(defplugin :make-binary :generic "0.0.1"
+  :author "Alexander Vynnyk <cosmonaut.ok@gmail.com>"
+  :maintainer "Alexander Vynnyk <cosmonaut.ok@gmail.com>"
+  :license "MIT"
+  :description "JABS plugin to make binary executable from project"
+  :serial t
+  :skelethon (:default)
+  :depends-on (:trivial-dump-core)
+  :components ((:file "make-binary")))

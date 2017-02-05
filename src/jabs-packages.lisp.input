@@ -167,6 +167,7 @@
            :*post-init-hook*
            :*pre-run-project-hook*
            :*post-run-project-hook*
+           :*run-project-hook*
            ;;
            :insert-hit
            :append-hit
