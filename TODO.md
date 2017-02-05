@@ -17,6 +17,7 @@
 * make possibility to add absolute pathnames to skelethon definition
 * make skelethon definition in project regular (now: `:skelethon (:default)` )
 * add CLI option additional-plugins
+* implement multiple directories support for plugins/bouts/rounds/hits/skelethons
 
 ## Plugins:
 * Core:
