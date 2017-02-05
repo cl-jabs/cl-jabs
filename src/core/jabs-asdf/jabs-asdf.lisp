@@ -1,6 +1,6 @@
 (defpackage asdf@core@plugin@jabs
   (:use :cl :tools@jabs :re@jabs :jabs
-				:skelethon@core@plugin@jabs))
+				:skeleton@core@plugin@jabs))
 
 ;; TODO: revise https://common-lisp.net/project/asdf/asdf.html#The-defsystem-grammar
 (in-package :asdf@core@plugin@jabs)
@@ -118,8 +118,8 @@ compiling asdf.lisp to a FASL and then loading it."
 
 ;;   (apply 'asdf/parse-defsystem:register-system-definition ',name
 ;;          (clear-defsystem ',options :prefix
-;;                           (or (car (get-skelethon-src
-;;                                     (find-skelethon (car (get-project-skelethon (find-project ',name))))))
+;;                           (or (car (get-skeleton-src
+;;                                     (find-skeleton (car (get-project-skeleton (find-project ',name))))))
 ;;                               "")))
 
 (defgeneric define-asdf-system (project)
@@ -127,17 +127,17 @@ compiling asdf.lisp to a FASL and then loading it."
 
 (defmethod define-asdf-system ((project project))
   (let* ((asdf-list)
-         (skelethon-name (or
-                          (try (car (slot-value project 'skelethon)))
-                          (try (slot-value project 'skelethon))
-                          (get-skelethon-name (find-skelethon *jabs-default-skelethon-name*))))
-         (skelethon)
+         (skeleton-name (or
+                          (try (car (slot-value project 'skeleton)))
+                          (try (slot-value project 'skeleton))
+                          (get-skeleton-name (find-skeleton *jabs-default-skeleton-name*))))
+         (skeleton)
          (name (get-project-name project))
-         (skelethon-src))
-    ;; Finding skelethon to get src-path
-    (setf skelethon (find-skelethon skelethon-name))
-    (let ((skelethon-got-src (get-skelethon-src skelethon)))
-      (setf skelethon-src (if (atom skelethon-got-src) skelethon-got-src (car skelethon-got-src))))
+         (skeleton-src))
+    ;; Finding skeleton to get src-path
+    (setf skeleton (find-skeleton skeleton-name))
+    (let ((skeleton-got-src (get-skeleton-src skeleton)))
+      (setf skeleton-src (if (atom skeleton-got-src) skeleton-got-src (car skeleton-got-src))))
     ;;
     (dolist (v *asdf-symbols-list*)
       (let ((slot (try (slot-value project (tosymbol v :jabs)))))
@@ -150,7 +150,7 @@ compiling asdf.lisp to a FASL and then loading it."
             ,name ',(append asdf-list
                             (list :pathname
                                   (merge-pathnames
-                                   (pathname-as-directory skelethon-src)
+                                   (pathname-as-directory skeleton-src)
                                    (pathname-as-directory
                                     (slot-value project 'pathname)))))))))
 
@@ -160,13 +160,13 @@ compiling asdf.lisp to a FASL and then loading it."
 (defmethod set-additional-sources ((project project))
   (let ((additional-sources (try (slot-value project 'jabs::sources)))
         (skel-lib
-         (get-skelethon-lib
-          (find-skelethon
+         (get-skeleton-lib
+          (find-skeleton
            (or
-            (ignore-errors (car (slot-value project 'jabs:skelethon)))
-            (ignore-errors (slot-value project 'jabs:skelethon))
-            *jabs-default-skelethon-name*)))))
-    ;; add skelethon lib dir
+            (ignore-errors (car (slot-value project 'jabs:skeleton)))
+            (ignore-errors (slot-value project 'jabs:skeleton))
+            *jabs-default-skeleton-name*)))))
+    ;; add skeleton lib dir
     (push skel-lib additional-sources)
     ;;
     (when additional-sources
@@ -202,7 +202,7 @@ compiling asdf.lisp to a FASL and then loading it."
           `(jabs::register-project
             ,(tools@jabs:tosymbol name)
             ',(append
-               '(:skelethon :flat) ; register ASDF system as project with flat skelethon
+               '(:skeleton :flat) ; register ASDF system as project with flat skeleton
                options))))))
 
 ;;;; Some macros for better ASDF compatability

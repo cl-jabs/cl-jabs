@@ -10,7 +10,7 @@
     (if (file-exists-p (merge-pathnames (make-pathname :name "build" :type "jab") (os-pwd)))
         (jlog:crit "Buildfile already exists. Nothing to create")
         (progn
-          (load-skelethon (list *tmpl-skelethon-name*))
+          (load-skeleton (list *tmpl-skeleton-name*))
           ;;
           (let ((project-name (car (reverse (pathname-directory (os-pwd))))))
 	    (setf *jabs-project-to-run* (tokeyword project-name))

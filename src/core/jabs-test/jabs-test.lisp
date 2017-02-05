@@ -77,19 +77,19 @@ The logic is: if you don't have modeline,
 than all of your test files acceptable.
 Else, you should mark, what test engine do you use
 "
-  (let* ((skelethon (find-skelethon
-                     (or (try (car (project-slot-value project 'skelethon)))
-                         (try (project-slot-value project 'skelethon))
-                         *jabs-default-skelethon-name*)))
-         (skelethon-test-dir (pathname-as-directory
+  (let* ((skeleton (find-skeleton
+                     (or (try (car (project-slot-value project 'skeleton)))
+                         (try (project-slot-value project 'skeleton))
+                         *jabs-default-skeleton-name*)))
+         (skeleton-test-dir (pathname-as-directory
                               (parse-namestring
-                               (or (try (car (get-skelethon-test skelethon)))
-                                   (try (get-skelethon-test skelethon))
+                               (or (try (car (get-skeleton-test skeleton)))
+                                   (try (get-skeleton-test skeleton))
                                    ""))))
          (project-pathname (pathname-as-directory
                             (parse-namestring
                              (or (project-slot-value project 'pathname) "")))))
-    ;; (jlog:note "~a" (merge-pathnames skelethon-test-dir project-pathname))
+    ;; (jlog:note "~a" (merge-pathnames skeleton-test-dir project-pathname))
     (labels ((check-files (string files)
                (if (null files) nil
                    (let ((scanstring
@@ -107,7 +107,7 @@ Else, you should mark, what test engine do you use
                            (get-plugin-name plugin)
                            (get-plugin-type plugin)) t)
                    (os-find (merge-pathnames
-                             (merge-pathnames skelethon-test-dir project-pathname)
+                             (merge-pathnames skeleton-test-dir project-pathname)
                              (os-pwd))
                             :type :file :extension "lisp")))))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -164,7 +164,7 @@ Else, you should mark, what test engine do you use
 ;; hit@round@bout -> bout -> round@bout -> round@ -> hit@@bout -> hit@round@ -> hit@@
 
 
-;; TEST running all files from skelethon test directory by default
+;; TEST running all files from skeleton test directory by default
 
 ;; "**/Test*.java" - includes all of its subdirectories and all Java filenames that start with "Test".
 ;; "**/*Test.java" - includes all of its subdirectories and all Java filenames that end with "Test".

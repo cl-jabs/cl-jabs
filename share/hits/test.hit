@@ -4,7 +4,7 @@
       ;; (jlog:err "NOT IMPLEMENTED"))
       ;; (jlog:info "Perform load testing...")
       ;; (let ((pname (get-project-name *jabs-current-project*))
-      ;; 	    (testdir (merge-n-directories (os-pwd) (get-project-pathname *jabs-current-project*) (car (skelethon@core@plugin@jabs::get-skelethon-test *jabs-current-skelethon*)))))
+      ;; 	    (testdir (merge-n-directories (os-pwd) (get-project-pathname *jabs-current-project*) (car (skeleton@core@plugin@jabs::get-skeleton-test *jabs-current-skeleton*)))))
       ;;   (asdf:operate 'asdf:load-op pname)
       ;;   (if (find-package pname)
       ;;       (jlog:info "DONE")

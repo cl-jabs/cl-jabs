@@ -11,7 +11,7 @@ cd ${DIR}
 echo '(in-package :jabs)' > testfile.lisp
 echo '(format *error-output* "Hello World~%")' >> testfile.lisp
 
-${ROOT}/src/wrappers/jn/jn.sh -Dbouts=tmpl-mkproject -Dplugins=tmpl@generic -Dtmpl-skelethon=flat
+${ROOT}/src/wrappers/jn/jn.sh -Dbouts=tmpl-mkproject -Dplugins=tmpl@generic -Dtmpl-skeleton=flat
 
 set +e
 

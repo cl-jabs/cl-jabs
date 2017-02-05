@@ -11,7 +11,7 @@
   :license "Public Domain"
   :description "Here is my project"
   ;; :serial t
-  :skelethon (:flat) ;; (nil) ;; will be w/o '(' ')' in v.0.2+
+  :skeleton (:flat) ;; (nil) ;; will be w/o '(' ')' in v.0.2+
   :bout :default
 ;;; Additional sources
   ;; :sources ((make-pathname :directory '(:relative "another-lib")))

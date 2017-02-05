@@ -28,7 +28,7 @@
 
 ;;load core plugins
 (jlog:info "Loading core plugins")
-(dolist (v '("jabs-skelethon"
+(dolist (v '("jabs-skeleton"
              "jabs-asdf"
              "jabs-depmanager"
              "jabs-hit"

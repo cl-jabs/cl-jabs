@@ -10,6 +10,6 @@
   :license "MIT"
   :description "JABS plugin to make binary executable from project"
   :serial t
-  :skelethon (:default)
+  :skeleton (:default)
   :depends-on (:trivial-dump-core)
   :components ((:file "make-binary")))
