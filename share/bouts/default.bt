@@ -11,7 +11,7 @@
     :deploy
   )
 ;; :validate
-;; :initialize - initialize skelethon, make source preprocessing etc
+;; :initialize - initialize skeleton, make source preprocessing etc
 ;; :generate-sources
 ;; :process-sources
 ;; :generate-resources

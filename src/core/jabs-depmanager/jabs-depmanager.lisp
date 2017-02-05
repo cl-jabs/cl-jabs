@@ -71,18 +71,18 @@ Created for ASDF compatability"
 (defmethod get-project-projects-map ((project project))
   "Get project names mapped to files for only for given project
 w\o global map"
-  (let* ((skel-name (or (car (try (slot-value project 'skelethon)))
-                        *jabs-default-skelethon-name*))
+  (let* ((skel-name (or (car (try (slot-value project 'skeleton)))
+                        *jabs-default-skeleton-name*))
          (skel (or
-                (find-skelethon skel-name)
+                (find-skeleton skel-name)
                 (and
-                 (load-skelethon skel-name)
-                 (find-skelethon skel-name))))
-         (lib (or (try (car (get-skelethon-lib skel)))
-                  (get-skelethon-lib skel)))
-         (contrib (or (try (car (get-skelethon-contrib skel)))
-                      (get-skelethon-contrib skel)))
-         (opt (get-skelethon-opt skel))
+                 (load-skeleton skel-name)
+                 (find-skeleton skel-name))))
+         (lib (or (try (car (get-skeleton-lib skel)))
+                  (get-skeleton-lib skel)))
+         (contrib (or (try (car (get-skeleton-contrib skel)))
+                      (get-skeleton-contrib skel)))
+         (opt (get-skeleton-opt skel))
          (hash (make-hash-table)))
     ;;
     (mapcar #'(lambda (x)
@@ -98,18 +98,18 @@ w\o global map"
 (defmethod get-project-systems-map ((project project))
   "Get asdf system names mapped to files for only for given project
 w\o global map. For ASDF back compatability"
-  (let* ((skel-name (or (car (try (slot-value project 'skelethon)))
-                        *jabs-default-skelethon-name*))
+  (let* ((skel-name (or (car (try (slot-value project 'skeleton)))
+                        *jabs-default-skeleton-name*))
          (skel (or
-                (find-skelethon skel-name)
+                (find-skeleton skel-name)
                 (and
-                 (load-skelethon skel-name)
-                 (find-skelethon skel-name))))
-         (lib (or (try (car (get-skelethon-lib skel)))
-                  (get-skelethon-lib skel)))
-         (contrib (or (try (car (get-skelethon-contrib skel)))
-                      (get-skelethon-contrib skel)))
-         (opt (get-skelethon-opt skel))
+                 (load-skeleton skel-name)
+                 (find-skeleton skel-name))))
+         (lib (or (try (car (get-skeleton-lib skel)))
+                  (get-skeleton-lib skel)))
+         (contrib (or (try (car (get-skeleton-contrib skel)))
+                      (get-skeleton-contrib skel)))
+         (opt (get-skeleton-opt skel))
          (hash (make-hash-table)))
     ;;
     (mapcar #'(lambda (x)

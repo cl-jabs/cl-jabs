@@ -1,5 +1,5 @@
 ;; -*- mode: lisp -*-
 (:initialize
- :process-skelethon
+ :process-skeleton
  ;; :load-plugins
  )

@@ -18,28 +18,28 @@
        (jlog:dbg "Quicklisp installed")))))
 
 (with-project-to-be-run *jabs-current-project*
-  (let ((skelethon-name (or
-                         (try (car (slot-value *jabs-current-project* 'jabs::skelethon)))
-                         (try (slot-value *jabs-current-project* 'jabs::skelethon))
-                         *jabs-default-skelethon-name*)))
-    ;; pre-load skelethon
-    (load-skelethon skelethon-name)
+  (let ((skeleton-name (or
+                         (try (car (slot-value *jabs-current-project* 'jabs::skeleton)))
+                         (try (slot-value *jabs-current-project* 'jabs::skeleton))
+                         *jabs-default-skeleton-name*)))
+    ;; pre-load skeleton
+    (load-skeleton skeleton-name)
     ;;
-    (let* ((skelethon (find-skelethon skelethon-name))
-           (skelethon-cache-dir
+    (let* ((skeleton (find-skeleton skeleton-name))
+           (skeleton-cache-dir
             (or
              (try
                (make-pathname :directory
                               (list :relative
-                                    (or (try (car (get-skelethon-cache skelethon)))
-                                        (try (get-skelethon-cache skelethon))))))
+                                    (or (try (car (get-skeleton-cache skeleton)))
+                                        (try (get-skeleton-cache skeleton))))))
              (make-pathname :directory '(:absolute "tmp"))))
            (path (merge-pathnames
                   (merge-pathnames
                    (make-pathname :directory
                                   (list :relative "quicklisp"
                                         (string-downcase (princ-to-string (get-project-name *jabs-current-project*)))))
-                   skelethon-cache-dir)
+                   skeleton-cache-dir)
                   jabs::+jabs-run-directory+)))
       (initialize-repository path)
       (share-plugin (find-plugin :quicklisp :repository))
