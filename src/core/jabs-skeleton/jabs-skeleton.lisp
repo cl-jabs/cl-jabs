@@ -349,6 +349,22 @@ not included to main schema (like socket or dev dir etc)"
  #'(lambda (x)
      (declare (ignore x))))
 
+(defgeneric get-project-skelethon (project)
+  )
+
+(defmethod get-project-skelethon ((project project))
+  (let* ((skelethon (project-slot-value project 'skelethon))
+	 (skelethon-name (or (try (tokeyword skelethon))
+			     (try (tokeyword (car skelethon))))))
+    (when (null skelethon-name)
+      (jlog:wrn "No skeletons defined in project ``~a''. Using default skelethon ``~a''" (get-project-name project) *jabs-default-skeleton-name*)
+      (setf skelethon-name *jabs-default-skeleton-name*))
+    (or
+     (find-skeleton skelethon-name)
+     (and
+      (load-skeleton skelethon-name)
+      (find-skeleton skelethon-name)))))
+
 (defgeneric load-project-skeleton (project)
   )
 
