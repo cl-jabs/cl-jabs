@@ -68,11 +68,13 @@ Created for ASDF compatability"
 (add-hook *post-init-hook* #'map-global-projects-to-files)
 (add-hook *post-init-hook* #'map-global-systems-to-files)
 
+(defgeneric get-project-projects-map (project)
+  )
+
 (defmethod get-project-projects-map ((project project))
   "Get project names mapped to files for only for given project
 w\o global map"
-  (let* ((skel-name (or (car (try (slot-value project 'skeleton)))
-                        *jabs-default-skeleton-name*))
+  (let* ((skel-name (get-project-skeleton-name project))
          (skel (or
                 (find-skeleton skel-name)
                 (and
@@ -95,11 +97,13 @@ w\o global map"
             (cons lib (cons contrib opt)))
     hash))
 
+(defgeneric get-project-systems-map (project)
+  )
+
 (defmethod get-project-systems-map ((project project))
   "Get asdf system names mapped to files for only for given project
 w\o global map. For ASDF back compatability"
-  (let* ((skel-name (or (car (try (slot-value project 'skeleton)))
-                        *jabs-default-skeleton-name*))
+  (let* ((skel-name (get-project-skeleton-name project))
          (skel (or
                 (find-skeleton skel-name)
                 (and
@@ -122,18 +126,30 @@ w\o global map. For ASDF back compatability"
             (cons lib (cons contrib opt)))
     hash))
 
+(defgeneric get-project-depends-on (project)
+  )
+
 (defmethod get-project-depends-on ((project project))
   (try (slot-value project 'depends-on)))
+
+(defgeneric dependency-project-reachable-locally-p (name project)
+  )
 
 (defmethod dependency-project-reachable-locally-p (name (project project))
   (check-type name keyword)
   (or (gethash name (get-project-projects-map project))
       (gethash name *jabs-global-projects-map*)))
 
+(defgeneric dependency-system-reachable-locally-p (name project)
+  )
+
 (defmethod dependency-system-reachable-locally-p (name (project project))
   (check-type name keyword)
   (or (gethash name (get-project-systems-map project))
       (gethash name *jabs-global-systems-map*)))
+
+(defgeneric find-project-dependency-force-locally (name project)
+  )
 
 (defmethod find-project-dependency-force-locally (name (project project))
   "Like ``find-project'', but tries to load local project or
@@ -166,11 +182,17 @@ system file, than retry to find project"
                           found-project-file-asd))
               found-project)))))
 
+(defgeneric dependency-project-reachable-remotely-p (name project)
+  )
+
 (defmethod dependency-project-reachable-remotely-p (name (project project))
   "Check if project can be reachable in all accessible plugins"
   (let ((plugins (filter-project-plugins-by-type project :repository)))
     (plugins-api-call-to-true
      :find-repository-project plugins name)))
+
+(defgeneric find-project-dependencies-remotely (name project)
+  )
 
 (defmethod find-project-dependencies-remotely (name (project project))
   "Check if project can be reachable in all accessible plugins"
@@ -178,11 +200,17 @@ system file, than retry to find project"
     (plugins-api-call-to-true
      :repository-project-dependencies plugins name)))
 
+(defgeneric load-project-remote-dependency (name project)
+  )
+
 (defmethod load-project-remote-dependency (name (project project))
   "Check if project can be reachable in all accessible plugins"
   (let ((plugins (filter-project-plugins-by-type project :repository)))
     (plugins-api-call-to-true
      :load-repository-project plugins name)))
+
+(defgeneric dependency-project-reachable-p (name project)
+  )
 
 (defmethod dependency-project-reachable-p (name (project project))
   (or (dependency-project-reachable-locally-p name project)
@@ -190,6 +218,9 @@ system file, than retry to find project"
       (dependency-project-reachable-remotely-p name project)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defgeneric make-project-depencencies-list (project)
+  )
 
 (defmethod make-project-depencencies-list ((project project))
   "Make full list of project dependencies (recursively)"
@@ -212,10 +243,16 @@ system file, than retry to find project"
     (remove (get-project-name project)
             (reverse (remove-duplicates (reverse (make-deps-list (get-project-name project))))))))
 
+(defgeneric load-project-local-dependency (name project)
+  )
+
 (defmethod load-project-local-dependency (name (project project))
   (jlog:dbg "Loading project ``~a'' as dependency for project ``~a''" name (get-project-name project))
   (and (find-project-dependency-force-locally name project)
        (asdf:operate 'asdf:load-op name)))
+
+(defgeneric load-project-dependencies (project)
+  )
 
 (defmethod load-project-dependencies ((project project))
   (dolist (v (make-project-depencencies-list project))
