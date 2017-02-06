@@ -13,11 +13,8 @@
 * realise round list view for projects
 * remove `*jabs-verbose*`, `*jabs-quiet*` and `*jabs-debug*` variables as deprecated
 * make automatic detection, which project should be launched
-* check for multiple directories to load libs/plugins/skeletons/bouts/rounds/hits etc
 * make possibility to add absolute pathnames to skeleton definition
-* make skeleton definition in project regular (now: `:skeleton (:default)` )
 * add CLI option additional-plugins
-* implement multiple directories support for plugins/bouts/rounds/hits/skelethons
 
 ## Plugins:
 * Core:

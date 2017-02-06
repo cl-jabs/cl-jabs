@@ -133,6 +133,9 @@ by many projects w/o requirement to set it as plugin in
                  (jlog:info "Plugin ``~a'', type ``~a'' registered" plugin-id (get-plugin-type plugin))
                  t))))))
 
+(defgeneric share-plugin (plugin)
+  )
+
 (defmethod share-plugin ((plugin plugin))
   "Add plugin to shared plugins"
   (push (concatenate-symbol *jabs-universal-delimiter*
@@ -239,6 +242,9 @@ by many projects w/o requirement to set it as plugin in
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; LIB
+(defgeneric filter-project-plugins-by-type (project type)
+  )
+
 (defmethod filter-project-plugins-by-type ((project project) type)
   "Get plugin names list of same type plugins from project and shared plugins"
   (check-type type keyword)
