@@ -69,6 +69,9 @@
 (defmacro filter-project-test-plugins (project)
   `(filter-project-plugins-by-type ,project :test))
 
+(defgeneric get-project-test-files (project plugin)
+  )
+
 (defmethod get-project-test-files ((project project) (plugin plugin))
   "Parse modeline with test-engine:
 ex: ;;; -*- TestEngine: fiveam; -*-
@@ -77,15 +80,12 @@ The logic is: if you don't have modeline,
 than all of your test files acceptable.
 Else, you should mark, what test engine do you use
 "
-  (let* ((skeleton (find-skeleton
-                     (or (try (car (project-slot-value project 'skeleton)))
-                         (try (project-slot-value project 'skeleton))
-                         *jabs-default-skeleton-name*)))
+  (let* ((skeleton (find-project-skeleton project))
          (skeleton-test-dir (pathname-as-directory
-                              (parse-namestring
-                               (or (try (car (get-skeleton-test skeleton)))
-                                   (try (get-skeleton-test skeleton))
-                                   ""))))
+                             (parse-namestring
+                              (or (try (car (get-skeleton-test skeleton)))
+                                  (try (get-skeleton-test skeleton))
+                                  ""))))
          (project-pathname (pathname-as-directory
                             (parse-namestring
                              (or (project-slot-value project 'pathname) "")))))
@@ -116,15 +116,24 @@ Else, you should mark, what test engine do you use
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defgeneric run-single-test-with-plugins (name  project)
+  )
+
 (defmethod run-single-test-with-plugins (name (project project))
   (let ((plugins (filter-project-test-plugins project)))
     (plugins-api-call-to-true
      :run-single-test plugins name)))
 
+(defgeneric run-single-suite-with-plugins (name project)
+  )
+
 (defmethod run-single-suite-with-plugins (name (project project))
   (let ((plugins (filter-project-test-plugins project)))
     (plugins-api-call-to-true
      :run-single-suite plugins name)))
+
+(defgeneric run-all-tests-with-plugins (project)
+  )
 
 (defmethod run-all-tests-with-plugins ((project project))
   (let ((plugins (filter-project-test-plugins project)))
@@ -132,6 +141,9 @@ Else, you should mark, what test engine do you use
      :run-all-tests plugins)))
 
 ;; defun register-test-report-format
+(defgeneric run-tests (project)
+  )
+
 (defmethod run-tests ((project project))
   "Run tests, according to preconfiguration"
   (when (and

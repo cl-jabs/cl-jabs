@@ -10,25 +10,46 @@
 
 (in-package :jabs)
 
+(defgeneric load-op (project &optional source-force)
+  )
+
 (defmethod load-op ((project project) &optional source-force)
   (if source-force
       (asdf:operate 'asdf:load-source-op (get-project-name project))
       (asdf:operate 'asdf:load-op (get-project-name project))))
 
+(defgeneric load-dependencies-op (project)
+  )
+
 (defmethod load-dependencies-op ((project project))
   (load-project-dependencies project))
+
+(defgeneric compile-op (project)
+  )
 
 (defmethod compile-op ((project project))
   (asdf:operate 'asdf:compile-op (get-project-name project)))
 
+(defgeneric test-op (project)
+  )
+
 (defmethod test-op ((project project))
   (run-tests project))
+
+(defgeneric lib-op (project)
+  )
 
 (defmethod lib-op ((project project))
   (jlog:err "lib-op Not implemented"))
 
+(defgeneric link-op (project)
+  )
+
 (defmethod link-op ((project project))
   (jlog:err "link-op Not implemented"))
+
+(defgeneric prepare-op (project)
+  )
 
 (defmethod prepare-op ((project project))
   (jlog:err "prepare-source-op Not implemented"))

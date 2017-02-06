@@ -28,7 +28,7 @@
           get-skeleton-template
           get-skeleton-opt
           get-skeleton-tmp
-	  get-skeleton-target
+          get-skeleton-target
           get-skeleton-readme-file
           get-skeleton-license-file
           get-skeleton-install-file
@@ -64,19 +64,17 @@
    (cache         :accessor get-skeleton-cache         :initarg :cache)
    (log           :accessor get-skeleton-log           :initarg :log)
    (template      :accessor get-skeleton-template      :initarg :template)
-   (opt           :accessor get-skeleton-opt           :initarg :opt) ;; other optional directories, not /opt :)
+   ;; other optional directories, not /opt :)
+   (opt           :accessor get-skeleton-opt           :initarg :opt)
    (tmp           :accessor get-skeleton-tmp           :initarg :tmp)
    (target        :accessor get-skeleton-target        :initarg :target)
    (readme-file   :accessor get-skeleton-readme-file   :initarg :readme-file)
    (license-file  :accessor get-skeleton-license-file  :initarg :license-file)
    (install-file  :accessor get-skeleton-install-file  :initarg :install-file)))
 
-(defun find-skeleton (name)
-  (check-type name keyword)
-  (gethash name *jabs-skeleton-registry*))
-
+;;;; functions
 (defun skeletondir-p (dir)
-  "Skelethon directory record must be a string, or list
+  "Skeleton directory record must be a string, or list
    in format
 
  (\"dirname\" 755 :required)
@@ -84,6 +82,8 @@ or
  (\"dirname\" :optional)
 or
  (\"dirname\" 511)
+or
+ \"dirname\"
 
 It`s optional by default
 "
@@ -107,7 +107,7 @@ It`s optional by default
 	    t)))
 
 (defun listskeletondirs-p (dirs)
-  "Skelethon can take list of optional directories, which are
+  "Skeleton can take list of optional directories, which are
 not included to main schema (like socket or dev dir etc)"
   (cond ((null dirs) t)
         ((atom dirs) nil)
@@ -159,7 +159,7 @@ not included to main schema (like socket or dev dir etc)"
     :readme-file readme-file
     :license-file license-file
     :install-file install-file))
-  (jlog:info "Skelethon ``~a'' registered" name))
+  (jlog:info "Skeleton ``~a'' registered" name))
 
 (defmacro defskeleton (name &body options)
   `(apply 'register-skeleton ,(tosymbol name) ',options))
@@ -190,9 +190,9 @@ not included to main schema (like socket or dev dir etc)"
              (or (eq (nth 1 dir) :required)
                  (eq (nth 2 dir) :required)))
             (not (null force)))
-    (let* ((path-dir (pathname-as-directory (parse-namestring (car dir))))
+    (let* ((path-dir (pathname-as-directory (parse-namestring (or (try (car dir)) dir))))
            (path-prefix (if (stringp prefix) (pathname-as-directory (parse-namestring prefix)) prefix))
-           (mode (when (integerp (nth 1 dir)) (nth 1 dir)))
+           (mode (when (and (listp dir) (integerp (nth 1 dir))) (nth 1 dir)))
            list
            (full-dir-path (merge-pathnames path-dir path-prefix)))
       ;;
@@ -257,47 +257,42 @@ not included to main schema (like socket or dev dir etc)"
 
 ;; (initialize-skeleton (find-skeleton :test))
 
+(defun find-skeleton-file (name)
+  (check-type name (or string symbol))
+  (let ((skeleton-name (string-downcase (princ-to-string name)))
+        (skeleton-dirs))
+    (dolist (dirs *jabs-skeleton-directories*)
+      (dolist (dir (directory
+                    (merge-pathnames
+                     (make-pathname :name skeleton-name :type *jabs-skeleton-template-type*)
+                     dirs)))
+        (push dir skeleton-dirs)))
+    (car skeleton-dirs)))
+
 (defun parse-skeleton-from-file (file)
   (check-type file (or string pathname))
   (let* ((content (car (os-cat file :list)))
          (skeleton-name (tosymbol (car content)))
          (skeleton-body (cdr content)))
     ;;
-    (jlog:dbg "Processing skeleton file ``~a''" file)
+    (jlog:info "Processing skeleton file ``~a''" file)
     (eval (cons 'defskeleton (cons skeleton-name skeleton-body)))))
 
-(defun parse-skeleton-inline (name skeleton)
-  (check-type name symbol)
-  (check-type skeleton list)
-  (eval (cons 'defskeleton (cons name skeleton))))
-
-(defmacro make-get-project-smth-dir (dir) ;; TODO: rewrite w/o get-project-skeleton
-  `(progn
-     (defgeneric ,(intern (string-upcase (concatenate 'string "project-" dir "-dir"))) (project))
-     (defmethod ,(intern (string-upcase (concatenate 'string "project-" dir "-dir"))) ((project project))
-       (let ((dir (parse-namestring
-                   (,(intern (string-upcase (concatenate 'string "get-skeleton-" dir)))
-                     (find-skeleton
-                      (or
-                       (try (slot-value project 'skeleton))
-                       (list *jabs-default-skeleton-name*))
-                      ))))
-             (project-pathname (get-project-pathname project))
-             (workdir (os-pwd)))
-         (cond ((eq :absolute (car (pathname-directory dir))) dir)
-               ((eq :absolute (car (pathname-directory project-pathname)))
-                (merge-pathnames dir project-pathname))
-               (t (merge-n-directories workdir project-pathname dir)))))))
-
-(dolist (d (list "src" "bin" "lib" "doc" "share" "test" "contrib" "conf" "public" "cache" "script" "log" "template" "opt" "tmp"))
-  (eval `(make-get-project-smth-dir ,d)))
-
-;; TODO: skeleton:create-from-project
-;; TODO: show list of skeletons
-
-;; TODO: +add project name to skeleton dirs
-;; TODO: +add package naming convension
-;; TODO: +add build.jab sample for all skeletons
+(defun find-skeleton (name)
+  (check-type name keyword)
+  (let ((maybe-skeleton
+         (gethash name *jabs-skeleton-registry*)))
+    (cond ((null maybe-skeleton)
+           (jlog:dbg "Skeleton ``~a'' not found in registry. Trying to load from file"
+                     name)
+           ;;
+           (let ((maybe-skeleton-file (find-skeleton-file name)))
+             (if maybe-skeleton-file
+                 (progn
+                   (parse-skeleton-from-file maybe-skeleton-file)
+                   (gethash name *jabs-skeleton-registry*))
+                 (jlog:err "Can not find skeleton ``~a''" name))))
+          (t maybe-skeleton))))
 
 (defun process-skeleton (skeleton-params)
   "process skeleton"
@@ -317,20 +312,8 @@ not included to main schema (like socket or dev dir etc)"
     (if skeleton-force
         (jlog:dbg "Processing skeleton ``~a'' for project ``~a'' FORCE" skeleton-name project-name)
         (jlog:dbg "Processing skeleton ``~a'' for project ``~a''" skeleton-name project-name))
-    (setf skeleton-name (tosymbol (gensym "SKELETHON-")))
+    (setf skeleton-name (tosymbol (gensym "SKELETON-")))
     (initialize-skeleton skeleton-obj :force skeleton-force)))
-
-(defun find-skeleton-file (name)
-  (check-type name (or string symbol))
-  (let ((skeleton-name (string-downcase (princ-to-string name)))
-        (skeleton-dirs))
-    (dolist (dirs *jabs-skeleton-directories*)
-      (dolist (dir (directory
-                    (merge-pathnames
-                     (make-pathname :name skeleton-name :type *jabs-skeleton-template-type*)
-                     dirs)))
-        (push dir skeleton-dirs)))
-    (car skeleton-dirs)))
 
 (defun load-skeleton (skeleton)
   (let ((skeleton-name (if (listp skeleton) (car skeleton) skeleton)))
@@ -341,29 +324,34 @@ not included to main schema (like socket or dev dir etc)"
 	    (parse-skeleton-from-file file-to-load)
 	  (jlog:crit "There is no file for skeleton ``~a''" skeleton-name))))))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;
 
-;;;; extending defproject syntax
-(bind-project-symbol
- :skeleton
- #'(lambda (x)
-     (declare (ignore x))))
-
-(defgeneric get-project-skelethon (project)
+(defgeneric get-project-skeleton-name (project)
   )
 
-(defmethod get-project-skelethon ((project project))
-  (let* ((skelethon (project-slot-value project 'skelethon))
-	 (skelethon-name (or (try (tokeyword skelethon))
-			     (try (tokeyword (car skelethon))))))
-    (when (null skelethon-name)
-      (jlog:wrn "No skeletons defined in project ``~a''. Using default skelethon ``~a''" (get-project-name project) *jabs-default-skeleton-name*)
-      (setf skelethon-name *jabs-default-skeleton-name*))
-    (or
-     (find-skeleton skelethon-name)
-     (and
-      (load-skeleton skelethon-name)
-      (find-skeleton skelethon-name)))))
+(defmethod get-project-skeleton-name ((project project))
+  (let ((maybe-skeleton-name (try (slot-value project 'skeleton))))
+    (cond ((null maybe-skeleton-name)
+           (jlog:dbg "No skeleton defined for project ``~a''. Falling back to default name"
+                     (get-project-name project))
+           (tokeyword *jabs-default-skeleton-name*))
+          ((listp maybe-skeleton-name)
+           (tokeyword (car maybe-skeleton-name)))
+          (t (tokeyword maybe-skeleton-name)))))
+
+(defgeneric project-skeleton-force-p (project)
+  )
+
+(defmethod project-skeleton-force-p ((project project))
+  "Check if project skeleton required to be initialized with all directories"
+  (try (member :force (slot-value project 'skeleton))))
+
+(defgeneric find-project-skeleton (project)
+  )
+
+(defmethod find-project-skeleton ((project project))
+  "Try to find project skeleton. Use default, if not defined"
+  (find-skeleton (get-project-skeleton-name project)))
 
 (defgeneric load-project-skeleton (project)
   )
@@ -380,9 +368,58 @@ not included to main schema (like socket or dev dir etc)"
 
 (defmethod process-project-skeleton ((project project))
   (let ((skeleton (or
-                    (try (slot-value project 'skeleton))
-                    (list *jabs-default-skeleton-name*))))
+                   (try (slot-value project 'skeleton))
+                   (list *jabs-default-skeleton-name*))))
     (process-skeleton skeleton)))
+;;;;;;;;;;
+
+(defmacro make-get-project-smth-dir (dir)
+  `(progn
+     (defgeneric ,(concat-symbols :jabs "project-" dir "-dir") (project))
+     (defmethod ,(concat-symbols :jabs "project-" dir "-dir") ((project project))
+       (let ((dir (parse-namestring
+                   (,(concat-symbols :jabs "get-skeleton-" dir)
+                     (find-skeleton (get-project-skeleton-name project)))))
+             (project-pathname (get-project-pathname project))
+             (workdir (os-pwd)))
+         (cond ((eq :absolute (car (pathname-directory dir))) dir)
+               ((eq :absolute (car (pathname-directory project-pathname)))
+                (merge-pathnames dir project-pathname))
+               (t (merge-n-directories workdir project-pathname dir)))))))
+
+(dolist (d (list
+            "src"
+            "bin"
+            "lib"
+            "doc"
+            "share"
+            "test"
+            "contrib"
+            "conf"
+            "public"
+            "script"
+            "cache"
+            "log"
+            "template"
+            "opt"
+            "tmp"
+            "target"
+            ))
+  (eval `(make-get-project-smth-dir ,d)))
+
+;; TODO: skeleton:create-from-project
+;; TODO: show list of skeletons
+
+;; TODO: +add project name to skeleton dirs
+;; TODO: +add package naming convension
+;; TODO: +add build.jab sample for all skeletons
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;; extending defproject syntax
+(bind-project-symbol
+ :skeleton
+ #'(lambda (x)
+     (declare (ignore x))))
 
 ;;;; adding define-project-hook to load skeleton
 (add-hook *define-project-hook* #'load-project-skeleton)

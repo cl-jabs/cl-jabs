@@ -27,8 +27,7 @@
                             (pathname-as-directory
                              (parse-namestring
                               (get-skeleton-bin
-                               (find-skeleton
-                                (car (jabs:project-slot-value *jabs-current-project* 'jabs::skeleton))))))
+                               (find-project-skeleton *jabs-current-project*))))
                             "")))
               ;;
               (when (not function)

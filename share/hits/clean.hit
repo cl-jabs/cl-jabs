@@ -1,8 +1,6 @@
 ;; -*- mode: lisp -*-
+
 (clean :depends-on ()
-       (let ((target-dir
-	      (or
-	       (try (get-skeleton-target (find-skeleton (project-slot-value *jabs-current-project* 'skeleton))))
-	       (try (get-skeleton-target (find-skeleton (car (project-slot-value *jabs-current-project* 'skeleton))))))))
-	 (when target-dir
-	   (os-rm target-dir :recursive t))))
+       (let ((target-dir (try (get-skeleton-target (find-project-skeleton *jabs-current-project*)))))
+         (when target-dir
+           (os-rm target-dir :recursive t))))
