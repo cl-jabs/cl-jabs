@@ -7,10 +7,10 @@
    :asdf/system :asdf/component :asdf/operation
    :asdf/find-system :asdf/action :asdf/lisp-action)
   (:export ;; for internal use
-   #:load-sysdef #:make-temporary-package
+   #:make-temporary-package
    #:%refresh-component-inline-methods
    #:make-sub-operation
-   #:load-sysdef #:make-temporary-package))
+   #:make-temporary-package))
 
 (in-package :asdf/backward-internals)
 
@@ -56,9 +56,6 @@
 
 ;;;; load-sysdef
 (with-upgradability ()
-  (defun load-sysdef (name pathname)
-    (load-asd pathname :name name))
-
   (defun make-temporary-package ()
     ;; For loading a .asd file, we don't make a temporary package anymore,
     ;; but use ASDF-USER. I'd like to have this function do this,
