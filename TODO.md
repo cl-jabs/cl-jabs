@@ -4,17 +4,14 @@
 * preprocessor (?)
 * jab **[PARTLY]**
   * compilers for `jab`
-* make feature logging to file (?)
-* fix loglevels (0-5)
+* make feature logging to file (?) 
+* fix loglevels (0-5) and remove `*jabs-verbose*`, `*jabs-quiet*` and `*jabs-debug*` variables as deprecated
 * make tests for JABS
 * clean
 * add profiling
 * launch single round or hit
-* realise round list view for projects
-* remove `*jabs-verbose*`, `*jabs-quiet*` and `*jabs-debug*` variables as deprecated
-* make automatic detection, which project should be launched
-* make possibility to add absolute pathnames to skeleton definition
-* add CLI option additional-plugins
+* implement bout/round/hit list view for projects
+* implement making absolute pathnames to skeleton definition
 
 ## Plugins:
 * Core:
