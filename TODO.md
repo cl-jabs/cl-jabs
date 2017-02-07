@@ -12,6 +12,7 @@
 * launch single round or hit
 * implement bout/round/hit list view for projects
 * implement making absolute pathnames to skeleton definition
+* implement plugins remote loading (via quicklisp or some other repository)
 
 ## Plugins:
 * Core:
