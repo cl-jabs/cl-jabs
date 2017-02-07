@@ -203,6 +203,20 @@ compiling asdf.lisp to a FASL and then loading it."
             (when (directory-pathname-p p)
               (push p asdf:*central-registry*))))))))
 
+(defun define-dummy-project (name)
+  (check-type name symbol)
+  (let* ((system (asdf:find-system name nil))
+         (project
+          (when system
+            (make-instance 'project
+                           :name name
+                           :description (try (slot-value system 'asdf/system::description))))))
+    (jlog:dbg "Defining dummy project after incompatible system ``~a''" name)
+    (if project
+        (setf (gethash name jabs::*jabs-project-registry*) project)
+        (jlog:crit "Can not define dummy project ``~a''. Parent system not found" name))
+    project))
+
 ;; TODO: make wrapper
 (add-hook *define-project-hook* #'define-asdf-system)
 (add-hook *define-project-hook* #'set-additional-sources)
@@ -228,6 +242,15 @@ compiling asdf.lisp to a FASL and then loading it."
             ',(append
                '(:skeleton :flat) ; register ASDF system as project with flat skeleton
                options))))))
+
+;; load some files for backward compatability with old ASDF versions
+(load (merge-pathnames
+       (make-pathname :name "backward-interface" :type "lisp")
+       *load-truename*))
+
+(load (merge-pathnames
+       (make-pathname :name "backward-internals" :type "lisp")
+       *load-truename*))
 
 ;;;; Some macros for better ASDF compatability
 (in-package :jabs)

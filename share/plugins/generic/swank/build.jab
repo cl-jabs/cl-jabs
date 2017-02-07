@@ -1,0 +1,20 @@
+;;; -*- Mode: Lisp -*-
+
+(defpackage :swank@generic@plugin@jabs
+  (:use :cl :jabs :tools@jabs))
+
+;; small hack. jabs-asdf still can't process defsystems,
+;; like in original swank system
+;; (setf (gethash :swank jabs::*jabs-project-registry*) (make-instance 'jabs:project :name :swank))
+	       
+;;(defproject :swank)
+
+(defplugin :swank :generic "0.1"
+  :author "John Doe <email@null>"
+  :maintainer ""
+  :license "Public Domain"
+  :description "Here is my project"
+  :skeleton (:flat)
+  :depends-on (:swank)
+  :components ((:file "swank")))
+

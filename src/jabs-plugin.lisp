@@ -323,8 +323,12 @@ by many projects w/o requirement to set it as plugin in
  "plugins"
  #'(lambda (&rest x)
      (dolist (plugin x)
-       (let ((plugin-name (tosymbol (car (split #\@ (princ-to-string plugin)))))
-             (plugin-type (tosymbol (cadr (split #\@ (princ-to-string plugin))))))
+       (let ((plugin-name (tosymbol (car (split
+                                          (car (concatenate 'list *jabs-universal-delimiter*))
+                                          (princ-to-string plugin)))))
+             (plugin-type (tosymbol (cadr (split
+                                           (car (concatenate 'list *jabs-universal-delimiter*))
+                                           (princ-to-string plugin))))))
          (load-plugin plugin-name plugin-type)))))
 
 ;; adding run-project-hook to load and process skeleton
