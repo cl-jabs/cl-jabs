@@ -180,7 +180,6 @@ w\o global map. For ASDF back compatability"
 system file, than retry to find project"
   (let* ((asdf:*central-registry* nil)
          (found-project (find-project name))
-         found-dummy-project
          (found-project-file-jab
           (when (null found-project)
             (dependency-project-reachable-locally-p name project)))
