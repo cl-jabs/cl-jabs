@@ -236,9 +236,10 @@ compiling asdf.lisp to a FASL and then loading it."
           ;; FIXME: skip project creation of systems with ``:class'' inclusion
           `(progn
              (jlog:dbg "Special ASDF system ``~a''. Registering only system" ',name)
-             (apply 'register-system-definition ',name ',options))
+             (apply 'register-system-definition ',name ',options)
+	     (asdf@core@plugin@jabs::define-dummy-project ,(tools@jabs:tokeyword name)))
           `(jabs::register-project
-            ,(tools@jabs:tosymbol name)
+            ,(tools@jabs:tokeyword name)
             ',(append
                '(:skeleton :flat) ; register ASDF system as project with flat skeleton
                options))))))

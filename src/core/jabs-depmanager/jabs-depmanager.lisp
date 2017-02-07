@@ -196,11 +196,6 @@ system file, than retry to find project"
                  (load found-project-file-jab)))
           ;;
           (setf found-project (find-project name))
-          ;; FIXME: try to handle incompatible ASDF systems
-          (when (and (null found-project) (asdf:find-system name nil))
-            (jlog:wrn "Incompatible ASDF system detected ``~a''. Trying creating dummy project for it"
-                      name)
-            (setf found-project (asdf@core@plugin@jabs::define-dummy-project name)))
           ;;
           (if (and (null found-project)
                    (or
