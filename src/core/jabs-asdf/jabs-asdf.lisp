@@ -205,6 +205,15 @@ compiling asdf.lisp to a FASL and then loading it."
                '(:skeleton :flat) ; register ASDF system as project with flat skeleton
                options))))))
 
+;; load some files for backward compatability with old ASDF versions
+(load (merge-pathnames
+       (make-pathname :name "backward-interface" :type "lisp")
+       *load-truename*))
+
+(load (merge-pathnames
+       (make-pathname :name "backward-internals" :type "lisp")
+       *load-truename*))
+
 ;;;; Some macros for better ASDF compatability
 (in-package :jabs)
 
