@@ -1,6 +1,6 @@
 # cl-jabs
 
-![](https://github.com/cl-jabs/cl-jabs/blob/master/share/images/JABS_64x64.png) [![Travis Build Status](https://api.travis-ci.org/cl-jabs/cl-jabs.svg?branch=master)](https://travis-ci.org/cl-jabs/cl-jabs) 
+![](https://github.com/cl-jabs/cl-jabs/blob/master/share/images/JABS_64x64.png) [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE) [![Travis Build Status](https://api.travis-ci.org/cl-jabs/cl-jabs.svg?branch=master)](https://travis-ci.org/cl-jabs/cl-jabs)
 ```lisp
 (Just
   (Another
@@ -24,6 +24,6 @@ JABS is a maven-like build system for common lisp. Code is under active developm
 ## License & Autor
 | | |
 |:--|---|
-| **License** | [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE) |
+| **License** | [MIT](./LICENSE) |
 | **Copyright** | (C) Alexander Vynnyk, 2015-2017 |
 | **Author** | [Alexander Vynnyk](https://github.com/cosmonaut.ok) (<cosmonaut.ok@zoho.com>) |
