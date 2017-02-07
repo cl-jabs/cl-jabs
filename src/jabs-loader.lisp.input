@@ -70,9 +70,6 @@ SOFTWARE.
 (let ((*jabs-add-project* t))
   (load-build-jab (os-pwd)))
 
-;; load plugin(s) defined in command line interface
-(process-jabs-cli-parameter "plugins")
-
 (when *post-init-hook*
   (dolist (run (reverse *post-init-hook*))
     (funcall run)))

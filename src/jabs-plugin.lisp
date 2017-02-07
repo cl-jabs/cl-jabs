@@ -59,6 +59,7 @@ Needed for plugins, like repository plugins to get dependencies
 by many projects w/o requirement to set it as plugin in
  every project etc")
 
+(defvar *jabs-cli-plugin-names* nil)
 ;;;;
 ;;;; plugin types
 ;;;;
@@ -323,20 +324,19 @@ by many projects w/o requirement to set it as plugin in
  "plugins"
  #'(lambda (&rest x)
      (dolist (plugin x)
-       (let ((plugin-name (tosymbol (car (split
-                                          (car (concatenate 'list *jabs-universal-delimiter*))
-                                          (princ-to-string plugin)))))
-             (plugin-type (tosymbol (cadr (split
-                                           (car (concatenate 'list *jabs-universal-delimiter*))
-                                           (princ-to-string plugin))))))
-         (load-plugin plugin-name plugin-type)))))
+       (push (tokeyword plugin) *jabs-cli-plugin-names*))))
+
+;; load plugin(s) defined in command line interface
+(process-jabs-cli-parameter "plugins")
 
 ;; adding run-project-hook to load and process skeleton
 (add-hook
     *define-project-hook*
   #'(lambda (x)
       (let ((*jabs-current-project* x) ;; TODO: is it needed?
-            (plugins (try (slot-value x 'plugins)))
+            (plugins (if (eq (get-project-name *jabs-current-project*) *jabs-project-to-run*)
+                         (append (project-slot-value x 'plugins) *jabs-cli-plugin-names*)
+                         (project-slot-value x 'plugins)))
             (delimiter-symbol (car (tolist *jabs-universal-delimiter*))))
         ;;
         (dolist (plugin plugins)
