@@ -59,6 +59,7 @@ SOFTWARE.
           ;;
           *jabs-default-skeleton-name*
           load-skeleton
+	  find-project-skeleton
           ))
 
 (defvar *jabs-skeleton-directories*

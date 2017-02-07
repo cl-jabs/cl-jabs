@@ -27,6 +27,7 @@ SOFTWARE.
 (defun initialize-repository (path)
   ;; (jlog:note "Initializing repository plugin in ~a" path)
   ;; )
+  (jlog:dbg "Initializing repository plugin ``quicklisp@repository'' in ``~a''" path)
   (let ((proj *jabs-current-project*)
         (quicklisp-setup-file (merge-pathnames (make-pathname :name "setup" :type "lisp") path)))
     (jlog:info "Initializing quicklisp repository for project ``~a''" (get-project-name proj) path)
@@ -41,33 +42,23 @@ SOFTWARE.
        (funcall (eval `(function ,(tools@jabs:tosymbol :install :quicklisp-quickstart))) :path path)
        (jlog:dbg "Quicklisp installed")))))
 
-(with-project-to-be-run *jabs-current-project*
-  (let ((skeleton-name (or
-                         (try (car (slot-value *jabs-current-project* 'jabs::skeleton)))
-                         (try (slot-value *jabs-current-project* 'jabs::skeleton))
-                         *jabs-default-skeleton-name*)))
-    ;; pre-load skeleton
-    (load-skeleton skeleton-name)
-    ;;
-    (let* ((skeleton (find-skeleton skeleton-name))
-           (skeleton-cache-dir
-            (or
-             (try
-               (make-pathname :directory
-                              (list :relative
-                                    (or (try (car (get-skeleton-cache skeleton)))
-                                        (try (get-skeleton-cache skeleton))))))
-             (make-pathname :directory '(:absolute "tmp"))))
-           (path (merge-pathnames
-                  (merge-pathnames
-                   (make-pathname :directory
-                                  (list :relative "quicklisp"
-                                        (string-downcase (princ-to-string (get-project-name *jabs-current-project*)))))
-                   skeleton-cache-dir)
-                  jabs::+jabs-run-directory+)))
-      (initialize-repository path)
-      (share-plugin (find-plugin :quicklisp :repository))
-      )))
+(with-project-to-be-run
+ *jabs-current-project*
+ (let* ((skeleton (find-project-skeleton *jabs-current-project*))
+	(skeleton-cache-dir
+	 (or (try (pathname-as-directory (parse-namestring (car (get-skeleton-cache skeleton)))))
+	     (try (pathname-as-directory (parse-namestring (get-skeleton-cache skeleton))))
+	     (make-pathname :directory '(:absolute "tmp"))))
+	(path (merge-pathnames
+	       (merge-pathnames
+		(make-pathname :directory
+			       (list :relative "quicklisp"
+				     (string-downcase (princ-to-string (get-project-name *jabs-current-project*)))))
+		skeleton-cache-dir)
+	       jabs::+jabs-run-directory+)))
+   (initialize-repository path)
+   (share-plugin (find-plugin :quicklisp :repository))
+   ))
 
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; API ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
