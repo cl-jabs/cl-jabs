@@ -29,7 +29,10 @@ SOFTWARE.
   ;; )
   (jlog:dbg "Initializing repository plugin ``quicklisp@repository'' in ``~a''" path)
   (let ((proj *jabs-current-project*)
-        (quicklisp-setup-file (merge-pathnames (make-pathname :name "setup" :type "lisp") path)))
+        (quicklisp-setup-file (merge-pathnames (make-pathname :name "setup" :type "lisp") path))
+	(quicklisp-quickstart:*after-load-message* "")
+	(quicklisp-quickstart:*after-initial-setup-message* "")
+	)
     (jlog:info "Initializing quicklisp repository for project ``~a''" (get-project-name proj) path)
     (jlog:dbg "Repository path is ``~a''" path)
     (or
