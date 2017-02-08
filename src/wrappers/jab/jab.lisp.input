@@ -62,12 +62,13 @@ SOFTWARE.
 
 (defconstant +usage+
   (concatenate 'string
-               "USAGE: jab [OPTIONS] [bout|round@bout] [OPTIONS]
+               "USAGE: jab [OPTIONS] [round|round@bout|@bout]... [OPTIONS]
 "
                "Application options:
  -h, --help-jabs              Show this help
  --help                       Show compiler toplevel help
- -c, --compiler               Use selected compiled, instead of default
+ -p                           Use custom project, instead of default
+ -x                           Load addition plugins (eXtend)
  -d, --debug                  Enable debugger
  -q, --quiet                  Quiet mode
  -v, --verbose                Use verbose output
@@ -231,10 +232,15 @@ SOFTWARE.
                (terminate 0))
            :action :store-t)
 
-;; (bind-argv "-p"
-;;            #'(lambda (x)
-;;                (setf *project* x)
-;;                (push-compiler-argument "project" x)))
+(bind-argv "-p"
+           #'(lambda (x)
+               (setf *project* x)
+               (push-compiler-argument "project" x)))
+
+(bind-argv "-x"
+           #'(lambda (x)
+               (setf *project* x)
+               (push-compiler-argument "plugins" x)))
 
 (bind-argv "--autogen-project"
            #'(lambda (x)
@@ -255,7 +261,7 @@ SOFTWARE.
 (bind-argv "--serve"
            #'(lambda (x)
                (declare (ignore x))
-               (push-compiler-argument "bouts" "swank-server")
+               (push-compiler-argument "bouts" "swank")
                (push-compiler-argument "plugins" "quicklisp@repository,swank@generic") ; TODO: load project's plugins too
                )
            :action :store-t)
@@ -269,7 +275,7 @@ SOFTWARE.
   ;; process bouts and rounds
   (process-bouts-and-rounds)
   ;; process regular arguments
-  (dolist (arg '("q" "v" "d" "V" "VV" "h" "p" "autogen-project"))
+  (dolist (arg '("q" "v" "d" "V" "VV" "h" "p" "x" "autogen-project" "serve"))
     (process-argv arg))
   ;; form bouts and rounds
   (labels ((concat-list (delimiter &optional list)
@@ -284,6 +290,13 @@ SOFTWARE.
                                     '("--noinform" "--no-sysinit" "--no-userinit" "--non-interactive"
                                       "--load" "@SRCDIR@/jabs-loader.lisp")
                                     *compiler-arguments*)
+                      :input *standard-input*
                       :output *standard-output*
-                      :error *error-output*)
+                      :error *error-output*
+                      :directory (os-pwd))
   )
+
+(handler-case (jab)
+  (sb-sys:interactive-interrupt ()
+    (format t "I'm your friendly interrupt handler.~%")
+    (sb-ext:exit)))
