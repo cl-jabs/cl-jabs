@@ -72,17 +72,9 @@
   :group 'jabs
   :type 'boolean)
 
-(defcustom jabs-debug-p nil
+(defcustom jabs-log-level nil
   :group 'jabs
-  :type 'boolean)
-
-(defcustom jabs-quiet-p nil
-  :group 'jabs
-  :type 'boolean)
-
-(defcustom jabs-verbose-p nil
-  :group 'jabs
-  :type 'boolean)
+  :type 'string)
 
 (defcustom jabs-logfile nil
   :group 'jabs

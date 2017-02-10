@@ -71,6 +71,20 @@ SOFTWARE.
          ((or (string-equal "NIL" (car ,argument)) (string-equal "nil" (car ,argument)))
           (setf ,variable nil))))
 
+(defmacro bool-option-p (argument)
+  "Check if boolean option set to T or NIL.
+We need it to convert it from list with string
+to real T/NIL values"
+  `(cond ((not (or (null (cdr ,argument))
+                   (string-equal "t" (car ,argument))
+                   (string-equal "T" (car ,argument))
+                   (string-equal "nil" (car ,argument))
+                   (string-equal "NIL" (car ,argument))))
+          (jlog:err "Incorrect format defined from CLI: ``~a'' (t or nil required)"
+                    ,(concatenate-to-string-with-delimiter #\, argument)))
+         ((or (string-equal "T" (car ,argument)) (string-equal "t" (car ,argument))) t)
+         ((or (string-equal "NIL" (car ,argument)) (string-equal "nil" (car ,argument))) nil)))
+
 (in-package :jabs)
 
 ;;;; bind params
@@ -86,33 +100,21 @@ SOFTWARE.
 (bind-jabs-cli-parameter
  "quiet"
  #'(lambda (&rest x)
-     (option-set-bool x *jabs-quiet* "quiet")
-     (when (or (string-equal (car x) "t")
-               (string-equal (car x) "T"))
-       (setf *jabs-verbose* nil)
-       (setf *jabs-debug* nil)
+     (when (bool-option-p x)
        (setf jlog:*log-level* "CRITICAL")
        (setf jlog:*log-disable-notes* t))))
 
 (bind-jabs-cli-parameter
  "verbose"
  #'(lambda (&rest x)
-     (option-set-bool x *jabs-verbose* "verbose")
-     (when (or (string-equal (car x) "t")
-               (string-equal (car x) "T"))
-       (setf *jabs-quiet* nil)
-       (setf *jabs-debug* nil)
+     (when (bool-option-p x)
        (setf jlog:*log-level* "INFO"))))
 
 (bind-jabs-cli-parameter
  "debug"
  #'(lambda (&rest x)
-     (option-set-bool x *jabs-debug* "debug")
-     (when (or (string-equal (car x) "t")
-               (string-equal (car x) "T"))
+     (when (bool-option-p x)
        (proclaim '(optimize (debug 3)))
-       (setf *jabs-verbose* t)
-       (setf *jabs-quiet* nil)
 			 (setf jlog::*log-trace-p* t)
        (setf jlog:*log-level* "DEBUG"))))
 
@@ -120,16 +122,6 @@ SOFTWARE.
  "fail-on-error"
  #'(lambda (&rest x)
      (option-set-bool x *fail-on-error* "fail-on-error")))
-
-;; (bind-jabs-cli-parameter
-;;  "use-bouts"
-;;  #'(lambda (&rest x)
-;;      (option-set-bool x *jabs-use-bouts* "use-bouts")))
-
-;; (bind-jabs-cli-parameter
-;;  "use-hitdeps"
-;;  #'(lambda (&rest x)
-;;      (option-set-bool x *jabs-use-hit-deps* "use-hitdeps")))
 
 (bind-jabs-cli-parameter
  "logfile"

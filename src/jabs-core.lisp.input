@@ -27,7 +27,7 @@ SOFTWARE.
 #+sbcl(require 'sb-posix)
 
 ;; define jabs version
-(defconstant +jabs-version+ "0.0.0")
+(defconstant +jabs-version+ "@JABS_VERSION@")
 
 (defconstant +jabs-run-directory+ (os-pwd))
 
@@ -49,35 +49,18 @@ SOFTWARE.
                                               '(:relative ".jabs"))
                                (user-homedir-pathname)))
 
-;; (defvar *jabs-source-registry* nil)
 (defvar *jabs-buildfile* (make-pathname :name "build" :type "jab"))
 
 (defconstant +jabs-configfile+ (make-pathname :name "jabs" :type "conf"))
 
-;; (defvar *jabs-no-bout* nil) ; run hits without bout (dependency-based running)
-
 (defvar *jabs-output-log* nil)
 (defvar *jabs-error-log* nil)
 
-;; verbosity/debug level
-(defvar *jabs-quiet* nil)
-(defvar *jabs-verbose* nil)
-(defvar *jabs-debug* nil)
-
 (defvar *jabs-universal-delimiter* "@")
 
-;; ;; environment variables
-;; (defvar *jabs-current-pathname* nil)
-;; (defvar *jabs-current-bout* nil)
-;; ;;
-;; (defvar *current-sources* nil)
-;; (defvar *current-repositories* nil)
-
 ;; ;; hooks
-;; (defvar *register-source-hook* nil)
-(defvar *post-init-hook* nil)
-(defvar *pre-run-project-hook* nil)
-(defvar *post-run-project-hook* nil)
+(defvar *post-init-hook* nil
+  "Run some functions without arguments after JABS initialization")
 
 (defvar *fail-on-error* nil)
 
@@ -127,10 +110,10 @@ SOFTWARE.
                              *jabs-project-to-run*))
      ,@body))
 
-;; read configfile
-(dolist (v (os-cat (merge-pathnames +jabs-configfile+ *jabs-config-directory*) :list))
-  (when (not (null (cadr v)))
-    (eval `(setf ,(tosymbol (car v) :jabs) ,(cadr v)))))
+;; ;; read configfile TODO: make it later ;)
+;; (dolist (v (os-cat (merge-pathnames +jabs-configfile+ *jabs-config-directory*) :list))
+;;   (when (not (null (cadr v)))
+;;     (eval `(setf ,(tosymbol (car v) :jabs) ,(cadr v)))))
 
 ;; setting version
 (push (intern (concatenate 'string "JABS" +jabs-version+) :keyword) *features*)
