@@ -66,6 +66,8 @@ SOFTWARE.
 ;; change directory to run-dir
 (os-cd +jabs-run-directory+)
 
+(process-jabs-cli-parameter "system-plugins")
+
 ;;;; loading build file
 (let ((*jabs-add-project* t))
   (load-build-jab (os-pwd)))
@@ -80,4 +82,4 @@ SOFTWARE.
       (if p
 	  (run-project p)
 	(jlog:crit "There is no project, named ``~a''" *jabs-project-to-run*)))
-  (jlog:crit "There is no projects to run. Exiting"))
+  (jlog:crit "There is no project to run. Exiting"))
