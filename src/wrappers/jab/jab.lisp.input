@@ -79,7 +79,8 @@ SOFTWARE.
                               available options:
                                 -Dtmpl-version=<number>
                                 -Dtmpl-skeleton=<skeleton_name>
- --serve                      Start swank server to work with app interactively
+ --serve                      Load project and dependencies, than start swank server to work with app interactively
+ --dev-serve                  Load project, dependencies and tests, than start swank server to work with app interactively
  -f, --buildfile=FILENAME     Use selected buildfile instead of default
 
  -D<some-parameter>           Give direct parameter to JABS (ex. jab -Dversion returns JABS version, but not JAB)
@@ -266,6 +267,15 @@ SOFTWARE.
                )
            :action :store-t)
 
+
+(bind-argv "--dev-serve"
+           #'(lambda (x)
+               (declare (ignore x))
+               (push-compiler-argument "bouts" "swank-dev")
+               (push-compiler-argument "plugins" "quicklisp@repository,swank@generic") ; TODO: load project's plugins too
+               )
+           :action :store-t)
+
 ;;;;
 ;;;; top-level function
 ;;;;
@@ -275,7 +285,7 @@ SOFTWARE.
   ;; process bouts and rounds
   (process-bouts-and-rounds)
   ;; process regular arguments
-  (dolist (arg '("q" "v" "d" "V" "VV" "h" "p" "x" "autogen-project" "serve"))
+  (dolist (arg '("q" "v" "d" "V" "VV" "h" "p" "x" "autogen-project" "serve" "dev-serve"))
     (process-argv arg))
   ;; form bouts and rounds
   (labels ((concat-list (delimiter &optional list)
@@ -293,10 +303,4 @@ SOFTWARE.
                       :input *standard-input*
                       :output *standard-output*
                       :error *error-output*
-                      :directory (os-pwd))
-  )
-
-(handler-case (jab)
-  (sb-sys:interactive-interrupt ()
-    (format t "I'm your friendly interrupt handler.~%")
-    (sb-ext:exit)))
+                      :directory (os-pwd)))

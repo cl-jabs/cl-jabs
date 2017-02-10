@@ -21,11 +21,13 @@ LIBS="asdf"
 SBCL_BIN=$(which sbcl)
 SBCL_URI="http://downloads.sourceforge.net/project/sbcl/sbcl/1.3.4/sbcl-1.3.4-x86-64-linux-binary.tar.bz2?r=http%3A%2F%2Fwww.sbcl.org%2Fplatform-table.html&ts=1461060178&use_mirror=tenet"
 PATH=$PATH:$BASEDIR/tmp/bin
-
+[ -z "$JABS_VERSION" ] && JABS_VERSION="`git rev-parse --short HEAD`-SNAPSHOT"
 print_help()
 {
+    local version="$(grep -R 'defconstant +jabs-version+' src/jabs-core.lisp 2>/dev/null | cut -d \" -f2)"
+    [ -z $version ] && version = $JABS_VERSION
     echo "This is bootstrap script for ${CYAN}(${RED}J${NO_COLOUR}ust ${CYAN}(${RED}A${NO_COLOUR}nother ${CYAN}(${RED}B${NO_COLOUR}uild ${CYAN}(${RED}S${NO_COLOUR}ystem${CYAN}))))${NO_COLOUR}"
-    echo "JABS version: $(grep -R 'defconstant +jabs-version+' src/jabs-core.lisp.input | cut -d \" -f2)"
+    echo "JABS version: $version"
     echo
     echo "${PURPLE}Usage: ${CYAN}$0${NO_COLOUR} ${GREEN}[help|clean|test|install]${NO_COLOUR}"
     echo
@@ -137,13 +139,14 @@ do_build()
     sed "s|@SRCDIR@|$PWD/src/|;s|@SBCL_BIN@|$SBCL_BIN|;s|@SRCDIR@|$PWD/src/|" src/wrappers/jab/jab.lisp.input > src/wrappers/jab/jab.lisp
     sed "s|@SRCDIR@|$PWD/src/|" src/jabs-loader.lisp.input > src/jabs-loader.lisp
     sed "s|@LIBDIR@|$PWD/lib/|" src/jabs-packages.lisp.input > src/jabs-packages.lisp
-    sed "s|@DATADIR@|$PWD/|;s|@SRCDIR@|$PWD/src/|;s|@LIBDIR@|$PWD/lib/|;s|@DATAROOTDIR@|$PWD/share/|;s|@SYSCONFIGDIR@|$PWD/etc/|" src/jabs-core.lisp.input > src/jabs-core.lisp
+    sed "s|@DATADIR@|$PWD/|;s|@SRCDIR@|$PWD/src/|;s|@LIBDIR@|$PWD/lib/|;s|@DATAROOTDIR@|$PWD/share/|;s|@SYSCONFIGDIR@|$PWD/etc/|;s|@JABS_VERSION@|$JABS_VERSION|" src/jabs-core.lisp.input > src/jabs-core.lisp
     echo "${PURPLE}DONE${NO_COLOUR}"
 
+    echo -n "${PURPLE}Building${NO_COLOUR} wrappers..."
     $SBCL --no-sysinit --no-userinit --disable-debugger --load ./src/wrappers/jab/make-jab.lisp >/dev/null
-    local ret=$?
-    [ $ret != 0 ] && echo "${PURPLE}Build${NO_COLOUR} ${RED}FAILED${NO_COLOUR}">&2 && return $ret
-
+    ret=$?
+    [ $ret != 0 ] && echo "${PURPLE}Build${NO_COLOUR} ${RED}FAILED${NO_COLOUR}">&2 && exit $ret
+    echo "${PURPLE}DONE${NO_COLOUR}"
     # echo
     # echo "You can operate now with ${CYAN}\`\`jab''${NO_COLOUR} utility from local directory, or do ${CYAN}\`\`./jab --self-install''${NO_COLOUR} to install it globally"
     # echo

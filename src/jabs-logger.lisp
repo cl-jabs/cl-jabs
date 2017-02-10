@@ -163,21 +163,21 @@ date - yyyy-mm-dd-hh-mm-ss-<TZ>
 (defun make-log-string (date level title message &optional (format *log-string*))
   (labels
       ((chars-replace (date list)
-                      (cond ((null list) nil)
-                            ((char-equal (car list) #\#)
-                             (cond ((char-equal (cadr list) #\T)
-                                    (append (concatenate 'list title) (chars-replace date (cddr list))))
-                                   ((char-equal (cadr list) #\L)
-                                    (append (concatenate 'list level) (chars-replace date (cddr list))))
-                                   ((char-equal (cadr list) #\R)
-                                    (append (concatenate 'list message) (chars-replace date (cddr list))))
-                                   (t
-                                    (let ((func (gethash (cadr list) *date-symbols*)))
-                                      (if func
-                                          (append (concatenate 'list (funcall func date))
-                                                  (chars-replace date (cddr list)))
-                                        (cl:error "Incorrect date format ~a" format))))))
-                            (t (cons (car list) (chars-replace date (cdr list)))))))
+         (cond ((null list) nil)
+               ((char-equal (car list) #\#)
+                (cond ((char-equal (cadr list) #\T)
+                       (append (concatenate 'list title) (chars-replace date (cddr list))))
+                      ((char-equal (cadr list) #\L)
+                       (append (concatenate 'list level) (chars-replace date (cddr list))))
+                      ((char-equal (cadr list) #\R)
+                       (append (concatenate 'list message) (chars-replace date (cddr list))))
+                      (t
+                       (let ((func (gethash (cadr list) *date-symbols*)))
+                         (if func
+                             (append (concatenate 'list (funcall func date))
+                                     (chars-replace date (cddr list)))
+                             (cl:error "Incorrect date format ~a" format))))))
+               (t (cons (car list) (chars-replace date (cdr list)))))))
     (format nil (concatenate 'string (chars-replace date (concatenate 'list format))))))
 
 (defvar *log-output-types* (make-hash-table))
@@ -215,13 +215,13 @@ date - yyyy-mm-dd-hh-mm-ss-<TZ>
   `(check-type name symbol)
   `(if (gethash ,name *log-output-types*)
        (pushnew ,name *log-used-output-types*)
-     (cl:error "No such output type ~a" ,name)))
+       (cl:error "No such output type ~a" ,name)))
 
 (defmacro disable-output-type (name)
   `(check-type name symbol)
   `(if (gethash ,name *log-output-types*)
        (setf *log-used-output-types* (remove ,name *log-used-output-types*))
-     (cl:error "No such output type ~a" ,name)))
+       (cl:error "No such output type ~a" ,name)))
 
 (defun level> (level1 level2)
   (when (< (length (member level1 *log-levels* :test 'equal))
@@ -253,7 +253,7 @@ date - yyyy-mm-dd-hh-mm-ss-<TZ>
 
 (define-output-type :logfile (date type title msg)
   (with-open-file (s *log-file* :direction :output :if-exists :append :if-does-not-exist :create)
-                  (format s "~a~%" (make-log-string date type title msg *log-string*))))
+    (format s "~a~%" (make-log-string date type title msg *log-string*))))
 
 (enable-output-type :terminal)
 ;; (enable-output-type :logfile)
@@ -263,8 +263,8 @@ date - yyyy-mm-dd-hh-mm-ss-<TZ>
      (log-write-output "CRITICAL" "" str)
      (if *fail-on-critical*
          (progn
-					 (when *log-trace-p*
-						 (sb-debug:print-backtrace))
+           (when *log-trace-p*
+             (sb-debug:print-backtrace))
            (write-output "CRITICAL" "" "Exiting.")
            (terminate 1)))))
 
@@ -274,7 +274,7 @@ date - yyyy-mm-dd-hh-mm-ss-<TZ>
      (if *fail-on-error*
          (progn
            (when *log-trace-p*
-                (sb-debug:print-backtrace))
+             (sb-debug:print-backtrace))
            (write-output "ERROR" "" "Exiting.")
            (terminate 1)))))
 

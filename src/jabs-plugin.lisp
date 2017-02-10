@@ -326,6 +326,18 @@ by many projects w/o requirement to set it as plugin in
      (dolist (plugin x)
        (push (tokeyword plugin) *jabs-cli-plugin-names*))))
 
+(bind-jabs-cli-parameter
+ "system-plugins"
+ #'(lambda (&rest x)
+     (dolist (plugin x)
+       (let ((plugin-name (tosymbol (car (split
+                                          (car (tolist *jabs-universal-delimiter*))
+                                          (princ-to-string plugin)))))
+             (plugin-type (tosymbol (cadr (split
+                                           (car (tolist *jabs-universal-delimiter*))
+                                           (princ-to-string plugin))))))
+         (load-plugin plugin-name plugin-type)))))
+
 ;; load plugin(s) defined in command line interface
 (process-jabs-cli-parameter "plugins")
 

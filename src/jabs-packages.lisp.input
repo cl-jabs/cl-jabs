@@ -139,6 +139,7 @@ SOFTWARE.
            :bind-jabs-cli-parameter
            :process-jabs-cli-parameter
            :option-set-bool
+           :bool-option-p
            ;;
            :find-file-from-list-by-filename
 					 ;;
@@ -157,9 +158,6 @@ SOFTWARE.
            :*jabs-currenct-compiler*
            :*jabs-output-log*
            :*jabs-error-log*
-           :*jabs-quiet*
-           :*jabs-verbose*
-           :*jabs-debug*
            :*fail-on-error*
            :*jabs-source-directory*
            :*jabs-lib-directory*

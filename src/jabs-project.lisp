@@ -58,14 +58,19 @@ SOFTWARE.
 (defvar *define-project-hook* nil
   "Run some functions when project defining with project as argument after bound symbols processing")
 
+(defvar *pre-run-project-hook* nil
+  "Run some functions without arguments before project will be launched")
+
 (defvar *run-project-hook* nil
   "Run some functions with project as argument after bound symbols processing")
+
+(defvar *post-run-project-hook* nil
+  "Run some functions without arguments after project launched")
 
 ;;;; bind CLI param to set project force
 (bind-jabs-cli-parameter
  "project"
  #'(lambda (&rest x)
-     ;; (setf *jabs-projects-force-to-run* t) ; set force projects to run
      (dolist (proj x)
        (setf *jabs-project-to-run* (tokeyword proj)))))
 
@@ -157,7 +162,7 @@ SOFTWARE.
 
 (defmacro defproject (name &body options)
   "Register project to jabs-project-registry"
-  `(progn 
+  `(progn
 	  (when *jabs-add-project*
 	    (setf *jabs-project-to-run* ,(tokeyword name))
 	    (setf *jabs-add-project* nil))
