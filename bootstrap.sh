@@ -136,6 +136,8 @@ do_build()
 
 
     echo -n "${PURPLE}Generating${NO_COLOUR} files from templates..."
+    sed "s|@SRCDIR@|$PWD/src/|" src/wrappers/jn/jn.sh.input > $PWD/bin/jn.sh
+    sed "s|@BINDIR@|$PWD/bin/|" src/wrappers/jab/make-jab.lisp.input > src/wrappers/jab/make-jab.lisp
     sed "s|@SRCDIR@|$PWD/src/|;s|@SBCL_BIN@|$SBCL_BIN|;s|@SRCDIR@|$PWD/src/|" src/wrappers/jab/jab.lisp.input > src/wrappers/jab/jab.lisp
     sed "s|@SRCDIR@|$PWD/src/|" src/jabs-loader.lisp.input > src/jabs-loader.lisp
     sed "s|@LIBDIR@|$PWD/lib/|" src/jabs-packages.lisp.input > src/jabs-packages.lisp
@@ -150,10 +152,10 @@ do_build()
     # echo
     # echo "You can operate now with ${CYAN}\`\`jab''${NO_COLOUR} utility from local directory, or do ${CYAN}\`\`./jab --self-install''${NO_COLOUR} to install it globally"
     # echo
-    echo -n "${PURPLE}Generating${NO_COLOUR} documentation..."
-    echo "# JABS Tools" > doc/Tools.md
-    grep -E '\(defun|\(defmacro|\(defvar' src/jabs-tools.lisp | grep -vE '^;' | sed 's|(defvar|var|g;s|(defmacro|macro|g;s|(defun|fun|g' | while read i; do printf "* \`$i\`\n\n"; done >> doc/Tools.md
-    echo "${PURPLE}DONE${NO_COLOUR}"
+    # echo -n "${PURPLE}Generating${NO_COLOUR} documentation..."
+    # echo "# JABS Tools" > doc/Tools.md
+    # grep -E '\(defun|\(defmacro|\(defvar' src/jabs-tools.lisp | grep -vE '^;' | sed 's|(defvar|var|g;s|(defmacro|macro|g;s|(defun|fun|g' | while read i; do printf "* \`$i\`\n\n"; done >> doc/Tools.md
+    # echo "${PURPLE}DONE${NO_COLOUR}"
 }
 
 case $1 in
