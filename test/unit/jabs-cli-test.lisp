@@ -1,3 +1,6 @@
+;; (defvar *jabs-cli-actions* (make-hash-table :test 'equal))
+;; (defun bind-jabs-cli-parameter (parameter function)
+;; (defun process-jabs-cli-parameter (parameter)
 ;;; -*- Mode: Lisp -*-
 #|
 MIT License

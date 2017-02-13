@@ -1,0 +1,9 @@
+;; (defvar *asdf-symbols-list* '(:name :long-name :description :long-description
+;; (defvar *required-asdf-version* "3.1")
+;; (defvar *asdf-system-structures* (make-hash-table))
+;; (defun dumb-string-hash (string) ;; FIXME: WTF
+;; (defun asdf-fasl-pathname ()
+;; (defun ensure-asdf-loaded ()
+;; (defmethod define-asdf-system ((project project))
+;; (defmethod set-additional-sources ((project project))
+;; (defun define-dummy-project (name)

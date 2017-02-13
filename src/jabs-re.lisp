@@ -146,6 +146,20 @@ SOFTWARE.
       (let ((result (middle-match-list startsymbol endsymbol (tolist string))))
         (when result (tostr result)))))
 
+(defun scan-all-to-list (startsymbol endsymbol target-string &optional collector) ; TODO: seems, not used. Remove?
+  (let* ((stringlist (concatenate 'list target-string))
+         (mml (concatenate 'list (middle-scan startsymbol endsymbol target-string)))
+         (position (+ 2 (- (length stringlist) (length (member startsymbol stringlist))) (length mml))))
+    (jlog:dbg "stringlist ``~a''~%mml ``~a''~%position ``~a''" stringlist mml position)
+    (if (null stringlist) (reverse collector)
+        (progn
+          (jlog:dbg "position ``~a''~%rest ``~a''"
+                    position (cut-first-n position stringlist))
+          (when mml (push (concatenate 'string mml) collector))
+          (scan-all-to-list startsymbol endsymbol
+                            (concatenate 'string
+                                         (cut-first-n position stringlist)) collector)))))
+
 (defun scan (sub string)
   "Scan for substring in string"
   (let ((sublist (tolist sub))

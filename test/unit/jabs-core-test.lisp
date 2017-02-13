@@ -1,3 +1,27 @@
+;; (defconstant +jabs-version+ "f65ee71-SNAPSHOT")
+;; (defconstant +jabs-run-directory+ (os-pwd))
+;; (defvar *jabs-local-share-directory* (make-pathname :directory '(:relative "share")))
+;; (defvar *jabs-local-config-directory* (make-pathname :directory '(:relative "etc")))
+;; (defvar *jabs-local-lib-directory* (make-pathname :directory '(:relative "lib")))
+;; (defvar *jabs-local-src-directory* (make-pathname :directory '(:relative "src")))
+;; (defvar *jabs-local-directory* (make-pathname :directory '(:relative ".jabs")))
+;; (defvar *jabs-source-directory* (parse-namestring "/home/vyo/dev/cl-jabs/src/"))
+;; (defvar *jabs-lib-directory* (parse-namestring "/home/vyo/dev/cl-jabs/lib/"))
+;; (defvar *jabs-share-directory* (parse-namestring "/home/vyo/dev/cl-jabs/share/"))
+;; (defvar *jabs-config-directory* (parse-namestring "/home/vyo/dev/cl-jabs/etc/"))
+;; (defvar *jabs-user-directory* (merge-pathnames
+;; (defvar *jabs-buildfile* (make-pathname :name "build" :type "jab"))
+;; (defconstant +jabs-configfile+ (make-pathname :name "jabs" :type "conf"))
+;; (defvar *jabs-output-log* nil)
+;; (defvar *jabs-error-log* nil)
+;; (defvar *jabs-universal-delimiter* "@")
+;; (defvar *post-init-hook* nil
+;; (defvar *fail-on-error* nil)
+;; (defun load-build-jab (dir)
+;; (defun make-jabs-symbol (symbol &optional (package :keyword))
+;; (defun concatenate-symbol (delimiter &rest symbols)
+;; (defun get-option-suffix (name list &key (test 'eql) (nth 1))
+;; (defun remove-with-arg (item list) ;; &key (test 'eql))
 ;;; -*- Mode: Lisp -*-
 #|
 MIT License

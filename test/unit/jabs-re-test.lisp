@@ -27,7 +27,7 @@ SOFTWARE.
 (load (make-pathname :directory '(:relative "src") :name "jabs-re" :type "lisp"))
 
 (defpackage re-test
-  (:use :cl :clunit :regexp@jabs))
+  (:use :cl :clunit :re@jabs))
 
 (in-package :re-test)
 
@@ -80,19 +80,27 @@ SOFTWARE.
 
 (format t "~a~%" (run-suite 're-suite :stop-on-fail nil :report-progress nil))
 
-
-;; get-before ???
-;; get-after ???
-;; get-first-n ???
-;; cut-first-n ???
-;; split
-;; replace-string
-;; replace-string-all
-;; replace-inside-string
-;; begin-scan
-;; end-scan
-;; middle-scan
-;; end-cut
-;; begin-cut
-;; scan
-;; concatenate-to-string-with-delimiter
+;; (defun tolist (string)
+;; (defun tostr (list)
+;; (defun get-before (char list)
+;; (defun get-after (char list)
+;; (defun get-first-n (n list)
+;; (defun cut-first-n (n list)
+;; (defun split (character string)
+;; (defun replace-list (list replace replace-to &key all)
+;; (defun replace-inside-list (list-in replacement &optional start-symbol end-symbol)
+;; (defun replace-string (string replace replace-to)
+;; (defun replace-string-all (string replace replace-to)
+;; (defvar *expressions* '(#\^ #\$ #\* #\| #\.))
+;; (defvar *exphash* (make-hash-table))
+;; (defun begin-match-list (sublist mainlist)
+;; (defun begin-scan (sub string)
+;; (defun middle-scan (startsymbol endsymbol string)
+;; (defun scan-all-to-list (startsymbol endsymbol target-string &optional collector) ; TODO: seems, not used. Remove?
+;; (defun scan (sub string)
+;; (defun end-scan (sub string)
+;; (defun end-cut (sub string)
+;; (defun begin-cut (sub string)
+;; (defun replace-inside-string (string replacement &optional start-symbol end-symbol)
+;; (defun concatenate-to-string-with-delimiter (delimiter &rest strings)
+;; (defun parse-complex-string (string)

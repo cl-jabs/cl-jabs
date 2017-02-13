@@ -1,0 +1,24 @@
+;; (defvar *jabs-skeleton-directories*
+;; (defvar *jabs-default-skeleton-name* :default)
+;; (defvar *jabs-skeleton-registry* (make-hash-table))
+;; (defvar *jabs-current-skeleton* nil)
+;; (defvar *jabs-skeleton-template-type* "skl")
+;; (defun skeletondir-p (dir)
+;; (defun listskeletondirs-p (dirs)
+;; (defun register-skeleton (name &key bin lib src test conf share doc
+;; (defmethod initialize-license ((skeleton skeleton)) ;; TODO:
+;; (defmethod initialize-readme ((skeleton skeleton)) ;; TODO:
+;; (defmethod initialize-install ((skeleton skeleton)) ;; TODO:
+;; (defun make-skeleton-directory (dir &key prefix force) ;; FIXME: rewrite for correct pathnames
+;; (defmethod initialize-skeleton ((skeleton skeleton) &key (prefix "") (force nil))
+;; (defun find-skeleton-file (name)
+;; (defun parse-skeleton-from-file (file)
+;; (defun find-skeleton (name)
+;; (defun process-skeleton (skeleton-params)
+;; (defun load-skeleton (skeleton)
+;; (defmethod get-project-skeleton-name ((project project))
+;; (defmethod project-skeleton-force-p ((project project))
+;; (defmethod find-project-skeleton ((project project))
+;; (defmethod load-project-skeleton ((project project))
+;; (defmethod process-project-skeleton ((project project))
+;;      (defmethod ,(concat-symbols :jabs "project-" dir "-dir") ((project project))

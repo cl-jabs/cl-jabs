@@ -1,3 +1,17 @@
+;; (defvar *jabs-project-registry* (make-hash-table))
+;; (defvar *jabs-project-to-run* nil) ;; when null, run all projects in registry
+;; (defvar *jabs-current-project* nil)
+;; (defvar *jabs-add-project* nil)
+;; (defvar *define-project-hook* nil
+;; (defvar *pre-run-project-hook* nil
+;; (defvar *run-project-hook* nil
+;; (defvar *post-run-project-hook* nil
+;; (defun find-project (name)
+;; (defvar *jabs-project-bound-symbols* (make-hash-table :test 'equal)
+;; (defun bind-project-symbol (project-symbol function)
+;; (defun register-project (name args)
+;; (defmethod run-project ((project project))
+;; (defmethod project-slot-value ((project project) slot)
 ;;; -*- Mode: Lisp -*-
 #|
 MIT License
@@ -24,7 +38,10 @@ SOFTWARE.
 |#
 (load (make-pathname :directory '(:relative "test" "unit") :name "header.lisp" :type "in"))
 
+(load (make-pathname :directory '(:relative "src") :name "jabs-re" :type "lisp"))
+(load (make-pathname :directory '(:relative "src") :name "jabs-tools" :type "lisp"))
 (load (make-pathname :directory '(:relative "src") :name "jabs-core" :type "lisp"))
+(load (make-pathname :directory '(:relative "src") :name "jabs-cli" :type "lisp"))
 (load (make-pathname :directory '(:relative "src") :name "jabs-project" :type "lisp"))
 
 (defpackage project-test
@@ -63,7 +80,7 @@ SOFTWARE.
   :version *project-exists-version*
   :components ((:file "test")))
 
-(defvar *exists-project* (car jabs::*jabs-project-registry*))
+(defvar *exists-project* (gethash *project-exists-name* jabs::*jabs-project-registry*))
 
 (deftest find-project-test (project-suite)
   (assert-true (eq (find-project *project-exists-name*) *exists-project*))
