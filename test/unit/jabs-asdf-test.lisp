@@ -52,7 +52,7 @@ SOFTWARE.
 
 (deftest asdf-fasl-pathname-test (asdf-suite)
   (let ((*jabs-source-directory* "/tmp/"))
-    (assert-equal t (asdf@core@plugin@jabs::asdf-fasl-pathname))))
+    (assert-equal (parse-namestring "/tmp/asdf.fasl") (asdf@core@plugin@jabs::asdf-fasl-pathname))))
 
 ;; (defun asdf-fasl-pathname ()
 
