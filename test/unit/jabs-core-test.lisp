@@ -1,27 +1,3 @@
-;; (defconstant +jabs-version+ "f65ee71-SNAPSHOT")
-;; (defconstant +jabs-run-directory+ (os-pwd))
-;; (defvar *jabs-local-share-directory* (make-pathname :directory '(:relative "share")))
-;; (defvar *jabs-local-config-directory* (make-pathname :directory '(:relative "etc")))
-;; (defvar *jabs-local-lib-directory* (make-pathname :directory '(:relative "lib")))
-;; (defvar *jabs-local-src-directory* (make-pathname :directory '(:relative "src")))
-;; (defvar *jabs-local-directory* (make-pathname :directory '(:relative ".jabs")))
-;; (defvar *jabs-source-directory* (parse-namestring "/home/vyo/dev/cl-jabs/src/"))
-;; (defvar *jabs-lib-directory* (parse-namestring "/home/vyo/dev/cl-jabs/lib/"))
-;; (defvar *jabs-share-directory* (parse-namestring "/home/vyo/dev/cl-jabs/share/"))
-;; (defvar *jabs-config-directory* (parse-namestring "/home/vyo/dev/cl-jabs/etc/"))
-;; (defvar *jabs-user-directory* (merge-pathnames
-;; (defvar *jabs-buildfile* (make-pathname :name "build" :type "jab"))
-;; (defconstant +jabs-configfile+ (make-pathname :name "jabs" :type "conf"))
-;; (defvar *jabs-output-log* nil)
-;; (defvar *jabs-error-log* nil)
-;; (defvar *jabs-universal-delimiter* "@")
-;; (defvar *post-init-hook* nil
-;; (defvar *fail-on-error* nil)
-;; (defun load-build-jab (dir)
-;; (defun make-jabs-symbol (symbol &optional (package :keyword))
-;; (defun concatenate-symbol (delimiter &rest symbols)
-;; (defun get-option-suffix (name list &key (test 'eql) (nth 1))
-;; (defun remove-with-arg (item list) ;; &key (test 'eql))
 ;;; -*- Mode: Lisp -*-
 #|
 MIT License
@@ -48,90 +24,47 @@ SOFTWARE.
 |#
 (load (make-pathname :directory '(:relative "test" "unit") :name "header.lisp" :type "in"))
 
+(load (make-pathname :directory '(:relative "src") :name "jabs-tools" :type "lisp"))
 (load (make-pathname :directory '(:relative "src") :name "jabs-re" :type "lisp"))
 (load (make-pathname :directory '(:relative "src") :name "jabs-core" :type "lisp"))
 
 (defpackage core-test
-  (:use :cl :test-engine :clunit :core@jabs))
+  (:use :cl :test-engine :clunit :jabs))
 
 (in-package :core-test)
 
 ;; tests
-(defsuite core-suite ()
-  )
+(defsuite core-suite ())
+(defsuite hooks-core-suite (core-suite))
 
-;; (deftest check-log-string-external-symbol (core-suite)
-;;   t)
-
-;; :load-jabs
-;; :bind-argv
-;; :process-argv
-;; :defcompiler
-;; :get-compiler-name
-;; :get-compiler-path
-;; :get-compiler-eval-opt
-;; :get-compiler-load-opt
-;; :get-compiler-default-opts
-;; :get-compiler-debug-opt
-;; :get-compiler-no-debug-opt
-;; :get-compiler-quit
-;; :get-compiler-pre-eval
-;; :get-compiler-post-eval
-;; :get-compiler-quiet-opt
+(deffixture hooks-core-suite (@body)
+  (let (4add-hook
+        4run-hook)
+    (add-hook 4add-hook #'(lambda () (format nil "test")))
+    (add-hook 4run-hook #'(lambda (x y) (+ x y)))
+    @body))
 
 ;; :add-hook
-(deftest add-hook-test (core-suite)
-  (assert-equal
-   "test"
-   (let ((zzz-hook))
-     (add-hook zzz-hook #'(lambda () (format nil "test")))
-     (funcall (car zzz-hook)))))
-  
+(deftest add-hook-test (hooks-core-suite)
+  (assert-equal "test" (funcall (car 4add-hook))))
+
 ;; :run-hook
-(deftest run-hook-test (core-suite)
+(deftest run-hook-test (hooks-core-suite)
   (assert-false ;; TODO uses 'dolist' now. Make possibility to collect output data
-   (let ((zzz-hook))
-     (add-hook zzz-hook #'(lambda (x y) (+ x y)))
-     (run-hook zzz-hook 1 2))))
-     
+   (jabs::run-hook 4run-hook 1 2)))
 
-;; :make-jabs-symbol
-(deftest make-jabs-symbol-test (core-suite)
-  (let ((smb (make-jabs-symbol "test")))
-    (assert-equal
-     (find-package :keyword)
-     (symbol-package smb))
-    (assert-equal
-     "TEST"
-     (symbol-name smb))))
+(deftest jabs-universal-delimiter-test (core-suite)
+  (assert-equal "@" jabs:*jabs-universal-delimiter*))
 
-;; :concatenate-symbol
-(deftest concatenate-symbol-test (core-suite)
-  (let ((smb (concatenate-symbol "-" "test" "ing")))
-    (assert-equal
-     (find-package :keyword)
-     (symbol-package smb))
-    (assert-equal
-     "TEST-ING"
-     (symbol-name smb))))
+;; (defun load-build-jab (dir)
 
-;; :get-option-suffix
-;; :bind-jabs-cli-parameter
-;; :find-compiler
-;; :remove-with-arg
-;; :parse-complex-string
-;; :get-repository-name
-;; :get-repository-type
-;; :get-repository-url
-;; :get-project-repository-names-list
+(deftest get-option-suffix-test (core-suite)
+  (assert-equal 5 (jabs::get-option-suffix :test '(1 2 3 :test 5 :zzz)))
+  (assert-condition type-error (jabs::get-option-suffix :test :zzz)))
 
-;; :file-exists-p
-;; :pathname-as-directory
-;; 
-;; :pathname-as-directory
-;; :list-directory
-;; :directory-pathname-p
-;; :pathname-as-file
-;; :load-build-jab
+
+(deftest remove-with-arg-test (core-suite)
+  (assert-equal '(1 2 3 :zzz) (jabs::remove-with-arg :test '(1 2 3 :test 5 :zzz)))
+  (assert-condition type-error (jabs::remove-with-arg :test :zzz)))
 
 (format t "~a~%" (run-suite 'core-suite :stop-on-fail nil :report-progress nil))

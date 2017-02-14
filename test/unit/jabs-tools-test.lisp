@@ -129,7 +129,11 @@ SOFTWARE.
     (assert-eq (type-of table) (type-of (copy-hash-table table)))
     (assert-condition type-error (copy-hash-table "test"))))
 
-;; (defun component-present-p (value)
+(deftest component-present-p-test (tools-suite)
+  (assert-true (component-present-p "test"))
+  (assert-true (component-present-p :test))
+  (assert-false (component-present-p nil))
+  (assert-false (component-present-p :unspecific)))
 
 (deftest directory-pathname-p (tools-suite)
   (assert-true (directory-pathname-p "/test/"))
@@ -181,6 +185,14 @@ SOFTWARE.
    '(1 5)
    (get-cars '((1 2 3 4) (5 6 7 8)))))
 
+
+(deftest emptyp-test (tools-suite)
+  (assert-true (tools@jabs::emptyp '()))
+  (assert-true (tools@jabs::emptyp ""))
+  (assert-false (tools@jabs::emptyp '(nil)))
+  (assert-false (tools@jabs::emptyp :test))
+  )
+
 ;; (defun emptyp (x)
 ;; (defun find-package* (package-designator &optional (error t))
 ;; (defun find-symbol* (name package-designator &optional (error t))
@@ -223,7 +235,9 @@ SOFTWARE.
 ;; (defun find-file-from-list-by-filename (name files)
 
 (deftest pathname-root-test (tools-suite)
-  (assert-equal t (pathname-root "/home/cosmonaut"))
+  (assert-equal (parse-namestring "/") (tools@jabs::pathname-root "/home/cosmonaut"))
+  (assert-equal (parse-namestring "/") (tools@jabs::pathname-root "./cosmonaut"))
+  (assert-condition type-error (tools@jabs::pathname-root :test))
   )
 ;; (defun pathname-root (pathname)
 

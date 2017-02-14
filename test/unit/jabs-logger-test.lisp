@@ -1,37 +1,3 @@
-;; (defvar *current-output-registry* nil)
-;; (defvar *log-string* "#Y-#m-#d #H:#M:#S [#L]: #R"
-;; (defvar *month-names* '("Jan" "Feb" "Mar"
-;; (defvar *day-of-week-names* '("Mon" "Tue" "Wed" "Thu" "Fri" "Sat" "Sun"))
-;; (defvar *log-disable-notes* nil)
-;; (defvar *log-level* "ERROR")
-;; (defvar *log-quiet-p* nil)
-;; (defvar *log-levels* '("CRITICAL" "ERROR" "WARNING" "INFO" "DEBUG"))
-;; (defvar *log-trace-p* nil)
-;; (defvar *fail-on-critical* t)
-;; (defvar *fail-on-error* nil)
-;; (defun terminate (status)
-;; (defun date-get-timezone (date)
-;; (defun date-get-year (date &key (short nil) timezone)
-;; (defun date-get-year-short (date &key timezone)
-;; (defun date-get-month (date &key timezone human-readable-p)
-;; (defun date-get-month-hr (date &key timezone)
-;; (defun date-get-day (date &key timezone)
-;; (defun date-get-hour (date &key timezone)
-;; (defun date-get-minute (date &key timezone)
-;; (defun date-get-second (date &key timezone)
-;; (defun date-get-doy (date &key timezone)
-;; (defun date-get-dow (date &key timezone human-readable-p)
-;; (defun date-get-dow-hr (date &key timezone)
-;; (defvar *date-symbols* (make-hash-table :test 'equal))
-;; (defun make-log-string (date level title message &optional (format *log-string*))
-;; (defvar *log-output-types* (make-hash-table))
-;; (defvar *log-used-output-types* nil)
-;; (defvar *log-file* "/tmp/jabs.log")
-;; (defun check-output-type-args (args)
-;; (defun level> (level1 level2)
-;; (defun level< (level1 level2)
-;; (defun log-write-output (level title string)
-;; (defun get-stamp (&optional (stamp "STAMP"))
 ;;; -*- Mode: Lisp -*-
 #|
 MIT License
@@ -56,6 +22,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 |#
+
 (load (make-pathname :directory '(:relative "test" "unit") :name "header.lisp" :type "in"))
 
 (defpackage logger-test
@@ -80,22 +47,130 @@ SOFTWARE.
 (defsuite logger-suite ()
   )
 
+(deffixture logger-suite (@body)
+  (let ((now 3696018717)) ; just don'tset dynamical time ;)
+    @body))
+
 (deftest check-log-string-external-symbol (logger-suite)
-  (assert-true (eq (nth-value 1 (find-symbol "*LOG-STRING*" :logger@jabs))
-                   :external)))
+  (assert-equal :external (nth-value 1 (find-symbol "*LOG-STRING*" :logger@jabs))))
 
 (deftest logger-test-messages (logger-suite)
-  (assert-true (progn (err "test")
-                      (check-msg "ERROR: test")))
-  (assert-false (progn (wrn "test")
-                       (check-msg "WARNING: test")))
-  (assert-true (progn
-                 (setf *log-level* "WARNING")
-                 (wrn "test")
-                 (check-msg "WARNING: test")))
-  (assert-false (progn
-                 (setf *log-disable-notes* t)
-                 (note "test")
-                 (check-msg "NOTE: test"))))
+  (assert-true (progn (err "test") (check-msg "ERROR: test")))
+  (assert-false (progn (wrn "test") (check-msg "WARNING: test")))
+  (assert-true (progn (setf *log-level* "WARNING") (wrn "test") (check-msg "WARNING: test")))
+  (assert-false (progn (setf *log-disable-notes* t) (note "test") (check-msg "NOTE: test"))))
+
+;; (defun terminate (status)
+(deftest date-get-timezone-test (logger-suite)
+    (assert-equal 2 (jlog::date-get-timezone now)))
+
+(deftest date-get-year-test (logger-suite)
+  (assert-equal "2017" (jlog::date-get-year now))
+  (assert-equal "2017" (jlog::date-get-year now :timezone 11))
+  (assert-equal "1899" (jlog::date-get-year 1))
+  (assert-condition type-error (jlog::date-get-year :zzz)))
+
+(deftest date-get-year-short-test (logger-suite)
+  (assert-equal "17" (jlog::date-get-year-short now))
+  (assert-equal "17" (jlog::date-get-year-short now :timezone 11))
+  (assert-equal "99" (jlog::date-get-year-short 1))
+  (assert-condition type-error (jlog::date-get-year-short :zzz)))
+
+(deftest date-get-month-test (logger-suite)
+  (assert-equal "02" (jlog::date-get-month now))
+  (assert-equal "02" (jlog::date-get-month now :timezone 11))
+  (assert-equal "Feb" (jlog::date-get-month now :timezone 11 :human-readable-p t))
+  (assert-equal "01" (jlog::date-get-month 1))
+  (assert-condition type-error (jlog::date-get-month :zzz)))
+
+(deftest date-get-month-hr-test (logger-suite)
+  (assert-equal "Feb" (jlog::date-get-month-hr now))
+  (assert-equal "Feb" (jlog::date-get-month-hr now :timezone 11))
+  (assert-equal "Jan" (jlog::date-get-month-hr 1))
+  (assert-condition type-error (jlog::date-get-month-hr :zzz)))
+
+
+(deftest date-get-day-test (logger-suite)
+  (assert-equal "14" (jlog::date-get-day now))
+  (assert-equal "14" (jlog::date-get-day now :timezone 11))
+  (assert-equal "01" (jlog::date-get-day 1))
+  (assert-condition type-error (jlog::date-get-day :zzz)))
+
+
+(deftest date-get-hour-test (logger-suite)
+  (assert-equal "01" (jlog::date-get-hour now))
+  (assert-equal "10" (jlog::date-get-hour now :timezone 11))
+  (assert-equal "02" (jlog::date-get-hour 3))
+  (assert-condition type-error (jlog::date-get-hour :zzz)))
+
+(deftest date-get-minute-test (logger-suite)
+  (assert-equal "51" (jlog::date-get-minute now))
+  (assert-equal "51" (jlog::date-get-minute now :timezone 11))
+  (assert-equal "02" (jlog::date-get-minute 1))
+  (assert-condition type-error (jlog::date-get-minute :zzz)))
+
+(deftest date-get-second-test (logger-suite)
+  (assert-equal "57" (jlog::date-get-second now))
+  (assert-equal "57" (jlog::date-get-second now :timezone 11))
+  (assert-equal "05" (jlog::date-get-second 1))
+  (assert-condition type-error (jlog::date-get-second :zzz)))
+
+
+(deftest date-get-doy-test (logger-suite) ;; TODO: fix it to strings
+  (assert-equal "45" (jlog::date-get-doy now))
+  (assert-equal "44" (jlog::date-get-doy now :timezone 11))
+  (assert-equal "1" (jlog::date-get-doy 1))
+  (assert-condition type-error (jlog::date-get-doy :zzz)))
+
+
+(deftest date-get-dow-test (logger-suite)
+  (assert-equal "2" (jlog::date-get-dow now))
+  (assert-equal "2" (jlog::date-get-dow now :timezone 11))
+  (assert-equal "Tue" (jlog::date-get-dow now :timezone 11 :human-readable-p t))
+  (assert-equal "1" (jlog::date-get-dow 1))
+  (assert-condition type-error (jlog::date-get-dow :zzz)))
+
+
+(deftest date-get-dow-hr-test (logger-suite)
+  (assert-equal "Tue" (jlog::date-get-dow-hr now))
+  (assert-equal "Tue" (jlog::date-get-dow-hr now :timezone 11))
+  (assert-equal "Mon" (jlog::date-get-dow-hr 1))
+  (assert-condition type-error (jlog::date-get-dow-hr :zzz)))
+
+(deftest date-symbols-test (logger-suite)
+  (assert-equal 'hash-table (type-of jlog::*date-symbols*)))
+
+;; (defun make-log-string (date level title message &optional (format *log-string*))
+
+(deftest log-output-types-test (logger-suite)
+  (assert-equal 'hash-table (type-of jlog::*log-output-types*)))
+
+;; (defun check-output-type-args (args)
+(deftest level>-test (logger-suite)
+  (assert-true (jlog::level> "DEBUG" "INFO"))
+  (assert-true (jlog::level> "INFO" "WARNING"))
+  (assert-true (jlog::level> "WARNING" "ERROR"))
+  (assert-true (jlog::level> "ERROR" "CRITICAL"))
+  ;;
+  (assert-false (jlog::level> "INFO" "DEBUG"))
+  (assert-false (jlog::level> "WARNING" "INFO"))
+  (assert-false (jlog::level> "ERROR" "WARNING"))
+  (assert-false (jlog::level> "CRITICAL" "ERROR"))
+  )
+
+(deftest level<-test (logger-suite)
+  (assert-false (jlog::level< "DEBUG" "INFO"))
+  (assert-false (jlog::level< "INFO" "WARNING"))
+  (assert-false (jlog::level< "WARNING" "ERROR"))
+  (assert-false (jlog::level< "ERROR" "CRITICAL"))
+  ;;
+  (assert-true (jlog::level< "INFO" "DEBUG"))
+  (assert-true (jlog::level< "WARNING" "INFO"))
+  (assert-true (jlog::level< "ERROR" "WARNING"))
+  (assert-true (jlog::level< "CRITICAL" "ERROR"))
+  )
+
+;; (defun log-write-output (level title string)
+;; (defun get-stamp (&optional (stamp "STAMP"))
 
 (format t "~a~%" (run-suite 'logger-suite :stop-on-fail nil :report-progress nil))

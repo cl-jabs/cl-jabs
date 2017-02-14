@@ -43,7 +43,7 @@ SOFTWARE.
 (define-plugin-type :test plugin
   (let ((checker t)
         (plugin-package-name
-         (eval (append '(concatenate-symbol *jabs-universal-delimiter*)
+         (eval (append '(concat-keywords-w-delimiter *jabs-universal-delimiter*)
                        (list (get-plugin-name plugin))
                        (list (get-plugin-type plugin))
                        +jabs-plugin-namespace+))))
@@ -126,7 +126,7 @@ Else, you should mark, what test engine do you use
                           (scan (format nil "TestEngine: ~a" string) scanstring))
                          (cons (car files) (check-files string (cdr files)))
                          (check-files string (cdr files)))))))
-      (check-files (tostr (concatenate-symbol
+      (check-files (tostr (concat-keywords-w-delimiter
                            *jabs-universal-delimiter*
                            (get-plugin-name plugin)
                            (get-plugin-type plugin)) t)

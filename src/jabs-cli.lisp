@@ -28,13 +28,13 @@ SOFTWARE.
 (defvar *jabs-cli-actions* (make-hash-table :test 'equal))
 
 (defun bind-jabs-cli-parameter (parameter function)
-  (check-type parameter (or string symbol))
+  (check-type parameter string) ;; TODO: make it symbol
   (check-type function function)
   (let ((param-symbol (tosymbol parameter)))
     (setf (gethash param-symbol *jabs-cli-actions*) function)))
 
 (defun process-jabs-cli-parameter (parameter)
-  (check-type parameter (or string symbol))
+  (check-type parameter string) ;; TODO: make it symbol
   (let ((parameter-symbol (tosymbol parameter))
         (parameter-value)
         (parameter-found-p))

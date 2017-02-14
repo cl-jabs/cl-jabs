@@ -32,7 +32,10 @@ SOFTWARE.
   (concatenate 'string list))
 
 (defun get-before (char list)
-  "Get part of list before character"
+  "Get part of list before character
+gives whole list, when char does not exists in list"
+  (check-type char character)
+  (check-type list list)
   (cond ((or
           (null list)
           (equal (car list) char))
@@ -40,6 +43,8 @@ SOFTWARE.
         (t (cons (car list) (get-before char (cdr list))))))
 
 (defun get-after (char list)
+  (check-type char character)
+  (check-type list list)
   (cdr (member char list)))
 
 (defun get-first-n (n list)
@@ -53,9 +58,9 @@ SOFTWARE.
   "Get first N elements of list"
   (if (= n 0) list (cut-first-n (- n 1) (cdr list))))
 
-(defun split (character string)
+(defun split (char string)
   (check-type string string)
-  (check-type character character)
+  (check-type char character)
   (let ((list (tolist string)) (splitted))
     (labels ((split-list (char list)
                          (let ((before (get-before char list)))
@@ -69,7 +74,7 @@ SOFTWARE.
                                         (t
                                          (cons (tostr (car list))
                                                (sublists-to-strings (cdr list)))))))
-      (sublists-to-strings (reverse (split-list character list))))))
+      (sublists-to-strings (reverse (split-list char list))))))
 
 ;; split
 ;; (string-trim '(#\[ #\]) "[ 'test', 'test2', 'test3' ]")
