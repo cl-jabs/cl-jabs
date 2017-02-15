@@ -39,14 +39,38 @@ SOFTWARE.
 
 ;; tests
 (defsuite asdf-suite ())
-(defsuite bind-asdf-suite (asdf-suite))
+(defsuite asdf-suite-with-project (asdf-suite))
+(defsuite asdf-suite-with-system (asdf-suite))
 
-;; (defvar *asdf-symbols-list* '(:name :long-name :description :long-description
-;; (defvar *required-asdf-version* "3.1")
+(deffixture asdf-suite-with-project (@body)
+  (let ((jabs::*jabs-project-registry* (make-hash-table)))
+    ;; define default project in isolated area
+    (defproject :just-mock
+        :name "JUST-MOCK"
+        :version "0.0.1"
+        :components ((:file "test")))))
+
+(deffixture asdf-suite-with-system (@body)
+  (asdf:defsystem :just-mock-system
+    :name "JUST-MOCK-SYSTEM"
+    :version "0.0.1"
+    :components ((:file "test"))))
+
+(dolist (v '(:name :long-name :description :long-description
+             :weakly-depends-on :depends-on :class
+             :build-operation
+             :license :repositories :version
+             :pathname :author :maintainer
+             :default-component-class :perform :explain
+             :output-files :operation-done-p :if-feature
+             :in-order-to
+             :homepage :bug-tracker :mailto :source-control
+             :serial :components :source))
+  (eval `(deftest ,(intern (concatenate 'string "ASDF-SYMBOLS-CHECK-" (princ-to-string v))) (asdf-suite)
+           (assert-true (member ,v asdf@core@plugin@jabs::*asdf-symbols-list*)))))
 
 (deftest asdf-system-structure-test (asdf-suite)
-  (assert-equal 'hash-table (type-of *asdf-system-structures*)))
-
+  (assert-equal 'hash-table (type-of asdf@core@plugin@jabs::*asdf-system-structures*)))
 
 ;; (defun dumb-string-hash (string) ;; FIXME: WTF
 
@@ -54,13 +78,14 @@ SOFTWARE.
   (let ((*jabs-source-directory* "/tmp/"))
     (assert-equal (parse-namestring "/tmp/asdf.fasl") (asdf@core@plugin@jabs::asdf-fasl-pathname))))
 
-;; (defun asdf-fasl-pathname ()
-
 ;; (defun ensure-asdf-loaded ()
 
-;; (defmethod define-asdf-system ((project project))
+(deftest define-asdf-system-test (asdf-suite-with-project)
+  (let ((proj (find-project :just-mock)))
+    (assert-equal :zzz (define-asdf-system proj))))
 
-;; (defmethod set-additional-sources ((project project))
+(deftest define-dummy-project-test (asdf-suite-with-system)
+  (assert-equal :zzz (asdf@core@plugin@jabs::define-dummy-project :dummy)))
 
 ;; (defun define-dummy-project (name)
 
