@@ -31,7 +31,9 @@ SOFTWARE.
 
 (in-package :jabs)
 
-(export '(defbout))
+(export '(defbout
+	   find-bout
+	   register-bout))
 
 (defvar *jabs-bout-directories*
   (list
@@ -40,7 +42,7 @@ SOFTWARE.
    (merge-pathnames (make-pathname :directory '(:relative ".jabs" "bouts")) (os-pwd))))
 
 (defvar *jabs-current-bout* nil)
-(defvar *jabs-bout-registry* (make-hash-table :test 'equal))
+(defvar *jabs-bout-registry* (make-hash-table))
 (defvar *jabs-bout-template-type* "bt")
 (defvar *jabs-default-bout-name* :default)
 (defvar *jabs-bouts-to-run* nil)
@@ -49,12 +51,15 @@ SOFTWARE.
   "Register bout"
   (check-type name keyword)
   (check-type rounds list)
+  ;; check if rounds has correct syntax
   (dolist (r rounds)
-    (if (not (typep r 'keyword))
-        (jlog:crit "Round ``~a'' in bout ``~a'' is not a symbol" r name)
-        (progn
-          (jlog:dbg "Registering bout ``~a''" name)
-          (setf (gethash name *jabs-bout-registry*) rounds)))))
+    (when (not (typep r 'keyword))
+      (jlog:crit "Round ``~a'' in bout ``~a'' is not a symbol" r name)))
+  
+  (jlog:dbg "Registering bout ``~a''" name)
+  (when (gethash name *jabs-bout-registry*)
+    (jlog:wrn "Bout, named ``~a'' already exists. Overriding" name))
+  (setf (gethash name *jabs-bout-registry*) rounds))
 
 (defun find-bout (name)
   (check-type name keyword)
@@ -130,6 +135,8 @@ SOFTWARE.
   )
 
 (defmethod load-bouts-by-name ((project project) bout-names)
+  "Load bouts for project, if they still not loaded
+Try to parse them from files" 
   (check-type bout-names list)
   (dolist (bout-name (or bout-names (list *jabs-default-bout-name*)))
     (let ((current-bout (find-bout bout-name))
