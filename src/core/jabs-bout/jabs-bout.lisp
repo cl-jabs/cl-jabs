@@ -86,6 +86,7 @@ SOFTWARE.
           (dolist (rnd rounds-to-run)
             (run-round rnd))
           (jlog:note ".[ DONE bout ``~a'' for project ``~a'' ]" name (get-project-name project))
+	  t
           ))))
 
 (defmacro defbout (name &body rounds)
@@ -202,8 +203,10 @@ Try to parse them from files"
            (bout-round-pairs (pair-b-r bouts rounds)))
 
       (if bouts
+	  (progn
           (dolist (br bout-round-pairs)
             (run-bout project (car br) (cdr br)))
+	  t)
           (jlog:crit "You did not define bout for project ``~a'' in any way"
                      (get-project-name project))))))
 

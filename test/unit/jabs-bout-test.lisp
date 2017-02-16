@@ -29,7 +29,7 @@ SOFTWARE.
 
 (defvar jabs::*jabs-rounds-to-run* nil)
 
-(dolist (v '("skeleton" "bout"))
+(dolist (v '("skeleton" "hit" "round" "bout"))
   (eval `(load (make-pathname :directory '(:relative "src" "core"
                                            ,(concatenate 'string "jabs-" v))
                               :name ,(concatenate 'string "jabs-" v) :type "lisp"))))
@@ -62,8 +62,8 @@ SOFTWARE.
 	    :version "0.0.1"
 	    :bout :just-mock
 	    :components ((:file "test")))
-
-	  @body)))
+	  (let ((jabs::*jabs-current-project* (find-project :just-mock-project)))
+	  @body))))
 
 ;; (defvar *jabs-bout-registry* (make-hash-table :test 'equal))
 
