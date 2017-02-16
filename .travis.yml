@@ -9,7 +9,7 @@ install:
   - sudo apt-get -y install sbcl realpath
 
 before_script:
-  - /bin/sh ./bootstrap.sh
+  - /bin/sh ./promoter build
 
 script:
-  - /bin/sh ./bootstrap.sh test
+  - /bin/sh ./promoter test
