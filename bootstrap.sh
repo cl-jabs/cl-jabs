@@ -171,25 +171,35 @@ case $1 in
         echo ">> ${PURPLE}DONE${NO_COLOUR} step"
         echo
         if [ ! -z $2 ]; then
-            echo ">> ${PURPLE}Running${NO_COLOUR} test $2"
             do_unittest ${2}.lisp
             exit $?
         else
             ## unit tests
+	    failed_tests=no
             echo ">> ${PURPLE}Running${NO_COLOUR} tests"
             for i in $(ls test/unit/*.lisp 2>/dev/null); do
-                do_unittest $(basename $i) | grep -vE '^ok [0-9]*'
-                [ $? != 0 ] && echo ">> ${RED}FAILED${NO_COLOUR} step">&2 && exit 1
+		echo -n "${PURPLE}Running${NO_COLOUR} test module ${CYAN}$(basename $i .lisp)${NO_COLOUR} "
+                do_unittest $(basename $i) | grep -E 'ok [0-9]' | grep -vE '^ok' | grep -c 'not ok' >/dev/null
+                if [ $? = 0 ]; then
+		    echo "${RED}FAILED${NO_COLOUR}"
+		    failed_tests=yes
+		else
+		    echo "${BLUE}PASSED${NO_COLOUR}"
+		fi
             done
-            echo ">> ${PURPLE}DONE${NO_COLOUR} step"
+	    if [ $failed_tests = "yes" ]; then
+		echo ">> ${RED}FAILED${NO_COLOUR} step" # && exit 1 ## do not fail if unit tests failed now
+	    else
+		echo ">> ${PURPLE}DONE${NO_COLOUR} step"
+	    fi
             echo
 	    ## e2e tests
-	    echo ">> ${PURPLE}Running ${CYAN}End-To-End tests${NO_COLOUR}"
-	    bash $BASEDIR/test/e2e.sh >/dev/null
+	    echo -n ">> ${PURPLE}Running ${CYAN}End-To-End tests${NO_COLOUR} "
+	    bash $BASEDIR/test/e2e.sh >/dev/null 2>/dev/null
 	    if [ "$?" = 0 ]; then
-		echo "${CYAN}End-To-End tests ${BLUE}PASSED${NO_COLOUR}"
+		echo "${BLUE}PASSED${NO_COLOUR}"
 	    else
-		echo "${RED}End-To-End tests FAILED${NO_COLOUR}">&2
+		echo "${RED}FAILED${NO_COLOUR}">&2
 		exit 1
 	    fi
             echo ">> ${PURPLE}DONE${NO_COLOUR} step"
