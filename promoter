@@ -1,5 +1,7 @@
 #!/bin/sh
 
+#### Prepare and Setup
+
 ## colors
 if which tput > /dev/null 2>&1 && [ $(tput -T$TERM colors 2>/dev/null || echo 0) -ge 8 ]; then
     ## action: PURPLE, name: CYAN, passed: BLUE, failed: RED, step done GREEN
@@ -15,21 +17,39 @@ if which tput > /dev/null 2>&1 && [ $(tput -T$TERM colors 2>/dev/null || echo 0)
 fi
 ## /colors
 
-BASEDIR=$PWD
+## set variables
+
 LIBS="asdf"
 # LIBS=""
-SBCL_BIN=$(which sbcl)
 SBCL_URI="http://downloads.sourceforge.net/project/sbcl/sbcl/1.3.4/sbcl-1.3.4-x86-64-linux-binary.tar.bz2?r=http%3A%2F%2Fwww.sbcl.org%2Fplatform-table.html&ts=1461060178&use_mirror=tenet"
-PATH=$PATH:$BASEDIR/tmp/bin
+CCL_URL=
+
+BASE_DIR=$(dirname $(readlink -n -f $0))
+TARGET_DIR="${BASE_DIR}/target"
+TARGET_BIN="${TARGET_DIR}/bin"
+
+[ ! -z "$TARGET_BIN" ] && export PATH=$PATH:${TARGET_BIN}
 [ -z "$JABS_VERSION" ] && JABS_VERSION="`git rev-parse --short HEAD`-SNAPSHOT"
+
+export SBCL_BIN=$(which sbcl)
+export CCL_BIN=$(which ccl)
+export PATH=$PATH:${BASE_DIR}/bin ## add to path directory with local binaries
+
+## /set variables
+
+## functions
+
 print_help()
 {
-    local version="$(grep -R 'defconstant +jabs-version+' src/jabs-core.lisp 2>/dev/null | cut -d \" -f2)"
-    [ -z $version ] && version = $JABS_VERSION
-    echo "This is bootstrap script for ${CYAN}(${RED}J${NO_COLOUR}ust ${CYAN}(${RED}A${NO_COLOUR}nother ${CYAN}(${RED}B${NO_COLOUR}uild ${CYAN}(${RED}S${NO_COLOUR}ystem${CYAN}))))${NO_COLOUR}"
-    echo "JABS version: $version"
+    local version="$(grep -R 'defconstant +jabs-version+' src/jabs-core.lisp 2>/dev/null | cut -d \" -f2 2>/dev/null)"
+    [ -z ${version} ] && version=$JABS_VERSION
+    echo "${PURPLE}This is a \`\`${YELLOW}promoter${NO_COLOUR}\`\` ${PURPLE}script for ${CYAN}(${RED}J${NO_COLOUR}ust ${CYAN}(${RED}A${NO_COLOUR}nother ${CYAN}(${RED}B${NO_COLOUR}uild ${CYAN}(${RED}S${NO_COLOUR}ystem${CYAN}))))${NO_COLOUR}"
+    echo "${PURPLE}JABS version: ${CYAN}$version${NO_COLOUR}"
+    echo "${PURPLE}Usage:\n       ${CYAN}$0${NO_COLOUR} ${GREEN}[build|test [-l|<test_module_name>]|clean]${NO_COLOUR}"
     echo
-    echo "${PURPLE}Usage: ${CYAN}$0${NO_COLOUR} ${GREEN}[help|clean|test|install]${NO_COLOUR}"
+    echo "       -l                 : list of test modules (only for \`\`test\`\` action)"
+    echo "       <test_module_name> : run only selected unit test (only for \`\`test\`\` action, see \`\`-l\`\`)"
+    echo "${PURPLE}Default action (${WHITE}without arguments${PURPLE}) is ${GREEN}\`\`help\`\`${NO_COLOUR}"
     echo
 
 }
@@ -38,32 +58,34 @@ check_sbcl()
 {
     echo -n ">> ${PURPLE}Checking${NO_COLOUR} for ${CYAN}sbcl${NO_COLOUR} binary present in system... "
     test -z $SBCL_BIN && echo "${CYAN}sbcl${NO_COLOUR} binary not found in system" && return 5
-    test -z "$SBCL" && SBCL="$SBCL_BIN --disable-debugger --no-sysinit --no-userinit"
+    test -z "$SBCL" && export SBCL="$SBCL_BIN --disable-debugger --no-sysinit --no-userinit"
     echo "${PURPLE}DONE${NO_COLOUR}"
 }
 
 do_sbcl()
 {
-    echo -n ">> ${PURPLE}Installing${NO_COLOUR} ${CYAN}sbcl${NO_COLOUR} locally... "
-    mkdir -p tmp
-    [ ! $? -eq 0 ] && echo "Can not make tmp directory. Exiting" && return 1
-    cd tmp
-    mkdir -p bin
+    echo -n ">> ${PURPLE}Installing${NO_COLOUR} ${CYAN}sbcl${NO_COLOUR} locally to user dire... "
+    mkdir -p ${TARGET_DIR} ${TARGET_BIN}
+    [ ! $? -eq 0 ] && echo "Can not make ${TARGET_BIN} and/or ${TARGET_DIR} directories. Exiting" && return 1
+    cd ${TARGET_DIR}
     wget -q $SBCL_URI -O sbcl.tar.gz
     tar -xf sbcl.tar.gz
-    ln -sf $BASEDIR/tmp/sbcl-*/run-sbcl.sh $BASEDIR/tmp/bin/sbcl
-    cd $BASEDIR
-    SBCL_BIN=$(which sbcl)
+    ln -sf ${TARGET_DIR}/sbcl-*/run-sbcl.sh ${TARGET_BIN}/sbcl
+    cd $BASE_DIR
+    export PATH=$PATH:${TARGET_BIN}
+    export SBCL_BIN=$(which sbcl)
     echo "${PURPLE}DONE${NO_COLOUR}"
 }
 
 do_unittest()
 {
-    local name=$(basename $1 .lisp)
-    echo "${PURPLE}Running${NO_COLOUR} test module ${CYAN}${name}${NO_COLOUR}"
-    $SBCL --no-sysinit --no-userinit --eval "(require 'asdf)" --script test/unit/$1
-    if [ "$?" != 0 ] ; then
-        echo "Test module ${CYAN}${name} ${RED}FAILED${NO_COLOUR}">&2
+    local name=$(basename ${1} .lisp)
+    echo "${PURPLE}Running${NO_COLOUR} test module ${CYAN}${name}${NO_COLOUR}..."
+    RES=`$SBCL --eval "(require 'asdf)" --script test/unit/$1`
+    echo "$RES"
+
+    if [ $(echo "$RES" | grep -cE '^not ok [0-9]') != 0 ] ; then
+        echo "Test module ${CYAN}${name} ${RED}FAILED${NO_COLOUR}"
         return 1
     fi
     echo "Test module ${CYAN}${name} ${BLUE}PASSED${NO_COLOUR}"
@@ -77,35 +99,62 @@ do_install()
 
 do_clean()
 {
-    cd $BASEDIR
-    echo -n "${PURPLE}Clearing${NO_COLOUR} working directory... "
-    rm -f jab src/wrappers/jab/jab.lisp src/jabs-loader.lisp src/jabs-core.lisp
-    rm -rf tmp
+    cd $BASE_DIR
+
+    echo -n "${PURPLE}Clearing${NO_COLOUR} wrappers... "
+    rm -f bin/jab bin/jn.sh
+    echo "${PURPLE}DONE${NO_COLOUR}"
+
+    echo -n "${PURPLE}Clearing${NO_COLOUR} autogenerated files... "
+    for i in `find . -type f -name '*.lisp.input'`; do
+        rm -rf $(basename ${i} .input)
+    done
+    echo "${PURPLE}DONE${NO_COLOUR}"
+
+    echo -n "${PURPLE}Clearing${NO_COLOUR} temporary directories... "
+    [ -n  ${TARGET_BIN} ] && rm -rf ${TARGET_BIN}
+    [ -n  ${TARGET_DIR} ] && rm -rf ${TARGET_DIR}
+    echo "${PURPLE}DONE${NO_COLOUR}"
+
+    echo -n "${PURPLE}Clearing${NO_COLOUR} backup files... "
     rm -f `find . -name '*~'`
+    echo "${PURPLE}DONE${NO_COLOUR}"
     ## resetting modules state (could change state during build)
+    echo -n "${PURPLE}Clearing${NO_COLOUR} git submodules state... "
     rm -rf lib/*
-    git submodule update --init >/dev/null 2>&1
+    git submodule update --init --recursive>/dev/null 2>/dev/null
     echo "${PURPLE}DONE${NO_COLOUR}"
 }
 
-
 do_build()
 {
-    [ -z "$(which git)" ] || [ ! -d .git ] && echo "There is ${RED}no ${CYAN}git${NO_COLOUR} executable or ${RED}not in git repository${NO_COLOUR}" && return 1
+    ## Check if system prepared to build
+    [ -z "$(which git)" ] && echo "There is ${RED}no ${CYAN}git${NO_COLOUR} executable. Can not continue!${NO_COLOUR}" && return 1
+    [ ! -d .git ] && echo "${RED}Not in git repository. Can not continue!${NO_COLOUR}" && return 1
 
-    git submodule update --init
+    echo -n "${PURPLE}Updating${NO_COLOUR} git submodules... "
+    git submodule update --init --recursive >/dev/null
+    echo "${PURPLE}DONE${NO_COLOUR}"
+
     ## preparing ASDF to use new texinfo
+    echo -n "${PURPLE}Preparing${NO_COLOUR} ASDF to use new texinfo... "
     sed -i 's/\&rest/Arest/g;s/\&key/Akey/g;s/\&optional/Aoptional/g;s/\&allow-other-keys/Aallow-other-keys/g;s/\&body/Abody/g' lib/asdf/doc/asdf.texinfo
-    ## building libraries
+    echo "${PURPLE}DONE${NO_COLOUR}"
+
+
     if [ -n "$LIBS" ]; then
+        echo -n "${PURPLE}Building${NO_COLOUR} extensions... "
         for i in "$LIBS"; do
             cd lib/$i
-            make
+            make >/dev/null
             local ret=$?
-            cd $BASEDIR
+            cd $BASE_DIR
             [ $ret != 0 ] && echo "${PURPLE}Build${NO_COLOUR} library ${CYAN}$i ${RED}FAILED${NO_COLOUR}">&2 && return $ret
         done
+        echo "${PURPLE}DONE${NO_COLOUR}"
     fi
+
+    echo -n "${PURPLE}Copying${NO_COLOUR} extension files to JABS directories... "
     if [ -f lib/asdf/build/asdf.lisp ]; then
         cp lib/asdf/build/asdf.lisp src/core/jabs-asdf/
     else
@@ -119,9 +168,9 @@ do_build()
         echo "${PURPLE}Build${NO_COLOUR} Quicklisp bootstrap library ${RED}FAILED${NO_COLOUR}. There is no file ${CYAN}share/plugins/repository/quicklisp/${NO_COLOUR}">&2
         return 1
     fi
+    echo "${PURPLE}DONE${NO_COLOUR}"
 
-
-    echo -n "${PURPLE}Generating${NO_COLOUR} files from templates..."
+    echo -n "${PURPLE}Generating${NO_COLOUR} files from templates... "
     sed "s|@SRCDIR@|$PWD/src/|" src/wrappers/jn/jn.sh.input > $PWD/bin/jn.sh
     sed "s|@BINDIR@|$PWD/bin/|" src/wrappers/jab/make-jab.lisp.input > src/wrappers/jab/make-jab.lisp
     sed "s|@SRCDIR@|$PWD/src/|;s|@SBCL_BIN@|$SBCL_BIN|;s|@SRCDIR@|$PWD/src/|" src/wrappers/jab/jab.lisp.input > src/wrappers/jab/jab.lisp
@@ -130,8 +179,8 @@ do_build()
     sed "s|@DATADIR@|$PWD/|;s|@SRCDIR@|$PWD/src/|;s|@LIBDIR@|$PWD/lib/|;s|@DATAROOTDIR@|$PWD/share/|;s|@SYSCONFIGDIR@|$PWD/etc/|;s|@JABS_VERSION@|$JABS_VERSION|" src/jabs-core.lisp.input > src/jabs-core.lisp
     echo "${PURPLE}DONE${NO_COLOUR}"
 
-    echo -n "${PURPLE}Building${NO_COLOUR} wrappers..."
-    $SBCL --no-sysinit --no-userinit --disable-debugger --load ./src/wrappers/jab/make-jab.lisp >/dev/null
+    echo -n "${PURPLE}Building${NO_COLOUR} wrappers... "
+    $SBCL --load ./src/wrappers/jab/make-jab.lisp >/dev/null
     ret=$?
     [ $ret != 0 ] && echo "${PURPLE}Build${NO_COLOUR} ${RED}FAILED${NO_COLOUR}">&2 && exit $ret
     echo "${PURPLE}DONE${NO_COLOUR}"
@@ -144,66 +193,93 @@ do_build()
     # echo "${PURPLE}DONE${NO_COLOUR}"
 }
 
+print_step()
+{
+    echo ">> ${PURPLE}$@${NO_COLOUR}"
+}
+
+print_step_done()
+{
+    echo ">> ${PURPLE}DONE${NO_COLOUR} step"
+    echo
+}
+
+print_step_fail()
+{
+    echo ">> ${RED}FAILED${NO_COLOUR} step"
+    echo
+}
+
 case $1 in
-    "help"|"-h"|"--help")
-        print_help
-        ;;
     "clean")
+        print_step Clearing
         do_clean
+        print_step_done
         ;;
     "test")
+        ## list of test modules
         if [ x$2 = "x-l" ]; then
-            for k in `ls test/unit`; do
+            for k in `ls test/unit/*.lisp`; do
                 echo $(basename $k .lisp)
             done
             exit 0
         fi
+
         ## check for sbcl binary
         check_sbcl || do_sbcl
         ret=$?
-        [ $ret != 0 ] && echo ">> ${RED}FAILED${NO_COLOUR} step">&2 && exit $ret
-        echo ">> ${PURPLE}DONE${NO_COLOUR} step"
-        echo
+        [ $ret != 0 ] && print_step_fail && exit $ret
+        print_step_done
+
         ## building
-        echo ">> ${PURPLE}Testing ${CYAN}build process${NO_COLOUR}"
-        do_build>/dev/null
+        print_step "Running ${CYAN}build${NO_COLOUR} test"
+        do_build
         [ $? != 0 ] && echo ">> ${RED}FAILED${NO_COLOUR} step">&2 && exit 1
-        echo ">> ${PURPLE}DONE${NO_COLOUR} step"
-        echo
+        print_step_done
+
         if [ ! -z $2 ]; then
             do_unittest ${2}.lisp
             exit $?
         else
             ## unit tests
-	    failed_tests=no
-            echo ">> ${PURPLE}Running${NO_COLOUR} tests"
+	    failed_unit_tests=no
+            print_step "${PURPLE}Running ${CYAN}unit ${NO_COLOUR}tests"
             for i in $(ls test/unit/*.lisp 2>/dev/null); do
-		echo -n "${PURPLE}Running${NO_COLOUR} test module ${CYAN}$(basename $i .lisp)${NO_COLOUR} "
+		echo -n "${PURPLE}Running${NO_COLOUR} test module ${CYAN}$(basename $i .lisp)${NO_COLOUR}... "
                 do_unittest $(basename $i) | grep -E 'ok [0-9]' | grep -vE '^ok' | grep -c 'not ok' >/dev/null
                 if [ $? = 0 ]; then
 		    echo "${RED}FAILED${NO_COLOUR}"
-		    failed_tests=yes
+		    failed_unit_tests=yes
 		else
 		    echo "${BLUE}PASSED${NO_COLOUR}"
 		fi
             done
-	    if [ $failed_tests = "yes" ]; then
-		echo ">> ${RED}FAILED${NO_COLOUR} step" # && exit 1 ## do not fail if unit tests failed now
+	    if [ $failed_unit_tests = "yes" ]; then
+		print_step_fail # && exit 1 ## do not fail if unit tests failed now
 	    else
-		echo ">> ${PURPLE}DONE${NO_COLOUR} step"
+		print_step_done
 	    fi
-            echo
+
 	    ## e2e tests
-	    echo -n ">> ${PURPLE}Running ${CYAN}End-To-End tests${NO_COLOUR} "
-	    bash $BASEDIR/test/e2e.sh >/dev/null 2>/dev/null
-	    if [ "$?" = 0 ]; then
-		echo "${BLUE}PASSED${NO_COLOUR}"
+            failed_e2e_tests=no
+	    print_step "${PURPLE}Running ${CYAN}integration${NO_COLOUR} tests"
+            for i in `ls $BASE_DIR/test/*.sh`; do
+		echo -n "${PURPLE}Running${NO_COLOUR} test module ${CYAN}$(basename $i .sh)${NO_COLOUR}... "
+	        RES=`/bin/bash $BASE_DIR/test/e2e.sh >/dev/null 2>&1`
+	        if [ "$?" = 0 ]; then
+		    echo "${BLUE}PASSED${NO_COLOUR}"
+	        else
+                    echo "$RES"
+		    echo "${RED}FAILED${NO_COLOUR}"
+                    failed_e2e_tests=yes
+	        fi
+            done
+            if [ $failed_e2e_tests = "yes" ]; then
+		print_step_fail # && exit 1 ## do not fail if unit tests failed now
 	    else
-		echo "${RED}FAILED${NO_COLOUR}">&2
-		exit 1
+                print_step_done
 	    fi
-            echo ">> ${PURPLE}DONE${NO_COLOUR} step"
-	    echo
+
             # ## install process
             # echo ">> ${PURPLE}Testing ${CYAN}installation process${NO_COLOUR}"
             # DSTDIR=`mktemp -d /tmp/.jabs.XXXXXX`
@@ -235,12 +311,11 @@ case $1 in
             # [ $? != 0 ] && echo ">> ${RED}FAILED${NO_COLOUR} step">&2 && exit 1
             # echo ">> ${PURPLE}DONE${NO_COLOUR} step"
             # echo
-            echo ">> ${PURPLE}Clearing${NO_COLOUR}"
-            rm -rf $DSTDIR
-            do_clean >/dev/null
+            print_step "${PURPLE}Clearing${NO_COLOUR}"
+            # rm -rf $DSTDIR
+            do_clean # >/dev/null
             [ $? != 0 ] && exit 1
-            echo ">> ${PURPLE}DONE${NO_COLOUR} step"
-            echo
+            print_step_done
         fi
         ;;
     "install")
@@ -248,26 +323,30 @@ case $1 in
         check_sbcl || do_sbcl
         ret=$?
         [ $ret != 0 ] && echo ">> ${RED}FAILED${NO_COLOUR} step">&2 && exit $ret
-        echo "${PURPLE}DONE${NO_COLOUR}"
-        echo "${PURPLE}Building${NO_COLOUR} JABS..."
+        print_step_done
+
+        print_step "${PURPLE}Building${NO_COLOUR} JABS"
         do_build
-        echo "${PURPLE}DONE${NO_COLOUR}"
-        echo
-        echo "${PURPLE}Installing${NO_COLOUR} JABS..."
+        print_step_done
+
+        print_step "${PURPLE}Installing${NO_COLOUR} JABS"
         do_install $@
-        [ $? != 0 ] && exit 1
-        echo "${PURPLE}DONE${NO_COLOUR}"
+        [ $? != 0 ] && print_step_fail && do_clean && exit 1
+        print_step_done
         ;;
     "prepare")
 	check_sbcl || do_sbcl
 	;;
-    *)
+    "build")
         check_sbcl || do_sbcl
         ret=$?
-        [ $ret != 0 ] && echo "${RED}FAILED${NO_COLOUR}">&2 && exit $ret
-        echo "${PURPLE}DONE${NO_COLOUR}"
-        echo "${PURPLE}Building${NO_COLOUR} JABS..."
+        [ $ret != 0 ] && print_step_fail && exit $ret
+        print_step_done
+        print_step "${PURPLE}Building${NO_COLOUR} JABS"
         do_build
-        echo "${PURPLE}DONE${NO_COLOUR}"
+        print_step_done
+        ;;
+    *)
+        print_help
         ;;
 esac
