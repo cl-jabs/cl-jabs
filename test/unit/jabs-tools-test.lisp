@@ -250,4 +250,4 @@ SOFTWARE.
 ;; (defun os-realpath (path)
 ;; (defun implementation-signature ()
 
-(format t "~a~%" (run-suite 'tools-suite :stop-on-fail nil :report-progress t))
+(format t "~a~%" (run-suite 'tools-suite :stop-on-fail nil :report-progress nil))
