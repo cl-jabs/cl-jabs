@@ -41,7 +41,7 @@ SOFTWARE.
    (merge-pathnames (make-pathname :directory '(:relative ".jabs" "hits")) (user-homedir-pathname))
    (merge-pathnames (make-pathname :directory '(:relative ".jabs" "hits")) (os-pwd))))
 
-(defvar *jabs-hit-registry* (make-hash-table :test 'equal))
+(defvar *jabs-hit-registry* (make-hash-table))
 (defvar *jabs-hit-template-type* "hit")
 (defvar *jabs-hits-to-run* nil)
 
