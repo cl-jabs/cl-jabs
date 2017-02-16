@@ -1,7 +1,0 @@
-;; (defmethod load-op ((project project) &optional source-force)
-;; (defmethod load-dependencies-op ((project project))
-;; (defmethod compile-op ((project project))
-;; (defmethod test-op ((project project))
-;; (defmethod lib-op ((project project))
-;; (defmethod link-op ((project project))
-;; (defmethod prepare-op ((project project))
