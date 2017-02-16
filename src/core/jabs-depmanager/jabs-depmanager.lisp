@@ -34,7 +34,7 @@ SOFTWARE.
 (define-plugin-type :repository plugin
   (let ((checker t)
         (plugin-package-name
-         (eval (append '(concatenate-symbol *jabs-universal-delimiter*)
+         (eval (append '(concat-keywords-w-delimiter *jabs-universal-delimiter*)
                        (list (get-plugin-name plugin))
                        (list (get-plugin-type plugin))
                        +jabs-plugin-namespace+))))
@@ -297,7 +297,7 @@ system file, than retry to find project"
              (plugin-package-name
               (eval
                (append
-                `(concatenate-symbol *jabs-universal-delimiter* ,name ,type)
+                `(concat-keywords-w-delimiter *jabs-universal-delimiter* ,name ,type)
                 +jabs-plugin-namespace+)))
              (project (find-project plugin-package-name)))
         (jlog:dbg "Loading plugin ``~a'' dependencies"

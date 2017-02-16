@@ -86,14 +86,6 @@ SOFTWARE.
           ;; (os-cd dirname) ;; TODO: is it needed??
           (load (merge-pathnames dirname *jabs-buildfile*))))))
 
-(defun make-jabs-symbol (symbol &optional (package :keyword))
-  ;; FIXME: Deprecated
-  (tosymbol symbol package))
-
-(defun concatenate-symbol (delimiter &rest symbols)
-  ;; FIXME: Deprecated
-  (eval `(concat-keywords-w-delimiter ,delimiter ,@symbols)))
-
 (defun get-option-suffix (name list &key (test 'eql) (nth 1))
   (nth nth (member name list :test test)))
 

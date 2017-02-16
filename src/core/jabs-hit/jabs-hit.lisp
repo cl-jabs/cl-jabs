@@ -41,36 +41,9 @@ SOFTWARE.
    (merge-pathnames (make-pathname :directory '(:relative ".jabs" "hits")) (user-homedir-pathname))
    (merge-pathnames (make-pathname :directory '(:relative ".jabs" "hits")) (os-pwd))))
 
-(defvar *jabs-hit-registry* (make-hash-table :test 'equal))
+(defvar *jabs-hit-registry* (make-hash-table))
 (defvar *jabs-hit-template-type* "hit")
 (defvar *jabs-hits-to-run* nil)
-
-(defun find-hit (name)
-  "Find hit in registry"
-  (check-type name keyword)
-  (gethash name *jabs-hit-registry*))
-
-(defmacro defhit (name depends-on &body body)
-  `(register-hit ,(tosymbol name) ',depends-on '(progn ,@body)))
-
-(defun register-hit (name depends-on body)
-  (check-type name keyword)
-  (check-type depends-on list)
-  (check-type body list)
-  ;;
-  (jlog:dbg "Registering hit ``~a''" name)
-  (setf (gethash name *jabs-hit-registry*)
-        (list depends-on (eval (append '(lambda nil) (list body))))))
-
-(defun check-hit-dependencies (name &key parent-hits)
-  (check-type parent-hits list)
-  ;;
-  (let ((hit (find-hit name)))
-    (if (or (null hit) (null (car hit))) t
-        (dolist (dep (car hit))
-          (if (member name parent-hits)
-              (jlog:crit "Cycle hit dependencies detected in hit ``~a'': ``~a''" name (cons name parent-hits))
-              (check-hit-dependencies dep :parent-hits (cons name parent-hits)))))))
 
 (defun find-hit-file (name)
   (check-type name (or string symbol))
@@ -96,6 +69,38 @@ SOFTWARE.
         (eval (append (list 'defhit name deps) body))
         (jlog:crit "Incorrect hit ``~a'' format from file ``~a''" name file))))
 
+(defun find-hit (name)
+  "Find hit in registry"
+  (check-type name keyword)
+  (or
+   (gethash name *jabs-hit-registry*)
+   (let ((hit-file (find-hit-file name)))
+     (when hit-file
+       (parse-hit-from-file hit-file)
+       (gethash name *jabs-hit-registry*)))))
+
+(defmacro defhit (name depends-on &body body)
+  `(register-hit ,(tosymbol name) ',depends-on '(progn ,@body)))
+
+(defun register-hit (name depends-on body)
+  (check-type name keyword)
+  (check-type depends-on list)
+  (check-type body list)
+  ;;
+  (jlog:dbg "Registering hit ``~a''" name)
+  (setf (gethash name *jabs-hit-registry*)
+        (list depends-on (eval (append '(lambda nil) (list body))))))
+
+(defun check-hit-dependencies (name &key parent-hits)
+  (check-type parent-hits list)
+  ;;
+  (let ((hit (find-hit name)))
+    (if (or (null hit) (null (car hit))) t
+        (dolist (dep (car hit))
+          (if (member name parent-hits)
+              (jlog:crit "Cycle hit dependencies detected in hit ``~a'': ``~a''" name (cons name parent-hits))
+              (check-hit-dependencies dep :parent-hits (cons name parent-hits)))))))
+
 (defun run-hit (name &key nodeps)       ; nodeps - ignore all dependencies
   (let ((project (get-project-name *jabs-current-project*)))
     (when (not nodeps)
@@ -103,29 +108,25 @@ SOFTWARE.
         (jlog:info "Checking hit ``~a'' dependencies in project ``~a''" name project)
         (check-hit-dependencies name)))
     ;;
-    (let ((hit (or
-                (find-hit name)
-                (and
-                 (parse-hit-from-file (find-hit-file name))
-                 (find-hit name)))))
-      (if (not (null hit))
-          (progn
-            (jlog:note "...[ Launching hit ``~a'' for project ``~a'' ]" name project)
-            (when (and (not (null (car hit))) (null nodeps))
-              (dolist (dep (car hit))
-                (jlog:dbg "Launching hit ``~a'' as dependency for ``~a'' in project ``~a''" dep name project)
-                (run-hit (tosymbol dep))))
-            (if (not (typep (cadr hit) 'function))
-                (jlog:crit "Incorrect format of hit ``~a'' in project ``~a''" name project)
-                (progn
-                  (jlog:dbg "Running hit ``~a'' for project ``~a''" name project)
-                  (funcall (cadr hit))
-                  (jlog:note "...[ DONE hit ``~a'' for project ``~a'' ]" name project))))
-          (jlog:info "Hit ``~a'' in project ``~a'' is empty. Nothing to do" name project)))))
+    (let ((hit (find-hit name)))
+      (cond ((not (null hit))
+             (jlog:note "...[ Launching hit ``~a'' for project ``~a'' ]" name project)
+             (when (and (not (null (car hit))) (null nodeps))
+               (dolist (dep (car hit))
+                 (jlog:dbg "Launching hit ``~a'' as dependency for ``~a'' in project ``~a''" dep name project)
+                 (run-hit (tokeyword dep))))
+             (if (not (typep (cadr hit) 'function))
+                 (jlog:crit "Incorrect format of hit ``~a'' in project ``~a''" name project)
+                 (progn
+                   (jlog:dbg "Running hit ``~a'' for project ``~a''" name project)
+                   (funcall (cadr hit))
+                   (jlog:note "...[ DONE hit ``~a'' for project ``~a'' ]" name project)
+                   t)))
+            (t (jlog:info "Hit ``~a'' in project ``~a'' is empty. Nothing to do" name project))))))
 ;; (declaim #+sbcl(sb-ext:unmuffle-conditions style-warning))
 
-(bind-jabs-cli-parameter
- "hits"
- #'(lambda (&rest x)
-     (dolist (hit x)
-       (push (string-upcase (princ-to-string hit)) *jabs-hits-to-run*))))
+;; (bind-jabs-cli-parameter
+;;  "hits"
+;;  #'(lambda (&rest x)
+;;      (dolist (hit x)
+;;        (push (string-upcase (princ-to-string hit)) *jabs-hits-to-run*))))

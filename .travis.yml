@@ -9,8 +9,7 @@ install:
   - sudo apt-get -y install sbcl realpath
 
 before_script:
-  - git submodule update --init
   - /bin/sh ./bootstrap.sh
 
 script:
-  - test/e2e.sh
+  - /bin/sh ./bootstrap.sh test

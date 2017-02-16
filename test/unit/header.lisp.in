@@ -24,3 +24,9 @@
 ;; load basic system
 (load (make-pathname :directory '(:relative "src") :name "jabs-packages" :type "lisp"))
 (load (make-pathname :directory '(:relative "src") :name "jabs-logger" :type "lisp"))
+
+;; set log params
+(setf jlog:*fail-on-error* nil)
+(setf jlog:*fail-on-critical* nil)
+(setf jlog:*log-disable-notes* t)
+(setf jlog:*log-level* "CRITICAL")

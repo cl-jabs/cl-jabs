@@ -261,12 +261,12 @@ date - yyyy-mm-dd-hh-mm-ss-<TZ>
 (defmacro crit (&rest message)
   `(let ((str (format nil ,@message)))
      (log-write-output "CRITICAL" "" str)
-     (if *fail-on-critical*
-         (progn
-           (when *log-trace-p*
-             (sb-debug:print-backtrace))
-           (write-output "CRITICAL" "" "Exiting.")
-           (terminate 1)))))
+     (when *fail-on-critical*
+       (progn
+	 (when *log-trace-p*
+	   (sb-debug:print-backtrace))
+	 (write-output "CRITICAL" "" "Exiting.")
+	 (terminate 1)))))
 
 (defmacro err (&rest message)
   `(let ((str (format nil ,@message)))
