@@ -26,6 +26,8 @@ SOFTWARE.
 
 (export '(defplugin
           find-plugin
+          find-plugin-type
+          register-plugin-type
           get-plugin-name
           get-plugin-type
           get-plugin-url
@@ -68,7 +70,7 @@ by many projects w/o requirement to set it as plugin in
   (check-type name keyword)
   (gethash name *jabs-plugin-type-registry*))
 
-(defun register-plugin-type (name &optional (validator t))
+(defun register-plugin-type (name &optional (validator #'(lambda (x) (declare (ignore x)) t)))
   "Register plugin type. Skip, when already registered"
   (check-type name keyword)
   (check-type validator function)
