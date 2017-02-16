@@ -60,7 +60,7 @@ date - yyyy-mm-dd-hh-mm-ss-<TZ>
 (defvar *log-level* "ERROR")
 (defvar *log-quiet-p* nil)
 (defvar *log-levels* '("CRITICAL" "ERROR" "WARNING" "INFO" "DEBUG"))
-(defvar *log-trace-p* nil)
+(defvar *log-trace-p* t)
 
 (defvar *fail-on-critical* t)
 (defvar *fail-on-error* nil)

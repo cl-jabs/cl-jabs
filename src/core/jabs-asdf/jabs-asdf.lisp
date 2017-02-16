@@ -245,6 +245,7 @@ compiling asdf.lisp to a FASL and then loading it."
                options))))))
 
 ;; load some files for backward compatability with old ASDF versions
+(declaim #+sbcl(sb-ext:muffle-conditions style-warning))
 (load (merge-pathnames
        (make-pathname :name "backward-interface" :type "lisp")
        *load-truename*))
@@ -252,6 +253,7 @@ compiling asdf.lisp to a FASL and then loading it."
 (load (merge-pathnames
        (make-pathname :name "backward-internals" :type "lisp")
        *load-truename*))
+(declaim #+sbcl(sb-ext:unmuffle-conditions style-warning))
 
 ;;;; Some macros for better ASDF compatability
 (in-package :jabs)
