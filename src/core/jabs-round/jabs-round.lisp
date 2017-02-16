@@ -31,7 +31,9 @@ SOFTWARE.
 
 (in-package :jabs)
 
-(export '(defround))
+(export '(find-round
+          defround
+          run-round))
 
 (defvar *jabs-round-directories*
   (list
@@ -47,7 +49,7 @@ SOFTWARE.
   (check-type name keyword)
   (dolist (h hits)
     (when (not (typep h 'keyword))
-      (jlog:err "Hit ``~a'' in round ``~a'' is not a keyword" h name)))
+      (jlog:crit "Hit name ``~a'' in round ``~a'' is not a keyword" h name)))
   (when (not (null name))
     (progn
       (jlog:dbg "Registering round ``~a''" name)
@@ -70,10 +72,6 @@ SOFTWARE.
           (car round-files))
         (jlog:dbg "File not found for round ``~a''" name))))
 
-(defun find-round (name)
-  (check-type name keyword)
-  (gethash name *jabs-round-registry*))
-
 (defun parse-round-from-file (file)
   (check-type file (or string pathname))
   (jlog:dbg "Processing round file ``~a''" file)
@@ -83,16 +81,19 @@ SOFTWARE.
          (hits (cdr exp)))
     (apply 'register-round (cons name hits))))
 
-(defun load-round-from-file (name)
-  (or (find-round name)
-      (and
-       (parse-round-from-file (find-round-file name))
-       (find-round name))))
+(defun find-round (name)
+  (check-type name keyword)
+  (or
+   (gethash name *jabs-round-registry*)
+   (let ((round-file (find-round-file name)))
+     (when round-file
+       (parse-round-from-file round-file)
+       (gethash name *jabs-round-registry*)))))
 
 (defun run-round (name &optional hit)
   (check-type name keyword)
   (check-type hit list)
-  (let ((round (load-round-from-file name)))
+  (let ((round (find-round name)))
     (labels ((run-round-to-hit
                  (round &optional hit)
                (when (and (not (null round)) (or (null hit) (member hit round)))
@@ -110,7 +111,8 @@ SOFTWARE.
           (jlog:note "..[ DONE round ``~a'' to hit ``~a'' for project ``~a'' ]"
                      name hit (get-project-name *jabs-current-project*))
           (jlog:note "..[ DONE round ``~a'' for project ``~a'' ]"
-                     name (get-project-name *jabs-current-project*))))))
+                     name (get-project-name *jabs-current-project*)))
+      t))) ;; TODO: make correct exit stauts
 
 (defmacro defround (name &body hits)
   `(register-round ,(tosymbol name) ,@hits))
@@ -120,7 +122,7 @@ SOFTWARE.
   (check-type hitname keyword)
   (check-type roundname keyword)
   (jlog:dbg "Inserting hit ``~a'' to round ``~a''" hitname roundname)
-  (let ((round (load-round-from-file roundname)))
+  (let ((round (find-round roundname)))
     (if round
         (progn
           (push hitname round)
@@ -132,7 +134,7 @@ SOFTWARE.
   (check-type hitname keyword)
   (check-type roundname keyword)
   (jlog:dbg "Appending hit ``~a'' to round ``~a''" hitname roundname)
-  (let ((round (reverse (load-round-from-file roundname))))
+  (let ((round (reverse (find-round roundname))))
     (if round
         (progn
           (push hitname round)
@@ -144,7 +146,7 @@ SOFTWARE.
   (check-type hitname keyword)
   (check-type roundname keyword)
   (jlog:dbg "Removing hit ``~a'' to round ``~a''" hitname roundname)
-  (let ((round (load-round-from-file roundname)))
+  (let ((round (find-round roundname)))
     (if round
         (setf (gethash roundname *jabs-round-registry*) (remove hitname round))
         (jlog:crit "No round ``~a'' found. Can not delete hit ``~a''" roundname hitname))))

@@ -499,14 +499,14 @@ might be removed instead!  This is currently fixed for SBCL and CCL."
   "Predicate that is true for an empty sequence"
   (or (null x) (and (vectorp x) (zerop (length x)))))
 
-(defun find-package* (package-designator &optional (error t))
+(defun find-package* (package-designator &optional (error-p t))
   (let ((package (find-package package-designator)))
     (cond
      (package package)
-     (error (jlog:crit "No package named ~S" (string package-designator)))
+     (error-p (jlog:crit "No package named ~S" (string package-designator)))
      (t nil))))
 
-(defun find-symbol* (name package-designator &optional (error t))
+(defun find-symbol* (name package-designator &optional (error-p t))
   "Find a symbol in a package of given string'ified NAME;
 unlike CL:FIND-SYMBOL, work well with 'modern' case sensitive syntax
 by letting you supply a symbol or keyword for the name;
@@ -514,12 +514,12 @@ also works well when the package is not present.
 If optional ERROR argument is NIL, return NIL instead of an error
 when the symbol is not found."
   (block nil
-    (let ((package (find-package* package-designator error)))
+    (let ((package (find-package* package-designator error-p)))
       (when package ;; package error handled by find-package* already
         (multiple-value-bind (symbol status) (find-symbol (string name) package)
           (cond
            (status (return (values symbol status)))
-           (error (jlog:crit "There is no symbol ~S in package ~S" name (package-name package))))))
+           (error-p (jlog:crit "There is no symbol ~S in package ~S" name (package-name package))))))
       (values nil nil))))
 
 (defun symbol-call (package name &rest args)
@@ -1074,20 +1074,6 @@ suitable for use as a directory name to segregate Lisp FASLs, C dynamic librarie
            (or (lisp-version-string) (lisp-implementation-version))
            (or (operating-system) (software-type))
            (or (os-architecture) (machine-type)))))
-
-(defun scan-all-to-list (startsymbol endsymbol target-string &optional collector)
-  (let* ((stringlist (concatenate 'list target-string))
-         (mml (concatenate 'list (middle-scan startsymbol endsymbol target-string)))
-         (position (+ 2 (- (length stringlist) (length (member startsymbol stringlist))) (length mml))))
-    (jlog:dbg "stringlist ``~a''~%mml ``~a''~%position ``~a''" stringlist mml position)
-    (if (null stringlist) (reverse collector)
-        (progn
-          (jlog:dbg "position ``~a''~%rest ``~a''"
-                    position (cut-first-n position stringlist))
-          (when mml (push (concatenate 'string mml) collector))
-          (scan-all-to-list startsymbol endsymbol
-                            (concatenate 'string
-                                         (cut-first-n position stringlist)) collector)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

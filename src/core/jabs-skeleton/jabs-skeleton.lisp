@@ -184,7 +184,7 @@ not included to main schema (like socket or dev dir etc)"
     :readme-file readme-file
     :license-file license-file
     :install-file install-file))
-  (jlog:info "Skeleton ``~a'' registered" name))
+  (jlog:info "Skeleton ``~a'' registered" name) t)
 
 (defmacro defskeleton (name &body options)
   `(apply 'register-skeleton ,(tosymbol name) ',options))
@@ -347,7 +347,7 @@ not included to main schema (like socket or dev dir etc)"
 	     (find-skeleton-file (string-downcase (princ-to-string skeleton-name)))))
 	(if file-to-load
 	    (parse-skeleton-from-file file-to-load)
-	  (jlog:crit "There is no file for skeleton ``~a''" skeleton-name))))))
+	  (jlog:err "There is no file for skeleton ``~a''. Skipping" skeleton-name))))))
 
 ;;;;;;;;;;
 

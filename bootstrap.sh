@@ -61,7 +61,7 @@ do_unittest()
 {
     local name=$(basename $1 .lisp)
     echo "${PURPLE}Running${NO_COLOUR} test module ${CYAN}${name}${NO_COLOUR}"
-    $SBCL --eval "(require 'asdf)" --script test/unit/$1
+    $SBCL --no-sysinit --no-userinit --eval "(require 'asdf)" --script test/unit/$1
     if [ "$?" != 0 ] ; then
         echo "Test module ${CYAN}${name} ${RED}FAILED${NO_COLOUR}">&2
         return 1
@@ -71,22 +71,8 @@ do_unittest()
 
 do_install()
 {
-    local DSTDIR=$1
-    local J_PREFIX=$DSTDIR
-    local J_BINDIR=$DSTDIR/bin
-    local J_LIBDIR=$DSTDIR/lib
-    local J_SYSCONFDIR=$DSTDIR/etc/
-    local J_DATAROOTDIR=$DSTDIR/share
-    local J_DOCDIR=$DSTDIR/doc
-    local J_MANDIR=$DSTDIR/man
-    ##
-    mkdir -p $DSTDIR
-    if [ -x ./jab ]; then
-        ./jab --self-install --prefix $J_PREFIX --bindir $J_BINDIR --libdir $J_LIBDIR --sysconfigdir $J_SYSCONFDIR --datarootdir $J_DATAROOTDIR --docdir $J_DOCDIR --mandir $J_MANDIR >/dev/null
-    else
-        echo "There is no ${CYAN}./jab${NO_COLOUR} file. Installation ${RED}failed${NO_COLOUR}">&2
-        return 1
-    fi
+    echo "${RED}Not Implemented${NO_COLOUR}">&2
+    return 1
 }
 
 do_clean()
@@ -136,6 +122,8 @@ do_build()
 
 
     echo -n "${PURPLE}Generating${NO_COLOUR} files from templates..."
+    sed "s|@SRCDIR@|$PWD/src/|" src/wrappers/jn/jn.sh.input > $PWD/bin/jn.sh
+    sed "s|@BINDIR@|$PWD/bin/|" src/wrappers/jab/make-jab.lisp.input > src/wrappers/jab/make-jab.lisp
     sed "s|@SRCDIR@|$PWD/src/|;s|@SBCL_BIN@|$SBCL_BIN|;s|@SRCDIR@|$PWD/src/|" src/wrappers/jab/jab.lisp.input > src/wrappers/jab/jab.lisp
     sed "s|@SRCDIR@|$PWD/src/|" src/jabs-loader.lisp.input > src/jabs-loader.lisp
     sed "s|@LIBDIR@|$PWD/lib/|" src/jabs-packages.lisp.input > src/jabs-packages.lisp
@@ -150,10 +138,10 @@ do_build()
     # echo
     # echo "You can operate now with ${CYAN}\`\`jab''${NO_COLOUR} utility from local directory, or do ${CYAN}\`\`./jab --self-install''${NO_COLOUR} to install it globally"
     # echo
-    echo -n "${PURPLE}Generating${NO_COLOUR} documentation..."
-    echo "# JABS Tools" > doc/Tools.md
-    grep -E '\(defun|\(defmacro|\(defvar' src/jabs-tools.lisp | grep -vE '^;' | sed 's|(defvar|var|g;s|(defmacro|macro|g;s|(defun|fun|g' | while read i; do printf "* \`$i\`\n\n"; done >> doc/Tools.md
-    echo "${PURPLE}DONE${NO_COLOUR}"
+    # echo -n "${PURPLE}Generating${NO_COLOUR} documentation..."
+    # echo "# JABS Tools" > doc/Tools.md
+    # grep -E '\(defun|\(defmacro|\(defvar' src/jabs-tools.lisp | grep -vE '^;' | sed 's|(defvar|var|g;s|(defmacro|macro|g;s|(defun|fun|g' | while read i; do printf "* \`$i\`\n\n"; done >> doc/Tools.md
+    # echo "${PURPLE}DONE${NO_COLOUR}"
 }
 
 case $1 in
@@ -189,43 +177,54 @@ case $1 in
         else
             ## unit tests
             echo ">> ${PURPLE}Running${NO_COLOUR} tests"
-            for i in $(ls test/unit/*.lisp); do
+            for i in $(ls test/unit/*.lisp 2>/dev/null); do
                 do_unittest $(basename $i) | grep -vE '^ok [0-9]*'
                 [ $? != 0 ] && echo ">> ${RED}FAILED${NO_COLOUR} step">&2 && exit 1
             done
             echo ">> ${PURPLE}DONE${NO_COLOUR} step"
             echo
-            ## install process
-            echo ">> ${PURPLE}Testing ${CYAN}installation process${NO_COLOUR}"
-            DSTDIR=`mktemp -d /tmp/.jabs.XXXXXX`
-            do_install $DSTDIR
-            ## testing if installation completed
-            J_PREFIX=$DSTDIR
-            J_BINDIR=$DSTDIR/bin
-            J_LIBDIR=$DSTDIR/lib
-            J_SYSCONFDIR=$DSTDIR/etc/
-            J_DATAROOTDIR=$DSTDIR/share
-            if [ -x $J_BINDIR/jab ] && \
-                   [ -f $J_SYSCONFDIR/jabs/alias.conf ] && [ -f $J_SYSCONFDIR/jabs/jabs.conf ] && \
-                   [ -f $J_LIBDIR/jabs/asdf/asdf.lisp ] && \
-                   [ -f $J_DATAROOTDIR/jabs/src/jabs-loader.lisp ]; then
-                echo "${CYAN}Installation process ${BLUE}PASSED${NO_COLOUR}"
-            else
-                echo "${RED}Installation incomplete. Install process failed${NO_COLOUR}">&2
-                exit 1
-            fi
+	    ## e2e tests
+	    echo ">> ${PURPLE}Running ${CYAN}End-To-End tests${NO_COLOUR}"
+	    bash $BASEDIR/test/e2e.sh >/dev/null
+	    if [ "$?" = 0 ]; then
+		echo "${CYAN}End-To-End tests ${BLUE}PASSED${NO_COLOUR}"
+	    else
+		echo "${RED}End-To-End tests FAILED${NO_COLOUR}">&2
+		exit 1
+	    fi
             echo ">> ${PURPLE}DONE${NO_COLOUR} step"
-            echo ">> ${PURPLE}Testing ${CYAN} functionality${NO_COLOUR}"
-            mkdir -p $J_PREFIX/workdir
-            cd $J_PREFIX/workdir
-            mkdir src
-            touch src/test.lisp
-            $J_BINDIR/jab --generate-buildfile -q > /dev/null
-            [ $? != 0 ] && echo ">> ${RED}FAILED${NO_COLOUR} step">&2 && exit 1
-            $J_BINDIR/jab -q && [ -d "doc" ] && [ -d "test" ]
-            [ $? != 0 ] && echo ">> ${RED}FAILED${NO_COLOUR} step">&2 && exit 1
-            echo ">> ${PURPLE}DONE${NO_COLOUR} step"
-            echo
+	    echo
+            # ## install process
+            # echo ">> ${PURPLE}Testing ${CYAN}installation process${NO_COLOUR}"
+            # DSTDIR=`mktemp -d /tmp/.jabs.XXXXXX`
+            # do_install $DSTDIR
+            # ## testing if installation completed
+            # J_PREFIX=$DSTDIR
+            # J_BINDIR=$DSTDIR/bin
+            # J_LIBDIR=$DSTDIR/lib
+            # J_SYSCONFDIR=$DSTDIR/etc/
+            # J_DATAROOTDIR=$DSTDIR/share
+            # if [ -x $J_BINDIR/jab ] && \
+            #        [ -f $J_SYSCONFDIR/jabs/alias.conf ] && [ -f $J_SYSCONFDIR/jabs/jabs.conf ] && \
+            #        [ -f $J_LIBDIR/jabs/asdf/asdf.lisp ] && \
+            #        [ -f $J_DATAROOTDIR/jabs/src/jabs-loader.lisp ]; then
+            #     echo "${CYAN}Installation process ${BLUE}PASSED${NO_COLOUR}"
+            # else
+            #     echo "${RED}Installation incomplete. Install process failed${NO_COLOUR}">&2
+            #     exit 1
+            # fi
+            # echo ">> ${PURPLE}DONE${NO_COLOUR} step"
+            # echo ">> ${PURPLE}Testing ${CYAN} functionality${NO_COLOUR}"
+            # mkdir -p $J_PREFIX/workdir
+            # cd $J_PREFIX/workdir
+            # mkdir src
+            # touch src/test.lisp
+            # $J_BINDIR/jab --generate-buildfile -q > /dev/null
+            # [ $? != 0 ] && echo ">> ${RED}FAILED${NO_COLOUR} step">&2 && exit 1
+            # $J_BINDIR/jab -q && [ -d "doc" ] && [ -d "test" ]
+            # [ $? != 0 ] && echo ">> ${RED}FAILED${NO_COLOUR} step">&2 && exit 1
+            # echo ">> ${PURPLE}DONE${NO_COLOUR} step"
+            # echo
             echo ">> ${PURPLE}Clearing${NO_COLOUR}"
             rm -rf $DSTDIR
             do_clean >/dev/null

@@ -25,20 +25,38 @@ SOFTWARE.
 (load (make-pathname :directory '(:relative "test" "unit") :name "header.lisp" :type "in"))
 
 (load (make-pathname :directory '(:relative "src") :name "jabs-tools" :type "lisp"))
+(load (make-pathname :directory '(:relative "src") :name "jabs-re" :type "lisp"))
 (load (make-pathname :directory '(:relative "src") :name "jabs-core" :type "lisp"))
-(load (make-pathname :directory '(:relative "src") :name "jabs-argparse" :type "lisp"))
 (load (make-pathname :directory '(:relative "src") :name "jabs-cli" :type "lisp"))
 
 (defpackage cli-test
-  (:use :cl :test-engine :clunit :jabs))
+  (:use :cl :test-engine :clunit :tools@jabs))
 
 (in-package :cli-test)
 
 ;; tests
-(defsuite cli-suite ()
-  )
+(defsuite cli-suite ())
+(defsuite bind-cli-suite (cli-suite))
 
-(deftest dummy-test (cli-suite)
-  )
+(bind-jabs-cli-parameter "process" #'(lambda (&rest x) (declare (ignore x)) t))
+
+(deffixture bind-cli-suite (@body)
+  (let ((tools@jabs::*jabs-cli-actions* (make-hash-table :test 'equal)))
+    (bind-jabs-cli-parameter "process" #'(lambda (&rest x) (declare (ignore x)) t))
+    @body))
+
+(deftest jabs-cli-actions-test (cli-suite)
+  (assert-equal 'hash-table (type-of tools@jabs::*jabs-cli-actions*)))
+
+(deftest bind-jabs-cli-parameter-test (cli-suite)
+  (assert-equal #'car (bind-jabs-cli-parameter "test" #'car))
+  (assert-condition type-error (bind-jabs-cli-parameter :testsymbol #'car)))
+
+(deftest process-jabs-cli-parameter-test (bind-cli-suite)
+  (assert-true (process-jabs-cli-parameter "process")) ; FIXME: some shit
+  (assert-condition type-error (process-jabs-cli-parameter :testsymbol)))
+
+;; (defun process-jabs-cli-parameter (parameter)
+
 
 (format t "~a~%" (run-suite 'cli-suite :stop-on-fail nil :report-progress nil))

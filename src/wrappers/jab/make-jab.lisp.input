@@ -33,7 +33,7 @@ SOFTWARE.
 
 #+sbcl
 (sb-ext:save-lisp-and-die
- "jab"
+ (make-pathname :directory '(:relative "@BINDIR@") :name "jab")
  :toplevel (lambda () (jab:jab) 0)
  :compression t
  :executable t)

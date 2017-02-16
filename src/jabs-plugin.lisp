@@ -26,6 +26,8 @@ SOFTWARE.
 
 (export '(defplugin
           find-plugin
+          find-plugin-type
+          register-plugin-type
           get-plugin-name
           get-plugin-type
           get-plugin-url
@@ -68,7 +70,7 @@ by many projects w/o requirement to set it as plugin in
   (check-type name keyword)
   (gethash name *jabs-plugin-type-registry*))
 
-(defun register-plugin-type (name &optional (validator t))
+(defun register-plugin-type (name &optional (validator #'(lambda (x) (declare (ignore x)) t)))
   "Register plugin type. Skip, when already registered"
   (check-type name keyword)
   (check-type validator function)
@@ -163,7 +165,7 @@ by many projects w/o requirement to set it as plugin in
 
 (defmethod share-plugin ((plugin plugin))
   "Add plugin to shared plugins"
-  (push (concatenate-symbol *jabs-universal-delimiter*
+  (push (concat-keywords-w-delimiter *jabs-universal-delimiter*
                             (get-plugin-name plugin)
                             (get-plugin-type plugin))
         *jabs-shared-plugin-names*))
@@ -245,7 +247,7 @@ by many projects w/o requirement to set it as plugin in
          (plugin-package-name
           (eval
            (append
-            `(concatenate-symbol *jabs-universal-delimiter* ,name ,type)
+            `(concat-keywords-w-delimiter *jabs-universal-delimiter* ,name ,type)
             +jabs-plugin-namespace+))))
     ;; perform load operations
     (if plugin-instance
@@ -289,9 +291,9 @@ by many projects w/o requirement to set it as plugin in
 (defmacro plugin-api-call (function-name plugin-name &body body)
   "Make API call to plugin repository"
   `(let ((plugin-package-name
-          (eval (append '(concatenate-symbol *jabs-universal-delimiter*)
+          (eval (append '(concat-keywords-w-delimiter *jabs-universal-delimiter*)
                         (mapcar #'(lambda (x) (tokeyword x))
-                                (split (car (concatenate 'list *jabs-universal-delimiter*))
+                                (split (car (tolist *jabs-universal-delimiter*))
                                        (princ-to-string ,plugin-name)))
                         +jabs-plugin-namespace+))))
      (funcall (tosymbol ,function-name plugin-package-name) ,@body)))

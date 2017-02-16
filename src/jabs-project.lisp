@@ -93,7 +93,7 @@ SOFTWARE.
   (check-type name keyword)
   (gethash name *jabs-project-registry*))
 
-(defvar *jabs-project-bound-symbols* (make-hash-table :test 'equal)
+(defvar *jabs-project-bound-symbols* (make-hash-table)
   "Define symbols, bound to project as recognizable (no syntax error)")
 
 (defun bind-project-symbol (project-symbol function)

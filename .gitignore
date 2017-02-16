@@ -2,7 +2,9 @@
 *.fasl
 *.lisp-temp
 
-jab
+bin/jab
+bin/jn.sh
+
 *~
 *#
 #*
@@ -14,3 +16,5 @@ src/wrappers/jab/jab.lisp
 tmp/*
 .markdown-preview.html
 share/plugins/repository/quicklisp/quicklisp.lisp
+
+src/wrappers/jab/make-jab.lisp
