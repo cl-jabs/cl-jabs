@@ -33,7 +33,7 @@ TARGET_BIN="${TARGET_DIR}/bin"
 
 export SBCL_BIN=$(which sbcl)
 export CCL_BIN=$(which ccl)
-export PATH=$PATH:${BASE_DIR}/bin ## add to path directory with local binaries
+export PATH=$PATH:${BASE_DIR}/bin:${TARGET_BIN} ## add to path directory with local binaries
 
 ## /set variables
 
@@ -45,7 +45,7 @@ print_help()
     [ -z ${version} ] && version=$JABS_VERSION
     echo "${PURPLE}This is a \`\`${YELLOW}promoter${NO_COLOUR}\`\` ${PURPLE}script for ${CYAN}(${RED}J${NO_COLOUR}ust ${CYAN}(${RED}A${NO_COLOUR}nother ${CYAN}(${RED}B${NO_COLOUR}uild ${CYAN}(${RED}S${NO_COLOUR}ystem${CYAN}))))${NO_COLOUR}"
     echo "${PURPLE}JABS version: ${CYAN}$version${NO_COLOUR}"
-    echo "${PURPLE}Usage:\n       ${CYAN}$0${NO_COLOUR} ${GREEN}[build|test [-l|<test_module_name>]|clean]${NO_COLOUR}"
+    echo "${PURPLE}Usage:\n       ${CYAN}$0${NO_COLOUR} ${GREEN}[prepare|build|test [-l|<test_module_name>]|clean]${NO_COLOUR}"
     echo
     echo "       -l                 : list of test modules (only for \`\`test\`\` action)"
     echo "       <test_module_name> : run only selected unit test (only for \`\`test\`\` action, see \`\`-l\`\`)"
@@ -56,7 +56,7 @@ print_help()
 
 check_sbcl()
 {
-    echo -n ">> ${PURPLE}Checking${NO_COLOUR} for ${CYAN}sbcl${NO_COLOUR} binary present in system... "
+    echo -n "${PURPLE}Checking${NO_COLOUR} for ${CYAN}sbcl${NO_COLOUR} binary present in system... "
     test -z $SBCL_BIN && echo "${CYAN}sbcl${NO_COLOUR} binary not found in system" && return 5
     test -z "$SBCL" && export SBCL="$SBCL_BIN --disable-debugger --no-sysinit --no-userinit"
     echo "${PURPLE}DONE${NO_COLOUR}"
@@ -64,7 +64,7 @@ check_sbcl()
 
 do_sbcl()
 {
-    echo -n ">> ${PURPLE}Installing${NO_COLOUR} ${CYAN}sbcl${NO_COLOUR} locally to user dire... "
+    echo -n "${PURPLE}Installing${NO_COLOUR} ${CYAN}sbcl${NO_COLOUR} locally to ${TARGET_DIR}... "
     mkdir -p ${TARGET_DIR} ${TARGET_BIN}
     [ ! $? -eq 0 ] && echo "Can not make ${TARGET_BIN} and/or ${TARGET_DIR} directories. Exiting" && return 1
     cd ${TARGET_DIR}
@@ -74,6 +74,7 @@ do_sbcl()
     cd $BASE_DIR
     export PATH=$PATH:${TARGET_BIN}
     export SBCL_BIN=$(which sbcl)
+    check_sbcl >/dev/null
     echo "${PURPLE}DONE${NO_COLOUR}"
 }
 
@@ -225,11 +226,14 @@ case $1 in
             exit 0
         fi
 
+	print_step Clearing
+	do_clean
+	print_step_done
+
+	print_step Preparing ${NO_COLOUR} environment to test
         ## check for sbcl binary
         check_sbcl || do_sbcl
-        ret=$?
-        [ $ret != 0 ] && print_step_fail && exit $ret
-        print_step_done
+	print_step_done
 
         ## building
         print_step "Running ${CYAN}build${NO_COLOUR} test"

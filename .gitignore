@@ -14,6 +14,7 @@ src/jabs-loader.lisp
 src/jabs-packages.lisp
 src/wrappers/jab/jab.lisp
 tmp/*
+target/
 .markdown-preview.html
 share/plugins/repository/quicklisp/quicklisp.lisp
 
