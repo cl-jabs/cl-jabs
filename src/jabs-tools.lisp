@@ -1226,3 +1226,29 @@ FASLs."
 						(lisp-implementation-version)
 						(machine-type)
 						(machine-version))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; External program ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defun os-exec (program args &key
+                               input if-input-does-not-exist
+                               output (if-output-exists :error)
+                               (error :output) (if-error-exists :error)
+                               environment
+                               status-hook
+                               (detach-p t))
+  (apply #'sb-ext:run-program
+         program (stringify-args args)
+         :search t
+         :env environment
+         :input input
+         :output output
+         :error error
+         :if-input-does-not-exist if-input-does-not-exist
+         :if-output-exists if-output-exists
+         :if-error-exists if-error-exists
+         :status-hook status-hook
+         :wait detach-p)
+;; os-ps
+;; os-kill
