@@ -53,12 +53,8 @@
   (defun make-sub-operation (c o dep-c dep-o)
     (declare (ignore c o dep-c dep-o)) (asdf-upgrade-error)))
 
-
 ;;;; load-sysdef
 (with-upgradability ()
-  (defun load-sysdef (name pathname)
-    (load-asd pathname :name name))
-
   (defun make-temporary-package ()
     ;; For loading a .asd file, we don't make a temporary package anymore,
     ;; but use ASDF-USER. I'd like to have this function do this,
