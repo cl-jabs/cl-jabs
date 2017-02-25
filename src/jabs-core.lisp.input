@@ -31,8 +31,7 @@ SOFTWARE.
 
 (defconstant +jabs-run-directory+ (os-pwd))
 
-;; (defvar *jabs-core-directory* (parse-namestring "@DATADIR@"))
-;; ;; local direcotry names:
+;; local direcotry names:
 (defvar *jabs-local-share-directory* (make-pathname :directory '(:relative "share")))
 (defvar *jabs-local-config-directory* (make-pathname :directory '(:relative "etc")))
 (defvar *jabs-local-lib-directory* (make-pathname :directory '(:relative "lib")))

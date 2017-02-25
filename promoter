@@ -27,6 +27,7 @@ CCL_URL=
 BASE_DIR=$(dirname $(readlink -n -f $0))
 TARGET_DIR="${BASE_DIR}/target"
 TARGET_BIN="${TARGET_DIR}/bin"
+ARGV=$@
 
 [ ! -z "$TARGET_BIN" ] && export PATH=$PATH:${TARGET_BIN}
 [ -z "$JABS_VERSION" ] && JABS_VERSION="`git rev-parse --short HEAD`-SNAPSHOT"
@@ -34,6 +35,30 @@ TARGET_BIN="${TARGET_DIR}/bin"
 export SBCL_BIN=$(which sbcl)
 export CCL_BIN=$(which ccl)
 export PATH=$PATH:${BASE_DIR}/bin:${TARGET_BIN} ## add to path directory with local binaries
+
+get_argv_argument ()
+{
+    argument=`echo $1 | sed 's/\-/\\\-/g'`
+    echo $ARGV | grep -oE "${argument}=[a-z,A-Z,0-9,/,:]*" | cut -d'=' -f2 | tr '\n' '/'
+}
+
+export I_PREFIX=`get_argv_argument --prefix`
+[ -z ${I_PREFIX} ] && export I_PREFIX=/usr/local/
+
+export I_BINDIR=`get_argv_argument --bindir`
+[ -Z ${I_BINDIR} ] && export I_BINDIR=${I_PREFIX}bin/
+
+export I_DATAROOTDIR=`get_argv_argument --sharedir`
+[ -z ${I_DATAROOTDIR} ] && export I_DATAROOTDIR=${I_PREFIX}share/jabs/
+
+export I_SRCDIR=`get_argv_argument --srcdir`
+[ -z ${I_SRCDIR} ] && export I_SRCDIR=${I_DATAROOTDIR}src/
+
+export I_LIBDIR=`get_argv_argument --libdir`
+[ -z ${I_LIBDIR} ] && export I_LIBDIR=${I_PREFIX}lib/jabs/
+
+export I_SYSCONFIGDIR=`get_argv_argument --sysconfigdir`
+[ -z ${I_SYSCONFIGDIR} ] && export I_SYSCONFIGDIR=${I_PREFIX}etc/jabs/
 
 ## /set variables
 
@@ -92,10 +117,52 @@ do_unittest()
     echo "Test module ${CYAN}${name} ${BLUE}PASSED${NO_COLOUR}"
 }
 
+
 do_install()
 {
-    echo "${RED}Not Implemented${NO_COLOUR}">&2
-    return 1
+    ## Generate files with correct pathnames
+    do_generate $I_BINDIR $I_SRCDIR $I_SYSCONFIGDIR $I_DATAROOTDIR $I_LIBDIR
+    ## making destination direcotories
+    mkdir -p $I_BINDIR $I_SRCDIR $I_SYSCONFIGDIR $I_DATAROOTDIR $I_LIBDIR
+
+    ## copying files to destination direcotories
+    # sources
+    for i in `find src/ -type f -name '*.lisp'`; do
+        dst=$I_SRCDIR/`dirname $i | sed 's/^src//g'`
+        mkdir -p $dst
+        cp $i $dst
+    done
+    # sysconfig
+    cp etc/* $I_SYSCONFIGDIR
+    # shared files
+    for i in `find share/bouts/ -type f | grep -vE 'README|TODO'`; do
+        dst=$I_DATAROOTDIR/`dirname $i | sed 's/^share//g'`
+        mkdir -p $dst
+        cp $i $dst
+    done
+    for i in `find share/rounds/ -type f | grep -vE 'README|TODO'`; do
+        dst=$I_DATAROOTDIR/`dirname $i | sed 's/^share//g'`
+        mkdir -p $dst
+        cp $i $dst
+    done
+    for i in `find share/hits/ -type f | grep -vE 'README|TODO'`; do
+        dst=$I_DATAROOTDIR/`dirname $i | sed 's/^share//g'`
+        mkdir -p $dst
+        cp $i $dst
+    done
+        for i in `find share/skeletons/ -type f | grep -vE 'README|TODO'`; do
+        dst=$I_DATAROOTDIR/`dirname $i | sed 's/^share//g'`
+        mkdir -p $dst
+        cp $i $dst
+    done
+    for i in `find share/plugins/ -type f | grep -vE 'README|TODO'`; do
+        dst=$I_DATAROOTDIR/`dirname $i | sed 's/^share//g'`
+        mkdir -p $dst
+        cp $i $dst
+    done
+    # binary
+    do_build_wrappers
+    cp bin/* $I_BINDIR
 }
 
 do_clean()
@@ -124,6 +191,37 @@ do_clean()
     echo -n "${PURPLE}Clearing${NO_COLOUR} git submodules state... "
     rm -rf lib/*
     git submodule update --init --recursive>/dev/null 2>/dev/null
+    echo "${PURPLE}DONE${NO_COLOUR}"
+}
+
+
+do_generate() # $PWD/bin/ $PWD/src/ $PWD/etc/ $PWD/share/ $PWD/lib/
+{
+    bindir=$1 # $PWD/bin/
+    srcdir=$2 # $PWD/src/
+    sysconfigdir=$3 # $PWD/etc/
+    datarootdir=$4 # $PWD/share/
+    libdir=$5 # $PWD/lib/
+
+    echo -n "${PURPLE}Generating${NO_COLOUR} files from templates... "
+
+    # SRCDIR BINDIR SBCL_BIN DATADIR LIBDIR DATAROOTDIR SYSCONFDIR
+
+    sed "s|@SRCDIR@|$srcdir|" src/wrappers/jn/jn.sh.input > $PWD/bin/jn.sh && chmod a+x $PWD/bin/jn.sh
+    sed "s|@BINDIR@|$bindir|;s|@SRCDIR@|$srcdir|" src/wrappers/jab/make-jab.lisp.input > src/wrappers/jab/make-jab.lisp
+    sed "s|@SRCDIR@|$srcdir|;s|@SBCL_BIN@|$SBCL_BIN|" src/wrappers/jab/jab.lisp.input > src/wrappers/jab/jab.lisp
+    sed "s|@SRCDIR@|$srcdir|" src/jabs-loader.lisp.input > src/jabs-loader.lisp
+    sed "s|@SRCDIR@|$srcdir|;s|@LIBDIR@|$libdir|;s|@DATAROOTDIR@|$datarootdir|;s|@SYSCONFIGDIR@|$sysconfigdir|;s|@JABS_VERSION@|$JABS_VERSION|" src/jabs-core.lisp.input > src/jabs-core.lisp
+
+    echo "${PURPLE}DONE${NO_COLOUR}"
+}
+
+do_build_wrappers ()
+{
+    echo -n "${PURPLE}Building${NO_COLOUR} wrappers... "
+    $SBCL --load ./src/wrappers/jab/make-jab.lisp >/dev/null
+    ret=$?
+    [ $ret != 0 ] && echo "${PURPLE}Build${NO_COLOUR} ${RED}FAILED${NO_COLOUR}">&2 && exit $ret
     echo "${PURPLE}DONE${NO_COLOUR}"
 }
 
@@ -171,20 +269,8 @@ do_build()
     fi
     echo "${PURPLE}DONE${NO_COLOUR}"
 
-    echo -n "${PURPLE}Generating${NO_COLOUR} files from templates... "
-    sed "s|@SRCDIR@|$PWD/src/|" src/wrappers/jn/jn.sh.input > $PWD/bin/jn.sh
-    sed "s|@BINDIR@|$PWD/bin/|" src/wrappers/jab/make-jab.lisp.input > src/wrappers/jab/make-jab.lisp
-    sed "s|@SRCDIR@|$PWD/src/|;s|@SBCL_BIN@|$SBCL_BIN|;s|@SRCDIR@|$PWD/src/|" src/wrappers/jab/jab.lisp.input > src/wrappers/jab/jab.lisp
-    sed "s|@SRCDIR@|$PWD/src/|" src/jabs-loader.lisp.input > src/jabs-loader.lisp
-    sed "s|@LIBDIR@|$PWD/lib/|" src/jabs-packages.lisp.input > src/jabs-packages.lisp
-    sed "s|@DATADIR@|$PWD/|;s|@SRCDIR@|$PWD/src/|;s|@LIBDIR@|$PWD/lib/|;s|@DATAROOTDIR@|$PWD/share/|;s|@SYSCONFIGDIR@|$PWD/etc/|;s|@JABS_VERSION@|$JABS_VERSION|" src/jabs-core.lisp.input > src/jabs-core.lisp
-    echo "${PURPLE}DONE${NO_COLOUR}"
-
-    echo -n "${PURPLE}Building${NO_COLOUR} wrappers... "
-    $SBCL --load ./src/wrappers/jab/make-jab.lisp >/dev/null
-    ret=$?
-    [ $ret != 0 ] && echo "${PURPLE}Build${NO_COLOUR} ${RED}FAILED${NO_COLOUR}">&2 && exit $ret
-    echo "${PURPLE}DONE${NO_COLOUR}"
+    do_generate $PWD/bin/ $PWD/src/ $PWD/etc/ $PWD/share/ $PWD/lib/
+    do_build_wrappers
     # echo
     # echo "You can operate now with ${CYAN}\`\`jab''${NO_COLOUR} utility from local directory, or do ${CYAN}\`\`./jab --self-install''${NO_COLOUR} to install it globally"
     # echo
@@ -329,9 +415,9 @@ case $1 in
         [ $ret != 0 ] && echo ">> ${RED}FAILED${NO_COLOUR} step">&2 && exit $ret
         print_step_done
 
-        print_step "${PURPLE}Building${NO_COLOUR} JABS"
-        do_build
-        print_step_done
+        # print_step "${PURPLE}Building${NO_COLOUR} JABS"
+        # do_build
+        # print_step_done
 
         print_step "${PURPLE}Installing${NO_COLOUR} JABS"
         do_install $@
