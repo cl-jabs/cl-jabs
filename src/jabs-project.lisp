@@ -150,15 +150,12 @@ SOFTWARE.
       (when (gethash name *jabs-project-registry*)
         (jlog:wrn "Project ``~a'' already registered. Overriding" name))
       (setf (gethash name *jabs-project-registry*) project)
-	    ;; run *define-project-hook*
-      (when *define-project-hook*
-        (let ((*jabs-current-project* project))
-          (dolist (run (reverse *define-project-hook*))
-            (apply run (list project)))))
-	    ;; return
+      (let ((*jabs-current-project* project))
+	(run-hook *define-project-hook* project))
+      ;; return
       (jlog:info "Project ``~a'' registered" name)
-	    t
-	    )))
+      t
+      )))
 
 (defmacro defproject (name &body options)
   "Register project to jabs-project-registry"
@@ -176,11 +173,8 @@ SOFTWARE.
   (jlog:note "[ Launching project ``~a'' ]" (get-project-name project))
   (let ((*jabs-current-project* project))
     ;; pre-run hook
-    (when *pre-run-project-hook*
-      (jlog:dbg "Running project ``~a'' pre-hooks" (get-project-name project))
-      (dolist (run (reverse *pre-run-project-hook*))
-        (let ((*jabs-current-project* project))
-          (funcall run project))))
+    (let ((*jabs-current-project* project))
+      (run-hook *pre-run-project-hook* project))
     ;;
     (let ((slots
            #+sbcl(mapcar #'sb-mop:slot-definition-name (sb-mop:class-slots (class-of project)))
@@ -197,10 +191,8 @@ SOFTWARE.
           ;;
           (funcall bound-symbol maybe-bound-slot))))
     ;; post-run hook
-    (when *run-project-hook*
-      (jlog:dbg "Running project ``~a'' hooks" (get-project-name project))
-      (dolist (run (reverse *run-project-hook*))
-        (funcall run project)))
+    (let ((*jabs-current-project* project))
+      (run-hook *run-project-hook* project))
     (jlog:note "[ DONE project ``~a'' ]" (get-project-name project))))
 
 (defgeneric project-slot-value (project slot)

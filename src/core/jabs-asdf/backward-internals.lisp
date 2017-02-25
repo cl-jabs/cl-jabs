@@ -53,7 +53,6 @@
   (defun make-sub-operation (c o dep-c dep-o)
     (declare (ignore c o dep-c dep-o)) (asdf-upgrade-error)))
 
-
 ;;;; load-sysdef
 (with-upgradability ()
   (defun make-temporary-package ()
@@ -63,5 +62,8 @@
     ;; this would be a bad idea, so preserve the old behavior.
     (make-package (fresh-package-name :prefix :asdf :index 0) :use '(:cl :asdf))))
 
+(in-package asdf/interface)
 
-
+(with-upgradability ()
+  (defun load-sysdef (name pathname)
+    (load-asd pathname :name name)))

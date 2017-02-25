@@ -99,6 +99,24 @@ SOFTWARE.
            :os-pwd
            :os-getenv
            :os-realpath
+           :os-env
+           :os-exec
+           :os-kill
+           ;;
+           :mypid
+           :myuid
+           :mygid
+           :mygroup
+           :process-parent-pid
+           :convert-signal
+           :list-pids
+           :parent-pid
+           :pid-uid
+           :pid-name
+           :pid-status
+           :pid-env
+           :pid-command
+           :list-user-pids
            ;; parser
            :parse-args
            :make-argument-parser

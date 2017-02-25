@@ -40,8 +40,8 @@ SOFTWARE.
 (defmacro try (&body body)
   "Try to do something without execption returning"
   `(handler-bind ((warning #'muffle-warning))
-       (ignore-errors
-         ,@body)))
+     (ignore-errors
+       ,@body)))
 
 ;; Define "lazy" functions (from asdf), which executes during call,
 ;; but not inline
@@ -50,9 +50,9 @@ SOFTWARE.
        `(defmacro ,def* (name formals &rest rest)
           `(progn
              #+(or ecl (and gcl (not gcl-pre2.7))) (fmakunbound ',name)
-             #-gcl ; gcl 2.7.0 notinline functions lose secondary return values :-(
+             #-gcl                      ; gcl 2.7.0 notinline functions lose secondary return values :-(
              ,(when (and #+ecl (symbolp name)) ; fails for setf functions on ecl
-                `(declaim (notinline ,name)))
+                    `(declaim (notinline ,name)))
              (,',def ,name ,formals ,@rest)))))
   (defdef defgeneric* defgeneric)
   (defdef defmethod* defgeneric)
@@ -86,26 +86,26 @@ SOFTWARE.
               #+clozure 'ccl::*stderr*
               #+(or cmu scl) 'system:*stderr*
               #+(or clasp ecl) 'ext::+process-error-output+
-               #+sbcl *error-output* ;; 'sb-sys:*stderr* ;; TODO: not woerking
+              #+sbcl *error-output* ;; 'sb-sys:*stderr* ;; TODO: not woerking
               '*error-output*)))
 
   ;; Run them now. In image.lisp, we'll register them to be run at image restart.
 (setup-stdin) (setup-stdout) (setup-stderr)
 
 (defun flatten (list)
-     (cond ((null list) nil)
-     ((atom (car list))
-      (cons (car list) (flatten (cdr list))))
-     (t (append (flatten (car list)) (flatten (cdr list))))))
+  (cond ((null list) nil)
+        ((atom (car list))
+         (cons (car list) (flatten (cdr list))))
+        (t (append (flatten (car list)) (flatten (cdr list))))))
 
 (defun terminate (&optional (status 0))
   (when (not (eq status 0))
     (format *error-output* "KNOCKED OUT!~%"))
-  #+sbcl (sb-ext:exit :code status) ; SBCL
-  #+ccl ( ccl:quit status) ; Clozure CL
-  #+clisp ( ext:quit status) ; GNU CLISP
-  #+cmu ( unix:unix-exit status) ; CMUCL
-  #+abcl ( ext:quit :status status) ; Armed Bear CL
+  #+sbcl (sb-ext:exit :code status)      ; SBCL
+  #+ccl ( ccl:quit status)               ; Clozure CL
+  #+clisp ( ext:quit status)             ; GNU CLISP
+  #+cmu ( unix:unix-exit status)         ; CMUCL
+  #+abcl ( ext:quit :status status)      ; Armed Bear CL
   #+allegro ( excl:exit status :quiet t) ; Allegro CL
   #-(or sbcl cmu clisp abcl allegro ecl ccl)(cl-user::quit))
 
@@ -136,7 +136,7 @@ SOFTWARE.
                ((stringp stuff)
                 stuff)
                (t
-		(princ-to-string stuff)))))
+                (princ-to-string stuff)))))
 
     (if downcase
         (string-downcase string)
@@ -145,7 +145,7 @@ SOFTWARE.
 (defun tosymbol (symbol &optional (package :keyword))
   (when (not (null symbol)) ;; don`t make symbol from NIL
     (if (and (stringp symbol) (string-equal "" symbol))
-	nil
+        nil
         (intern (string-upcase (princ-to-string symbol)) package))))
 
 (defun tokeyword (symbol)
@@ -193,7 +193,7 @@ SOFTWARE.
           nil)))
     (if (not (null argnumber))
         (nth argnumber argv)
-      argv)))
+        argv)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Alexandria
@@ -258,9 +258,9 @@ copy is returned by default."
 a directory, PATHSPEC otherwise.  It is irrelevant whether file or
 directory designated by PATHSPEC does actually exist."
   (and
-    (not (component-present-p (pathname-name pathspec)))
-    (not (component-present-p (pathname-type pathspec)))
-    pathspec))
+   (not (component-present-p (pathname-name pathspec)))
+   (not (component-present-p (pathname-type pathspec)))
+   pathspec))
 
 (defun pathname-as-directory (pathspec)
   "Converts the non-wild pathname designator PATHSPEC to directory
@@ -291,6 +291,14 @@ form."
                             :defaults pathname)))
           (t pathname))))
 
+(defun file-pathname-p (pathspec)
+  "Returns T if PATHSPEC \(a pathname designator) does not designate
+a directory, PATHSPEC otherwise.  It is irrelevant whether file or
+directory designated by PATHSPEC does actually exist."
+  (and
+   (component-present-p (pathname-name pathspec))
+   pathspec))
+
 (defun directory-wildcard (dirname)
   "Returns a wild pathname designator that designates all files within
 the directory named by the non-wild pathname designator DIRNAME."
@@ -298,8 +306,8 @@ the directory named by the non-wild pathname designator DIRNAME."
     (jlog:crit "Can only make wildcard directories from non-wildcard directories."))
   (make-pathname :name #-:cormanlisp :wild #+:cormanlisp "*"
                  :type #-(or :clisp :cormanlisp) :wild
-                       #+:clisp nil
-                       #+:cormanlisp "*"
+                 #+:clisp nil
+                 #+:cormanlisp "*"
                  :defaults (pathname-as-directory dirname)))
 
 #+:clisp
@@ -730,7 +738,7 @@ keywords explicitly."
           #+clozure (setf (ccl:current-directory) x)
           #+(or cmu scl) (unix:unix-chdir (ext:unix-namestring x))
           #+cormanlisp (unless (zerop (win32::_chdir (namestring x)))
-                         (jlog:crit "Could not set current directory to ~A" x))
+                         (jlog:crit "Could not set current directory to ``~A''" x))
           #+(or clasp ecl) (ext:chdir x)
           #+gcl (system:chdir x)
           #+lispworks (hcl:change-directory x)
@@ -757,7 +765,7 @@ and NIL NAME, TYPE and VERSION components"
                (append
                 (if (atom dir) (list dir) dir)
                 (list-files-recursively (car list-dir) (cdr list-dir))))
-           (list dir)))
+             (list dir)))
         (t
          (if (directory-pathname-p dir)
              (let ((list-dir (list-directory dir)))
@@ -765,7 +773,7 @@ and NIL NAME, TYPE and VERSION components"
                        (append
                         (list-files-recursively (car list-dir) (cdr list-dir))
                         (list-files-recursively (car files) (cdr files)))))
-           (cons dir (list-files-recursively (car files) (cdr files)))))))
+             (cons dir (list-files-recursively (car files) (cdr files)))))))
 
 (defun find-by-name (name list)
   (cond ((null list) nil)
@@ -785,7 +793,6 @@ and NIL NAME, TYPE and VERSION components"
          (cons (car list) (find-directories (cdr list))))
         (t (find-directories (cdr list)))))
 
-
 (defun merge-n-directories (&rest dirs)
   (cond ((not (null (cdr dirs)))
          (merge-pathnames
@@ -796,6 +803,91 @@ and NIL NAME, TYPE and VERSION components"
         (t "")))
 
 ;;;; FS functions
+
+;;;; Stat section
+(defun os-stat (pathname)
+  (check-type pathname (or string pathname))
+  #+sbcl(sb-posix:stat pathname)
+  #-sbcl(jlog:crit "This lisp implementation is not supported by ``os-stat''"))
+
+(defun os-stat-atime (pathname)
+  (let ((stat (os-stat pathname)))
+    (when stat
+      #+sbcl(sb-posix:stat-atime stat)
+      #-sbcl(jlog:crit "This lisp implementation is not supported by ``os-stat-atime''")
+      )))
+
+(defun os-stat-ctime (pathname)
+  (let ((stat (os-stat pathname)))
+    (when stat
+      #+sbcl(sb-posix:stat-ctime stat)
+      #-sbcl(jlog:crit "This lisp implementation is not supported by ``os-stat-ctime''")
+      )))
+
+(defun os-stat-dev (pathname)
+  (let ((stat (os-stat pathname)))
+    (when stat
+      #+sbcl(sb-posix:stat-dev stat)
+      #-sbcl(jlog:crit "This lisp implementation is not supported by ``os-stat-dev''")
+      )))
+
+(defun os-stat-gid (pathname)
+  (let ((stat (os-stat pathname)))
+    (when stat
+      #+sbcl(sb-posix:stat-gid stat)
+      #-sbcl(jlog:crit "This lisp implementation is not supported by ``os-stat-gid''")
+      )))
+
+(defun os-stat-ino (pathname)
+  (let ((stat (os-stat pathname)))
+    (when stat
+      #+sbcl(sb-posix:stat-ino stat)
+      #-sbcl(jlog:crit "This lisp implementation is not supported by ``os-stat-ino''")
+      )))
+
+(defun os-stat-mode (pathname)
+  (let ((stat (os-stat pathname)))
+    (when stat
+      #+sbcl(sb-posix:stat-mode stat)
+      #-sbcl(jlog:crit "This lisp implementation is not supported by ``os-stat-mode''")
+      )))
+
+(defun os-stat-mtime (pathname)
+  (let ((stat (os-stat pathname)))
+    (when stat
+      #+sbcl(sb-posix:stat-mtime stat)
+      #-sbcl(jlog:crit "This lisp implementation is not supported by ``os-stat-mtime''")
+      )))
+
+(defun os-stat-nlink (pathname)
+  (let ((stat (os-stat pathname)))
+    (when stat
+      #+sbcl(sb-posix:stat-nlink stat)
+      #-sbcl(jlog:crit "This lisp implementation is not supported by ``os-stat-nlink''")
+      )))
+
+(defun os-stat-rdev (pathname)
+  (let ((stat (os-stat pathname)))
+    (when stat
+      #+sbcl(sb-posix:stat-rdev stat)
+      #-sbcl(jlog:crit "This lisp implementation is not supported by ``os-stat-rdev''")
+      )))
+
+(defun os-stat-size (pathname)
+  (let ((stat (os-stat pathname)))
+    (when stat
+      #+sbcl(sb-posix:stat-size stat)
+      #-sbcl(jlog:crit "This lisp implementation is not supported by ``os-stat-size''")
+      )))
+
+(defun os-stat-uid (pathname)
+  (let ((stat (os-stat pathname)))
+    (when stat
+      #+sbcl(sb-posix:stat-uid stat)
+      #-sbcl(jlog:crit "This lisp implementation is not supported by ``os-stat-uid''")
+      )))
+;;;; /Stat section
+
 (defun os-find (path &key name extension (type t))
   (check-type path (or string pathname))
   (check-type name (or null string))
@@ -814,27 +906,27 @@ and NIL NAME, TYPE and VERSION components"
 (defun cat-to-string (file)
   "cat Concatenate and print (display) the content of files"
   (flet ((slurp-stream (stream)
-    (with-output-to-string (out)
-      (let ((seq (make-array 1024 :element-type 'character
-                             :adjustable t
-                             :fill-pointer 1024)))
-        (loop
-           (setf (fill-pointer seq) (read-sequence seq stream))
-           (when (zerop (fill-pointer seq))
-             (return))
-           (write-sequence seq out))))))
+           (with-output-to-string (out)
+             (let ((seq (make-array 1024 :element-type 'character
+                                    :adjustable t
+                                    :fill-pointer 1024)))
+               (loop
+                  (setf (fill-pointer seq) (read-sequence seq stream))
+                  (when (zerop (fill-pointer seq))
+                    (return))
+                  (write-sequence seq out))))))
     (with-open-file (s file :direction :input)
       (slurp-stream s))))
 
 (defun cat-to-list (file &aux result list (rt (copy-readtable)))
   "Converts file content to list of sequences"
   (with-open-file (stream file)
-      (let ((*readtable* rt))
-        (loop for item = (read stream nil stream)
-           until (eq item stream)
-           when item do (push item list)
-           finally (when list (push (nreverse list) result)))
-        (car (nreverse result)))))
+    (let ((*readtable* rt))
+      (loop for item = (read stream nil stream)
+         until (eq item stream)
+         when item do (push item list)
+         finally (when list (push (nreverse list) result)))
+      (car (nreverse result)))))
 
 (defun os-cat (file &optional (output-type :string)) ; types: :string :list
   "cat Concatenate and print (display) the content of files"
@@ -869,7 +961,6 @@ and NIL NAME, TYPE and VERSION components"
     (jlog:wrn "Directory ``~a'' already exists. Skipping" dirname)))
 
 (defmacro os-mv (from to)
-  ;; (copy-move-files from to :recursive t :force t :copy-move :move))
   (rename-file from to))
 
 (defun os-cp (from to &key recursive force)
@@ -880,9 +971,9 @@ and NIL NAME, TYPE and VERSION components"
         (from-file (if (directory-exists-p (pathname-as-directory from))
                        (pathname-as-directory from) from)))
     (flet ((copy-file-local (from to force)
-                            (jlog:dbg "Copying from ``~a'' to ``~a''" from to)
-                            (when (not (directory-pathname-p from))
-                              (copy-file from to :overwrite force))))
+             (jlog:dbg "Copying from ``~a'' to ``~a''" from to)
+             (when (not (directory-pathname-p from))
+               (copy-file from to :overwrite force))))
       ;;
       (cond ((and (directory-pathname-p from-file) (not recursive))
              (jlog:err "Skipping copying. ``~a'' is directory and copying is not recursive" from-file))
@@ -910,72 +1001,30 @@ and NIL NAME, TYPE and VERSION components"
 
 (defun os-rm (pathname &key recursive)
   (cond ((not (file-exists-p pathname))
-         (jlog:err "File ~a does not exists. Skipping" pathname))
+         (jlog:err "File ``~a'' does not exists. Skipping" pathname))
         ((and (directory-pathname-p pathname) (not recursive))
-         (jlog:err "Skipping removing. ~a is directory and removing is not recursive" pathname))
+         (jlog:err "Skipping removing. ``~a'' is directory and removing is not recursive" pathname))
         ((and (not (directory-pathname-p pathname))
               (not (directory-exists-p (pathname-as-directory pathname)))) ;; checking for incorrect filename input ;)
-         (jlog:info "Removing file ~a" pathname)
+         (jlog:info "Removing file ``~a''" pathname)
          (delete-file pathname))
-        (t (jlog:info "Removing directory ~a" pathname)
+        (t (jlog:info "Removing directory ``~a''" pathname)
            (delete-directory-and-files pathname :if-does-not-exist nil))))
 
 (defun os-touch (pathname)
   (if (directory-pathname-p pathname)
-      (jlog:err "Can not touch. ~a is a directory" pathname)
-    (close (open pathname :direction :probe :if-does-not-exist :create))))
+      (jlog:err "Can not touch. ``~a'' is a directory" pathname)
+      (close (open pathname :direction :probe :if-does-not-exist :create))))
 
+(defun os-ln (oldpath newpath &optional (symbolic-p nil))
+  #+sbcl(if symbolic-p
+            (sb-posix:symlink oldpath newpath)
+            (sb-posix:link oldpath newpath))
+  #-sbcl(jlog:crit "This lisp implementation is not supported by ``os-ln''"))
 
-(defun os-getuid ()
-  #+sbcl (sb-posix:getuid)
-  #-sbcl (jlog:crit "GETUID not implemented"))
-
-;;   (defun os-unix-p ()
-;;     "Is the underlying operating system some Unix variant?"
-;;     (or #+abcl (featurep :unix)
-;;         #+(and (not abcl) (or unix cygwin darwin)) t))
-
-;;   (defun os-macosx-p ()
-;;     "Is the underlying operating system MacOS X?"
-;;     ;; OS-MACOSX is not mutually exclusive with OS-UNIX,
-;;     ;; in fact the former implies the latter.
-;;     (or
-;;      #+allegro (featurep :macosx)
-;;      #+clisp (featurep :macos)
-;;      (featurep :darwin)))
-
-;;   (defun os-windows-p ()
-;;     "Is the underlying operating system Microsoft Windows?"
-;;     (or #+abcl (featurep :windows)
-;;         #+(and (not (or abcl unix cygwin darwin)) (or win32 windows mswindows mingw32 mingw64)) t))
-
-;;   (defun os-genera-p ()
-;;     "Is the underlying operating system Genera (running on a Symbolics Lisp Machine)?"
-;;     (or #+genera t))
-
-;;   (defun os-oldmac-p ()
-;;     "Is the underlying operating system an (emulated?) MacOS 9 or earlier?"
-;;     (or #+mcl t))
-
-;;   (defun detect-os ()
-;;     "Detects the current operating system. Only needs be run at compile-time,
-;; except on ABCL where it might change between FASL compilation and runtime."
-;;     (loop* :with o
-;;            :for (feature . detect) :in '((:os-unix . os-unix-p) (:os-macosx . os-macosx-p)
-;;                                          (:os-windows . os-windows-p)
-;;                                          (:genera . os-genera-p) (:os-oldmac . os-oldmac-p))
-;;            :when (and (or (not o) (eq feature :os-macosx)) (funcall detect))
-;;            :do (setf o feature) (pushnew feature *features*)
-;;            :else :do (setf *features* (remove feature *features*))
-;;            :finally
-;;            (return (or o (jlog:crit "Congratulations for trying ASDF on an operating system~%~
-;; that is neither Unix, nor Windows, nor Genera, nor even old MacOS.~%Now you port it.")))))
-
-;;   (defmacro os-cond (&rest clauses)
-;;     #+abcl `(cond ,@clauses)
-;;     #-abcl (loop* :for (test . body) :in clauses :when (eval test) :return `(progn ,@body)))
-
-;;   (detect-os))
+(defun os-ls (pathname)
+  (check-type pathname (or string pathname))
+  (list-directory (pathname-as-directory pathname)))
 
 ;;;; Environment variables: getting them, and parsing them.
 (defun os-getenv (x)
@@ -995,47 +1044,47 @@ use getenvp to return NIL in such a case."
          (buffer1 (ct:malloc (1+ needed-size))))
     (prog1 (if (zerop (win:getenvironmentvariable cname buffer1 needed-size))
                nil
-             (ct:c-string-to-lisp-string buffer1))
+               (ct:c-string-to-lisp-string buffer1))
       (ct:free buffer)
       (ct:free buffer1)))
   #+gcl (system:getenv x)
   #+genera nil
   #+lispworks (lispworks:environment-variable x)
   #+mcl (ccl:with-cstrs ((name x))
-                        (let ((value (_getenv name)))
-                          (unless (ccl:%null-ptr-p value)
-                            (ccl:%get-cstring value))))
+          (let ((value (_getenv name)))
+            (unless (ccl:%null-ptr-p value)
+              (ccl:%get-cstring value))))
   #+mkcl (#.(or (find-symbol* 'getenv :si nil) (find-symbol* 'getenv :mk-ext nil)) x)
   #+sbcl (sb-ext:posix-getenv x)
   #-(or abcl allegro clasp clisp clozure cmu cormanlisp ecl gcl genera lispworks mcl mkcl sbcl scl xcl)
   (jlog:crit "~S is not supported on your implementation" 'getenv))
 
-  (defsetf os-getenv (x) (val)
-    "Set an environment variable."
-      (declare (ignorable x val))
-    #+allegro `(setf (sys:getenv ,x) ,val)
-    #+clisp `(system::setenv ,x ,val)
-    #+clozure `(ccl:setenv ,x ,val)
-    #+cmu `(unix:unix-setenv ,x ,val 1)
-    #+ecl `(ext:setenv ,x ,val)
-    #+lispworks `(hcl:setenv ,x ,val)
-    #+mkcl `(mkcl:setenv ,x ,val)
-    #+sbcl `(progn (require :sb-posix) (symbol-call :sb-posix :setenv ,x ,val 1))
-    #-(or allegro clisp clozure cmu ecl lispworks mkcl sbcl)
-    '(jlog:crit "~S ~S is not supported on your implementation" 'setf 'getenv))
+(defsetf os-getenv (x) (val)
+  "Set an environment variable."
+  (declare (ignorable x val))
+  #+allegro `(setf (sys:getenv ,x) ,val)
+  #+clisp `(system::setenv ,x ,val)
+  #+clozure `(ccl:setenv ,x ,val)
+  #+cmu `(unix:unix-setenv ,x ,val 1)
+  #+ecl `(ext:setenv ,x ,val)
+  #+lispworks `(hcl:setenv ,x ,val)
+  #+mkcl `(mkcl:setenv ,x ,val)
+  #+sbcl `(progn (require :sb-posix) (symbol-call :sb-posix :setenv ,x ,val 1))
+  #-(or allegro clisp clozure cmu ecl lispworks mkcl sbcl)
+  '(jlog:crit "~S ~S is not supported on your implementation" 'setf 'getenv))
 
-  (defun os-getenvp (x)
-    "Predicate that is true if the named variable is present in the libc environment,
+(defun os-getenvp (x)
+  "Predicate that is true if the named variable is present in the libc environment,
 then returning the non-empty string value of the variable"
-    (let ((g (os-getenv x))) (and (not (emptyp g)) g)))
+  (let ((g (os-getenv x))) (and (not (emptyp g)) g)))
 
 (defun implementation-type ()
   "The type of Lisp implementation used, as a short UIOP-standardized keyword"
   (first-feature
    '(:abcl (:acl :allegro) (:ccl :clozure) :clisp (:corman :cormanlisp)
-           (:cmu :cmucl :cmu) :clasp :ecl :gcl
-           (:lwpe :lispworks-personal-edition) (:lw :lispworks)
-           :mcl :mkcl :sbcl :scl (:smbx :symbolics) :xcl)))
+     (:cmu :cmucl :cmu) :clasp :ecl :gcl
+     (:lwpe :lispworks-personal-edition) (:lw :lispworks)
+     :mcl :mkcl :sbcl :scl (:smbx :symbolics) :xcl)))
 
 (defvar *implementation-type* (implementation-type)
   "The type of Lisp implementation used, as a short UIOP-standardized keyword")
@@ -1056,9 +1105,9 @@ then returning the non-empty string value of the variable"
   "The operating system of the current host"
   (first-feature
    '(:cygwin
-     (:win :windows :mswindows :win32 :mingw32)        ;; try cygwin first!
-     (:linux :linux :linux-target)                     ;; for GCL at least, must appear before :bsd
-     (:macosx :macosx :darwin :darwin-target :apple)   ; also before :bsd
+     (:win :windows :mswindows :win32 :mingw32)      ;; try cygwin first!
+     (:linux :linux :linux-target)                   ;; for GCL at least, must appear before :bsd
+     (:macosx :macosx :darwin :darwin-target :apple) ; also before :bsd
      (:solaris :solaris :sunos)
      (:bsd :bsd :freebsd :netbsd :openbsd :dragonfly)
      :unix
@@ -1084,7 +1133,7 @@ suitable for use as a directory name to segregate Lisp FASLs, C dynamic librarie
         ((atom (car list))
          (if (equal (car name) (car list))
              (subtree (cdr name) (cadr list))
-           (subtree name (cdr list))))
+             (subtree name (cdr list))))
         (t ;; (car list) is list
          (subtree name (cdr list)))))
 
@@ -1098,9 +1147,9 @@ suitable for use as a directory name to segregate Lisp FASLs, C dynamic librarie
              (if (listp (cadr list))
                  (cons (car list) (append (list (replace-subtree (cdr name) (cadr list) sublist))
                                           (replace-subtree (or (cdr name) t) (cddr list) sublist)))
-               (cons (car list) (append (replace-subtree (cdr name) (cadr list) sublist)
-                                        (replace-subtree (or (cdr name) t) (cddr list) sublist))))
-           (cons (car list) (replace-subtree name (cdr list) sublist))))
+                 (cons (car list) (append (replace-subtree (cdr name) (cadr list) sublist)
+                                          (replace-subtree (or (cdr name) t) (cddr list) sublist))))
+             (cons (car list) (replace-subtree name (cdr list) sublist))))
         (t ;; (car list) is list
          (cons (car list) (replace-subtree name (cdr list) sublist)))))
 
@@ -1114,9 +1163,9 @@ suitable for use as a directory name to segregate Lisp FASLs, C dynamic librarie
              (if (listp (cadr list))
                  (cons (car list) (append (list (add-subtree (cdr name) (cadr list) sublist))
                                           (add-subtree (or (cdr name) t) (cddr list) sublist)))
-               (cons (car list) (append (add-subtree (cdr name) (cadr list) sublist)
-                                        (add-subtree (or (cdr name) t) (cddr list) sublist))))
-           (cons (car list) (add-subtree name (cdr list) sublist))))
+                 (cons (car list) (append (add-subtree (cdr name) (cadr list) sublist)
+                                          (add-subtree (or (cdr name) t) (cddr list) sublist))))
+             (cons (car list) (add-subtree name (cdr list) sublist))))
         (t ;; (car list) is list
          (cons (car list) (add-subtree name (cdr list) sublist)))))
 
@@ -1140,7 +1189,6 @@ suitable for use as a directory name to segregate Lisp FASLs, C dynamic librarie
 				 (car files))
 				(t (find-file-from-list-by-filename name (cdr files)))))
 
-
 ;; (defun get-namespace-subtree-level (&rest name)
 ;;   (let ((subtree (apply #'namespace-subtree name))
 ;;         (collection))
@@ -1150,7 +1198,6 @@ suitable for use as a directory name to segregate Lisp FASLs, C dynamic librarie
 ;;            (dolist (v subtree)
 ;;              (push (car v) collection)))
 ;;           collection)))
-
 
 ;; (defun set-namespace-subtree (space tree)
 ;;   (cond ((null space) t)
@@ -1226,3 +1273,163 @@ FASLs."
 						(lisp-implementation-version)
 						(machine-type)
 						(machine-version))))
+
+(defun os-env ()
+  #+sbcl(sb-ext:posix-environ)
+  #-sbcl(jlog:crit "os-env note implemented for this lisp")
+  )
+
+(defun os-exec (program args &key
+                               (input t)
+                               if-input-does-not-exist
+                               (output t)
+                               (if-output-exists :error)
+                               (error *error-output*)
+                               (if-error-exists :error)
+                               ;; (environment (os-env))
+                               status-hook
+                               (detach-p t)
+                               (directory (os-pwd))
+                               ;; (collect-output-to-string-p nil)
+                               )
+  #+sbcl(sb-ext:run-program
+         program args ;; (stringify-args args)
+         ;; :env environment
+         :wait (not detach-p)
+         :search t
+         :input input
+         :output output
+         :error error
+         :if-input-does-not-exist if-input-does-not-exist
+         :if-output-exists if-output-exists
+         :if-error-exists if-error-exists
+         :status-hook status-hook
+         :directory directory
+         )
+  #-sbcl(jlog:crit "Can not exec ``~a''. Lisp implementation is not supported" program)
+  )
+
+;; os-ps
+
+(defun mypid ()
+  #+sbcl(sb-posix:getpid)
+  #-sbcl(jlog:crit "This lisp implementation is not supported by mypid")
+  )
+
+(defun myuid ()
+  #+sbcl(sb-posix:getuid)
+  #-sbcl(jlog:crit "This lisp implementation is not supported by myuid")
+  )
+
+(defun mygid ()
+  #+sbcl(sb-posix:getgid)
+  #-sbcl(jlog:crit "This lisp implementation is not supported by mygid")
+  )
+
+(defun mygroup ()
+  #+sbcl(sb-posix:getgrgid (mygid))
+  #-sbcl(jlog:crit "This lisp implementation is not supported by mygroup")
+  )
+
+(defun process-parent-pid (pid)
+  #+sbcl(sb-posix:getpgid pid)
+  #-sbcl(jlog:crit "This lisp implementation is not supported by process-parent-pid")
+  )
+
+;;;; KILL
+(defvar *signal-mapping*
+  '((:hangup . 1)
+    (:interrupt . 2)
+    (:quit . 3)
+    (:illegal-instruction . 4)
+    (:breakpoint-trap . 5)
+    (:abort . 6)
+    (:emulation-trap . 7)
+    (:arithmetic-exception . 8)
+    (:killed . 9)
+    (:bus-error . 10)
+    (:segmentation-fault . 11)
+    (:bad-system-call . 12)
+    (:broken-pipe . 13)
+    (:alarm-clock . 14)
+    (:terminate . 15)
+    ))
+
+(defun convert-signal (signal)
+  (check-type signal keyword)
+  (or
+   (cdr (assoc signal *signal-mapping*))
+   (jlog:crit "Symbolic signal ``~A'' not supported." signal)))
+
+(defun os-kill (process &optional (signal 15))
+  (check-type signal (or keyword integer))
+  #+sbcl(let ((real-signal (if (keywordp signal) (convert-signal signal) signal))
+              (real-pid (if (sb-ext:process-p process) (sb-ext:process-pid process) process)))
+          (sb-posix:kill real-pid real-signal))
+  #-sbcl(jlog:crit "This lisp implementation is not supported by ``os-kill''")
+  )
+
+;;;; ps section
+#+linux(defvar +linux-proc-directory+ (make-pathname :directory '(:absolute "proc")))
+
+(defun list-pids ()
+  #+linux(remove nil
+                 (mapcar #'(lambda (v)
+                             (when (and
+                                    (directory-pathname-p v)
+                                    (file-exists-p (merge-pathnames (make-pathname :name "stat")  v))
+                                    (not (directory-exists-p
+                                          (merge-pathnames (make-pathname :name "stat")  v)))
+                                    (file-pathname-p (merge-pathnames (make-pathname :name "stat")  v)))
+                               (parse-integer (tostr (pathname-name (pathname-as-file v))))))
+                         (list-directory +linux-proc-directory+)))
+  #-linux(jlog:crit "This OS is not supported by ``pid-list''"))
+
+#+linux(defun linux-proc-file (pid filename)
+              (check-type pid integer)
+              (check-type filename (or string pathname))
+              (file-exists-p
+               (merge-pathnames
+                (parse-namestring filename)
+                (merge-pathnames
+                 (make-pathname :directory (list :relative (tostr pid)))
+                 +linux-proc-directory+))))
+
+#+linux(defun linux-pid-stat (pid)
+         (check-type pid integer)
+         (let ((file (linux-proc-file pid "stat")))
+           (when file
+             (cat-to-list file))))
+
+(defun parent-pid (pid)
+  #+linux(nth 3 (linux-pid-stat pid))
+  #-linux(jlog:crit "This OS is not supported by ``parent-pid''"))
+
+(defun pid-uid (pid)
+  #+linux(car (cat-to-list (linux-proc-file pid "loginuid")))
+  #-linux(jlog:crit "This OS is not supported by ``pid-uid''"))
+
+(defun pid-name (pid)
+  #+linux(nth 1 (linux-pid-stat pid))
+  #-linux(jlog:crit "This OS is not supported by ``pid-name''"))
+
+(defun pid-status (pid)
+  #+linux(nth 2 (linux-pid-stat pid))
+  #-linux(jlog:crit "This OS is not supported by ``pid-status''"))
+
+(defun pid-env (pid)
+  #+linux(split #\  (cat-to-string (linux-proc-file pid "environ")))
+  #-linux(jlog:crit "This OS is not supported by ``pid-env''"))
+
+(defun pid-command (pid)
+  #+linux(split #\  (cat-to-string (linux-proc-file pid "cmdline")))
+  #-linux(jlog:crit "This OS is not supported by ``pid-cmdline''"))
+
+(defun list-user-pids (&optional (uid (myuid)))
+  (remove nil
+          (mapcar
+           #'(lambda (x)
+               (when (equal uid
+                            (car (cat-to-list (linux-proc-file (parse-integer x) "loginuid"))))
+                 (parse-integer x)))
+                  (list-pids))))

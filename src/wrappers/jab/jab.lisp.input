@@ -296,11 +296,13 @@ SOFTWARE.
     (when *bouts* (push-compiler-argument "bouts" (end-cut "," (concat-list "," (reverse *bouts*)))))
     )
   ;;
-  (sb-ext:run-program "@SBCL_BIN@" (append
-                                    '("--noinform" "--no-sysinit" "--no-userinit" "--non-interactive"
-                                      "--load" "@SRCDIR@/jabs-loader.lisp")
-                                    *compiler-arguments*)
-                      :input *standard-input*
-                      :output *standard-output*
-                      :error *error-output*
-                      :directory (os-pwd)))
+  (os-exec "@SBCL_BIN@" (append
+                         '("--noinform" "--no-sysinit" "--no-userinit" "--non-interactive"
+                           "--load" "@SRCDIR@/jabs-loader.lisp")
+                         *compiler-arguments*)
+           :input *standard-input*
+           :output *standard-output*
+           :error *error-output*
+           :directory (os-pwd)
+           :detach-p nil
+           ))
