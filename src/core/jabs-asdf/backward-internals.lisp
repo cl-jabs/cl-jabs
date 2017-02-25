@@ -56,6 +56,9 @@
 
 ;;;; load-sysdef
 (with-upgradability ()
+  (defun load-sysdef (name pathname)
+    (load-asd pathname :name name))
+
   (defun make-temporary-package ()
     ;; For loading a .asd file, we don't make a temporary package anymore,
     ;; but use ASDF-USER. I'd like to have this function do this,
@@ -63,5 +66,8 @@
     ;; this would be a bad idea, so preserve the old behavior.
     (make-package (fresh-package-name :prefix :asdf :index 0) :use '(:cl :asdf))))
 
+(in-package asdf/interface)
 
-
+(with-upgradability ()
+  (defun load-sysdef (name pathname)
+    (load-asd pathname :name name)))
