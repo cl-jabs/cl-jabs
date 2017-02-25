@@ -13,4 +13,4 @@ before_script:
 
 script:
   - /bin/sh ./promoter test
-  - /bin/sh ./promoter install --prefix=./targetdir
+  - /bin/sh ./promoter install --prefix=/tmp/fixturepath/
