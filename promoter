@@ -120,22 +120,6 @@ do_unittest()
 
 do_install()
 {
-
-    # ARGV=$@
-    # # echo "${RED}Not Implemented${NO_COLOUR}">&2
-    # # return 1
-    # prefix=`get_argv_argument --prefix`
-    # [ -z ${prefix} ] && prefix=/usr/local
-
-    # bindir=`get_argv_argument --bindir`
-    # [ -z ${bindir} ] && bindir=$prefix/bin
-
-    # sharedir=`get_argv_argument --sharedir`
-    # [ -z ${sharedir} ] && sharedir=$prefix/share/jabs
-
-    # srcdir=`get_argv_argument --srcdir`
-    # [ -z ${srcdir} ] && srcdir=$prefix/lib/jabs
-
     ## Generate files with correct pathnames
     do_generate $I_BINDIR $I_SRCDIR $I_SYSCONFIGDIR $I_DATAROOTDIR $I_LIBDIR
 
