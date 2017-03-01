@@ -59,7 +59,8 @@ SOFTWARE.
     suite-file)
   )
 
-(defun run-single-test ()
+(defun run-single-test (&rest rest)
+  (declare (ignore rest))
   (format t "~%``run-single-test`` IS NOT IMPLEMENTED~%~%"))
 
 (defun run-single-suite (name)
