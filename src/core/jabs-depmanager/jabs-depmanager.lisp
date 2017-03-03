@@ -41,7 +41,7 @@ SOFTWARE.
     ;; TODO: check for functions format (args and their types)
     (dolist (v '(:initialize-repository :find-repository-project
                  :load-repository-project :remove-repository-project
-                 :repository-project-version :update-project-repository-projects
+                 :repository-project-version :update-repository-project-list
                  :repository-project-dependencies))
       (when (not (try (symbol-function (tosymbol v plugin-package-name))))
         (setf checker nil)))
