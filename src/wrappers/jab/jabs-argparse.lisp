@@ -131,12 +131,7 @@ SOFTWARE.
                       (jlog:dbg "``~a'' is direct argument. Skipping" (car arguments))
                       (store-args (cdr arguments)))
                      ((not (member (car arguments) arg-keys :test 'equal))
-                      ;; recognize it as hit for JAB!
-                      #+jab(if (not (begin-scan "-" (car arguments)))
-			       (store-args (cdr arguments))
-                               (jlog:crit "Unrecognized argument: ``~a''" (car arguments)))
-                      #-jab(jlog:crit "Unrecognized argument: ``~a''" (car arguments))
-                      )
+                      (jlog:crit "Unrecognized argument: ``~a''" (car arguments)))
                      (t
                       (let ((action (arg-action (get-argument-from-k-a-list (car arguments) k-a-list)))
                             (argtype (arg-type (get-argument-from-k-a-list (car arguments) k-a-list)))
