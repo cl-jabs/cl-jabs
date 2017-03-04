@@ -169,23 +169,6 @@ SOFTWARE.
         (jlog:dbg "Pushing compiler argument ``~a''" v)
         (push v *compiler-arguments*)))))
 
-;; (defun process-bouts-and-rounds ()
-;;   "Process direct compiler arguments"
-;;   (dolist (v (argv))
-;;     (when (and (not (null v)) (not (begin-scan "-D" v)) (not (begin-scan "-" v)))
-;;       (let ((round
-;;              (if (scan *jabs-universal-delimiter* v)
-;; 		 (car (split (car (concatenate 'list *jabs-universal-delimiter*)) v))
-;; 	         v))
-;;             (bout
-;;              (when (scan *jabs-universal-delimiter* v)
-;; 	       (cadr (split (car (concatenate 'list *jabs-universal-delimiter*)) v)))))
-;;         ;;
-;;         (jlog:dbg "Processing (round)@bout ``~a''" v)
-;;         (push round *rounds*)
-;;         (push bout *bouts*)
-;;         ))))
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (bind-argv "-q"
@@ -291,8 +274,6 @@ SOFTWARE.
 (defun jab ()
   ;; process direct arguments initially. Will be at the end of argument list
   (process-direct-jabs-arguments)
-  ;; process bouts and rounds
-  ;; (process-bouts-and-rounds)
   ;; process regular arguments
   (dolist (arg '("q" "v" "d" "V" "VV" "h" "p" "t" "x" "autogen-project" "serve" "dev-serve"))
     (process-argv arg))
