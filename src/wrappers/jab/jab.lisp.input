@@ -27,12 +27,6 @@ SOFTWARE.
          (make-pathname :name v :type "lisp")
          (parse-namestring "@SRCDIR@"))))
 
-;; (load (merge-pathnames (make-pathname :name "jabs-logger" :type "lisp") (parse-namestring "@SRCDIR@")))
-;; (load (merge-pathnames (make-pathname :name "jabs-logger" :type "lisp") (parse-namestring "@SRCDIR@")))
-;; (load (merge-pathnames (make-pathname :name "jabs-re" :type "lisp") (parse-namestring "@SRCDIR@")))
-;; (load (merge-pathnames (make-pathname :name "jabs-tools" :type "lisp") (parse-namestring "@SRCDIR@")))
-;; (load (merge-pathnames (make-pathname :name "jabs-core" :type "lisp") (parse-namestring "@SRCDIR@")))
-
 (defpackage jab
   (:use :cl :tools@jabs :jabs :re@jabs)
   (:export :jab))
@@ -68,6 +62,7 @@ SOFTWARE.
  -h, --help-jabs              Show this help
  --help                       Show compiler toplevel help
  -p                           Use custom project, instead of default
+ -t                           Use custom build target. Target has format: `round@bout`
  -x                           Load addition plugins (eXtend)
  -d, --debug                  Enable debugger
  -q, --quiet                  Quiet mode
@@ -174,22 +169,22 @@ SOFTWARE.
         (jlog:dbg "Pushing compiler argument ``~a''" v)
         (push v *compiler-arguments*)))))
 
-(defun process-bouts-and-rounds ()
-  "Process direct compiler arguments"
-  (dolist (v (argv))
-    (when (and (not (null v)) (not (begin-scan "-D" v)) (not (begin-scan "-" v)))
-      (let ((round
-             (if (scan *jabs-universal-delimiter* v)
-		 (car (split (car (concatenate 'list *jabs-universal-delimiter*)) v))
-	         v))
-            (bout
-             (when (scan *jabs-universal-delimiter* v)
-	       (cadr (split (car (concatenate 'list *jabs-universal-delimiter*)) v)))))
-        ;;
-        (jlog:dbg "Processing (round@)bout ``~a''" v)
-        (push round *rounds*)
-        (push bout *bouts*)
-        ))))
+;; (defun process-bouts-and-rounds ()
+;;   "Process direct compiler arguments"
+;;   (dolist (v (argv))
+;;     (when (and (not (null v)) (not (begin-scan "-D" v)) (not (begin-scan "-" v)))
+;;       (let ((round
+;;              (if (scan *jabs-universal-delimiter* v)
+;; 		 (car (split (car (concatenate 'list *jabs-universal-delimiter*)) v))
+;; 	         v))
+;;             (bout
+;;              (when (scan *jabs-universal-delimiter* v)
+;; 	       (cadr (split (car (concatenate 'list *jabs-universal-delimiter*)) v)))))
+;;         ;;
+;;         (jlog:dbg "Processing (round)@bout ``~a''" v)
+;;         (push round *rounds*)
+;;         (push bout *bouts*)
+;;         ))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -235,8 +230,23 @@ SOFTWARE.
 
 (bind-argv "-p"
            #'(lambda (x)
-               (setf *project* x)
-               (push-compiler-argument "project" x)))
+               (setf *project* (car x))
+               (push-compiler-argument "project" (car x))) :action :append)
+
+(bind-argv "-t"
+           #'(lambda (v)
+               ;; (jlog:crit "~a" (car v))
+               (let ((round
+                      (if (scan *jabs-universal-delimiter* (car v))
+                          (car (split (car (concatenate 'list *jabs-universal-delimiter*)) (car v)))
+                          (car v)))
+                     (bout
+                      (when (scan *jabs-universal-delimiter* (car v))
+                        (cadr (split (car (concatenate 'list *jabs-universal-delimiter*)) (car v))))))
+                 ;;
+                 (jlog:dbg "Processing target ``~a''" (car v))
+                 (push round *rounds*)
+                 (push bout *bouts*))) :action :append)
 
 (bind-argv "-x"
            #'(lambda (x)
@@ -267,7 +277,6 @@ SOFTWARE.
                )
            :action :store-t)
 
-
 (bind-argv "--dev-serve"
            #'(lambda (x)
                (declare (ignore x))
@@ -283,9 +292,9 @@ SOFTWARE.
   ;; process direct arguments initially. Will be at the end of argument list
   (process-direct-jabs-arguments)
   ;; process bouts and rounds
-  (process-bouts-and-rounds)
+  ;; (process-bouts-and-rounds)
   ;; process regular arguments
-  (dolist (arg '("q" "v" "d" "V" "VV" "h" "p" "x" "autogen-project" "serve" "dev-serve"))
+  (dolist (arg '("q" "v" "d" "V" "VV" "h" "p" "t" "x" "autogen-project" "serve" "dev-serve"))
     (process-argv arg))
   ;; form bouts and rounds
   (labels ((concat-list (delimiter &optional list)
@@ -296,6 +305,7 @@ SOFTWARE.
     (when *bouts* (push-compiler-argument "bouts" (end-cut "," (concat-list "," (reverse *bouts*)))))
     )
   ;;
+  (format t "~%~%~%~a~%~%~%" *compiler-arguments*)
   (os-exec "@SBCL_BIN@" (append
                          '("--noinform" "--no-sysinit" "--no-userinit" "--non-interactive"
                            "--load" "@SRCDIR@/jabs-loader.lisp")
