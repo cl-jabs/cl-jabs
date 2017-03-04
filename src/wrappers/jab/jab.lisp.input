@@ -286,7 +286,6 @@ SOFTWARE.
     (when *bouts* (push-compiler-argument "bouts" (end-cut "," (concat-list "," (reverse *bouts*)))))
     )
   ;;
-  (format t "~%~%~%~a~%~%~%" *compiler-arguments*)
   (os-exec "@SBCL_BIN@" (append
                          '("--noinform" "--no-sysinit" "--no-userinit" "--non-interactive"
                            "--load" "@SRCDIR@/jabs-loader.lisp")
