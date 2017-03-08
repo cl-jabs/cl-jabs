@@ -1292,6 +1292,7 @@ FASLs."
                                (directory (os-pwd))
                                ;; (collect-output-to-string-p nil)
                                )
+  (jlog:dbg "Executing binary ``~a'' with arguments ``~a''" program args)
   #+sbcl(sb-ext:run-program
          program args ;; (stringify-args args)
          ;; :env environment
