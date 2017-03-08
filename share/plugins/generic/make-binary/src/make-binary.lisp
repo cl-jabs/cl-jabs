@@ -43,8 +43,9 @@ SOFTWARE.
             (let* ((toplevel-list (re@jabs:split #\: *make-binary-toplevel-function*))
                    (package (or (find-package (tools@jabs:tokeyword (first toplevel-list))) *package*))
                    (function (find-symbol (string-upcase (car (last toplevel-list))) package))
-                   (name (or *make-binary-name*
-                             (tostr (get-project-name *jabs-current-project*) t)))
+                   (name (tostr
+			  (or *make-binary-name*
+			      (get-project-name *jabs-current-project*) t)))
                    (folder (or
                             (try (pathname-as-directory
 				  (parse-namestring
