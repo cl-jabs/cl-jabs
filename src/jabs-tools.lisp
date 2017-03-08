@@ -1280,9 +1280,9 @@ FASLs."
   )
 
 (defun os-exec (program args &key
-                               (input t)
+                               (input *standard-input*)
                                if-input-does-not-exist
-                               (output t)
+                               (output *standard-output*)
                                (if-output-exists :error)
                                (error *error-output*)
                                (if-error-exists :error)
