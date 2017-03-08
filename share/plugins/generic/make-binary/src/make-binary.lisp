@@ -46,10 +46,10 @@ SOFTWARE.
                    (name (or *make-binary-name*
                              (tostr (get-project-name *jabs-current-project*) t)))
                    (folder (or
-                            (pathname-as-directory
-                             (parse-namestring
-                              (get-skeleton-bin
-                               (find-project-skeleton *jabs-current-project*))))
+                            (try (pathname-as-directory
+				  (parse-namestring
+				   (get-skeleton-bin
+				    (find-project-skeleton *jabs-current-project*)))))
                             "")))
               ;;
               (when (not function)
