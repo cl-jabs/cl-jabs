@@ -9,7 +9,7 @@
 ```
 
 ## WAT
-JABS is a maven-like build system for common lisp. Code is under active development and still not ready for production usage. Please, find some documentation [here](https://github.com/cl-jabs/cl-jabs/wiki).
+JABS is a project of modern build system for common lisp. Code is under active development and still not ready for production usage. Please, find some documentation [here](https://github.com/cl-jabs/cl-jabs/wiki).
 
 ## [Quickstart](https://github.com/cl-jabs/cl-jabs/wiki/quickstart)
 
