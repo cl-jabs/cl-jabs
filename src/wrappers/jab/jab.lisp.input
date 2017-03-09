@@ -240,7 +240,7 @@ SOFTWARE.
            #'(lambda (x)
                (declare (ignore x))
                (push-compiler-argument "bouts" "tmpl-mkproject")
-               (push-compiler-argument "plugins" "tmpl@generic")
+               (push-compiler-argument "system-plugins" "tmpl@generic")
                )
            :action :store-t)
 
@@ -248,7 +248,7 @@ SOFTWARE.
            #'(lambda (x)
                (declare (ignore x))
                (push-compiler-argument "bouts" "tmpl-mkplugin")
-               (push-compiler-argument "plugins" "tmpl@generic")
+               (push-compiler-argument "system-plugins" "tmpl@generic")
                )
            :action :store-t)
 

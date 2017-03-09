@@ -73,6 +73,8 @@ SOFTWARE.
   (load-build-jab (os-pwd)))
 
 ;; run post-init-hook
+(format t "~%~%~%~a~%~%~%" *post-init-hook*)
+
 (run-hook *post-init-hook*)
 
 ;; run project

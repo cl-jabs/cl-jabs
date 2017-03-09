@@ -59,8 +59,6 @@ SOFTWARE.
   :skeleton ~a
   ;; :bout :~a
   ;; :plugins ~a
-  ;;;; Additional sources
-  ;; :sources ((make-pathname :directory '(:relative \"another-lib\")))
   ;;;; Dependencies
   ;; :depends-on (:alexandria :cl-ppcre)
   ;; :pathname \"some/relative/path\" ;; relative name to your plugin root directory (where skeleton located)
