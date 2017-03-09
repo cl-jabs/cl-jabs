@@ -17,10 +17,6 @@ JABS is a project of modern build system for common lisp. Code is under active d
 
 * sbcl >= 1.0.52
 
-## TODO
-
-[TODO.md](./TODO.md)
-
 ## License & Autor
 | | |
 |:--|---|
