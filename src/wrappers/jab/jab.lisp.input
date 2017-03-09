@@ -75,7 +75,7 @@ SOFTWARE.
                                 -Dtmpl-name=<project_name>
                                 -Dtmpl-version=<number>
                                 -Dtmpl-skeleton=<skeleton_name>
- --autogen-project            Same as ``--autogen-project'', but generates plugin
+ --autogen-plugin             Same as ``--autogen-project'', but generates plugin
                               available options:
                                 -Dtmpl-name=<plugin_name>
                                 -Dtmpl-version=<number>
