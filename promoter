@@ -356,8 +356,8 @@ case $1 in
 		print_step_done
 	    fi
 
-	    ## e2e tests
-            failed_e2e_tests=no
+	    ## integration tests
+            failed_integration_tests=no
 	    print_step "${PURPLE}Running ${CYAN}integration${NO_COLOUR} tests"
             for i in `ls $BASE_DIR/test/*.sh`; do
 		echo -n "${PURPLE}Running${NO_COLOUR} test module ${CYAN}$(basename $i .sh)${NO_COLOUR}... "
@@ -367,10 +367,10 @@ case $1 in
 	        else
                     echo "$RES"
 		    echo "${RED}FAILED${NO_COLOUR}"
-                    failed_e2e_tests=yes
+                    failed_integration_tests=yes
 	        fi
             done
-            if [ $failed_e2e_tests = "yes" ]; then
+            if [ $failed_integration_tests = "yes" ]; then
 		print_step_fail # && exit 1 ## do not fail if unit tests failed now
 	    else
                 print_step_done
