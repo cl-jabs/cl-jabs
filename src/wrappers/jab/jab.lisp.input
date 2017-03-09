@@ -70,10 +70,17 @@ SOFTWARE.
  -V, --version                Show JAB wrapper version
  -VV,                         Show JABS version
 
- --autogen-project            Generates simple buildfile (``build.jab'' by default. See -f option)
+ --autogen-project            Generates simple buildfile
                               available options:
+                                -Dtmpl-name=<project_name>
                                 -Dtmpl-version=<number>
                                 -Dtmpl-skeleton=<skeleton_name>
+ --autogen-project            Same as ``--autogen-project'', but generates plugin
+                              available options:
+                                -Dtmpl-name=<plugin_name>
+                                -Dtmpl-version=<number>
+                                -Dtmpl-skeleton=<skeleton_name>
+                                -Dtmpl-plugin-type=<plugin_type>
  --serve                      Load project and dependencies, than start swank server to work with app interactively
  --dev-serve                  Load project, dependencies and tests, than start swank server to work with app interactively
  -f, --buildfile=FILENAME     Use selected buildfile instead of default
@@ -244,6 +251,7 @@ SOFTWARE.
                )
            :action :store-t)
 
+
 (bind-argv "--autogen-plugin"
            #'(lambda (x)
                (declare (ignore x))
@@ -275,7 +283,7 @@ SOFTWARE.
   ;; process direct arguments initially. Will be at the end of argument list
   (process-direct-jabs-arguments)
   ;; process regular arguments
-  (dolist (arg '("q" "v" "d" "V" "VV" "h" "p" "t" "x" "autogen-project" "serve" "dev-serve"))
+  (dolist (arg '("q" "v" "d" "V" "VV" "h" "p" "t" "x" "autogen-project" "autogen-plugin" "serve" "dev-serve"))
     (process-argv arg))
   ;; form bouts and rounds
   (labels ((concat-list (delimiter &optional list)

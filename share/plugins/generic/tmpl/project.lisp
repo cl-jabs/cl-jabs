@@ -22,16 +22,21 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 |#
-(in-package :jabs)
-
-;; fix, if some project selected
-(setf *jabs-project-to-run* nil)
 
 (in-package #:tmpl@generic@plugin@jabs)
 
-(defvar *tmpl-skeleton-name* :default)
+
+(defvar *tmpl-name* (car (reverse (pathname-directory (os-pwd)))))
 (defvar *tmpl-author* :default)
 (defvar *tmpl-version* "0.0.1")
+(defvar *tmpl-skeleton-name* :default)
+
+(bind-jabs-cli-parameter
+ "tmpl-name"
+ #'(lambda (&rest x)
+     (setf *tmpl-name* (car x))))
+
+(process-jabs-cli-parameter "tmpl-name")
 
 (defbout :tmpl-mkproject :tmpl-mkproject)
 (defround :tmpl-mkproject :tmpl-mkproject)
@@ -54,7 +59,7 @@ SOFTWARE.
 
 (in-package :~a-system)
 
-(defproject ~a
+(defproject :~a
   :name \"~a\"
   :author \"~a\"
   :version \"~a\"
@@ -74,7 +79,7 @@ SOFTWARE.
 " name name name name author version maintainer license description skeleton bout plugins components))
 
 (defhit tmpl-mkproject () ()
-        (let* ((project-name (get-project-name *jabs-current-project*))
+        (let* ((project-name *tmpl-name*)
                (project-description (get-project-description *jabs-current-project*))
                (project-skeleton-name (car (slot-value *jabs-current-project* 'jabs::skeleton)))
                (project-components (slot-value *jabs-current-project* 'jabs::components))
@@ -121,7 +126,7 @@ SOFTWARE.
        (progn
          (load-skeleton (list *tmpl-skeleton-name*))
          ;;
-         (let* ((project-name (car (reverse (pathname-directory (os-pwd)))))
+         (let* ((project-name *tmpl-name*)
                 (project-author "John Doe <john@doe.local>")
                 (project-version *tmpl-version*)
                 (project-maintainer "John Doe <john@doe.local>")

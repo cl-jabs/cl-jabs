@@ -36,6 +36,6 @@ SOFTWARE.
        (progn
          (load-skeleton (list *tmpl-skeleton-name*))
          ;;
-         (let ((project-name (car (reverse (pathname-directory (os-pwd))))))
+         (let ((project-name *tmpl-name*))
            (setf jabs:*jabs-project-to-run* (tokeyword project-name))
            (run-project (find-project (tokeyword project-name))))))))
