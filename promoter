@@ -361,7 +361,7 @@ case $1 in
 	    print_step "${PURPLE}Running ${CYAN}integration${NO_COLOUR} tests"
             for i in `ls $BASE_DIR/test/*.sh`; do
 		echo -n "${PURPLE}Running${NO_COLOUR} test module ${CYAN}$(basename $i .sh)${NO_COLOUR}... "
-	        RES=`/bin/bash $BASE_DIR/test/${i}.sh >/dev/null 2>&1`
+	        RES=`/bin/bash ${i} >/dev/null 2>&1`
 	        if [ "$?" = 0 ]; then
 		    echo "${BLUE}PASSED${NO_COLOUR}"
 	        else
