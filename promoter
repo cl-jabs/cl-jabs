@@ -33,6 +33,12 @@ ARGV=$@
 [ -z "$JABS_VERSION" ] && JABS_VERSION="`git rev-parse --short HEAD`-SNAPSHOT"
 
 export SBCL_BIN=$(which sbcl)
+if [ -d "/usr/lib/sbcl" ]; then
+    export SBCL_LIBDIR=/usr/lib/sbcl
+else
+    export SBCL_LIBDIR=${TARGET_DIR}
+fi
+
 export CCL_BIN=$(which ccl)
 export PATH=$PATH:${BASE_DIR}/bin:${TARGET_BIN} ## add to path directory with local binaries
 
@@ -211,7 +217,7 @@ do_generate() # $PWD/bin/ $PWD/src/ $PWD/etc/ $PWD/share/ $PWD/lib/
     sed "s|@BINDIR@|$bindir|;s|@SRCDIR@|$srcdir|" src/wrappers/jab/make-jab.lisp.input > src/wrappers/jab/make-jab.lisp
     sed "s|@SRCDIR@|$srcdir|;s|@SBCL_BIN@|$SBCL_BIN|" src/wrappers/jab/jab.lisp.input > src/wrappers/jab/jab.lisp
     sed "s|@SRCDIR@|$srcdir|" src/jabs-loader.lisp.input > src/jabs-loader.lisp
-    sed "s|@SRCDIR@|$srcdir|;s|@LIBDIR@|$libdir|;s|@DATAROOTDIR@|$datarootdir|;s|@SYSCONFIGDIR@|$sysconfigdir|;s|@JABS_VERSION@|$JABS_VERSION|" src/jabs-core.lisp.input > src/jabs-core.lisp
+    sed "s|@SRCDIR@|$srcdir|;s|@LIBDIR@|$libdir|;s|@DATAROOTDIR@|$datarootdir|;s|@SYSCONFIGDIR@|$sysconfigdir|;s|@JABS_VERSION@|$JABS_VERSION|;s|@SBCL_LIBDIR@|$SBCL_LIBDIR|" src/jabs-core.lisp.input > src/jabs-core.lisp
 
     echo "${PURPLE}DONE${NO_COLOUR}"
 }

@@ -43,6 +43,7 @@ SOFTWARE.
 (defvar *jabs-lib-directory* (parse-namestring "@LIBDIR@"))
 (defvar *jabs-share-directory* (parse-namestring "@DATAROOTDIR@"))
 (defvar *jabs-config-directory* (parse-namestring "@SYSCONFIGDIR@"))
+#+sbcl(defvar *jabs-sbcl-lib-directory* (parse-namestring "@SBCL_LIBDIR@"))
 (defvar *jabs-user-directory* (merge-pathnames
                                (make-pathname :directory
                                               '(:relative ".jabs"))

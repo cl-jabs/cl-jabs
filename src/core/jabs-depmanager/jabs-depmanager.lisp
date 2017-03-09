@@ -78,7 +78,11 @@ Created for ASDF compatability"
           (os-find
            (merge-pathnames (make-pathname :directory '(:relative "lib"))
                             *jabs-lib-directory*)
-           :extension "asd"))))
+           :extension "asd")
+	  ;; include sbcl contrib systemd
+	  #+sbcl(os-find *jabs-sbcl-lib-directory* :extension "asd")
+	  ;;
+	  )))
     (dolist (file sources)
       (dolist (l (os-cat file :list))
         (when (eq (tosymbol (car l)) :defsystem)
