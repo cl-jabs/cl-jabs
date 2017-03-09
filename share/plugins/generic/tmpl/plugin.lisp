@@ -50,7 +50,7 @@ SOFTWARE.
 
 (in-package :~a-system)
 
-(defplugin ~a :~a \"~a\"
+(defplugin :~a :~a \"~a\"
   :author \"~a\"
   :maintainer \"~a\"
   :license \"~a\"
@@ -59,8 +59,6 @@ SOFTWARE.
   :skeleton ~a
   ;; :bout :~a
   ;; :plugins ~a
-  ;;;; Additional sources
-  ;; :sources ((make-pathname :directory '(:relative \"another-lib\")))
   ;;;; Dependencies
   ;; :depends-on (:alexandria :cl-ppcre)
   ;; :pathname \"some/relative/path\" ;; relative name to your plugin root directory (where skeleton located)
@@ -70,7 +68,7 @@ SOFTWARE.
 " name name name type version author maintainer license description skeleton bout plugins components))
 
 (defhit tmpl-mkplugin () ()
-        (let* ((plugin-name (get-project-name *jabs-current-project*))
+        (let* ((plugin-name *tmpl-name*)
                (plugin-description (get-project-description *jabs-current-project*))
                (plugin-skeleton-name (car (slot-value *jabs-current-project* 'jabs::skeleton)))
                (plugin-components (slot-value *jabs-current-project* 'jabs::components))
@@ -119,7 +117,7 @@ SOFTWARE.
           (jlog:note "Plugin not exists. Going on")
           (load-skeleton (list *tmpl-skeleton-name*))
           ;;
-          (let* ((plugin-name (tools@jabs:tosymbol (car (reverse (pathname-directory (os-pwd))))))
+          (let* ((plugin-name *tmpl-name*)
                  (plugin-type (tools@jabs:tosymbol *tmpl-plugin-type*))
                  (plugin-author "John Doe <john@doe.local>")
                  (plugin-version *tmpl-version*)

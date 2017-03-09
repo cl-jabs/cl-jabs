@@ -22,16 +22,21 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 |#
-(in-package :jabs)
-
-;; fix, if some project selected
-(setf *jabs-project-to-run* nil)
 
 (in-package #:tmpl@generic@plugin@jabs)
 
-(defvar *tmpl-skeleton-name* :default)
+
+(defvar *tmpl-name* (car (reverse (pathname-directory (os-pwd)))))
 (defvar *tmpl-author* :default)
 (defvar *tmpl-version* "0.0.1")
+(defvar *tmpl-skeleton-name* :default)
+
+(bind-jabs-cli-parameter
+ "tmpl-name"
+ #'(lambda (&rest x)
+     (setf *tmpl-name* (car x))))
+
+(process-jabs-cli-parameter "tmpl-name")
 
 (defbout :tmpl-mkproject :tmpl-mkproject)
 (defround :tmpl-mkproject :tmpl-mkproject)
@@ -54,7 +59,7 @@ SOFTWARE.
 
 (in-package :~a-system)
 
-(defproject ~a
+(defproject :~a
   :name \"~a\"
   :author \"~a\"
   :version \"~a\"
@@ -65,9 +70,6 @@ SOFTWARE.
   :skeleton ~a
   :bout ~a
   ;; :plugins ~a
-  ;;;; Additional sources
-  ;; :sources ((make-pathname :directory '(:relative \"another-lib\")))
-  ;; :repositories (:quicklisp) ;; define some repositories here
   ;;;; Dependencies
   ;; :depends-on (:alexandria :cl-ppcre)
   ;; :pathname \"some/relative/path\" ;; relative name to your project root directory (where skeleton located)
@@ -77,7 +79,7 @@ SOFTWARE.
 " name name name name author version maintainer license description skeleton bout plugins components))
 
 (defhit tmpl-mkproject () ()
-        (let* ((project-name (get-project-name *jabs-current-project*))
+        (let* ((project-name *tmpl-name*)
                (project-description (get-project-description *jabs-current-project*))
                (project-skeleton-name (car (slot-value *jabs-current-project* 'jabs::skeleton)))
                (project-components (slot-value *jabs-current-project* 'jabs::components))
@@ -115,53 +117,53 @@ SOFTWARE.
 
 ;; no projects to run, so run one
 (add-hook
-    *post-init-hook*
-  (lambda ()
-    (if (file-exists-p (merge-pathnames (make-pathname :name "build" :type "jab") (os-pwd)))
-	(progn
-	  (jlog:note "Project already exists. Nothing to create")
-	  (terminate 0))
-        (progn
-          (load-skeleton (list *tmpl-skeleton-name*))
-          ;;
-          (let* ((project-name (car (reverse (pathname-directory (os-pwd)))))
-                 (project-author "John Doe <john@doe.local>")
-                 (project-version *tmpl-version*)
-                 (project-maintainer "John Doe <john@doe.local>")
-                 (project-license "Public Domain")
-                 (project-description "Personal use project")
-                 (project-serial t)
-                 (project-plugins '(:quicklisp@repository))
-                 (project-skeleton (find-skeleton *tmpl-skeleton-name*))
-                 (project-bout :default)
-                 (project-src-dir
-                  (if (listp (get-skeleton-src project-skeleton))
-                      (merge-pathnames (make-pathname :directory (list :relative (car (get-skeleton-src project-skeleton)))) (os-pwd))
-                      (merge-pathnames (make-pathname :directory (list :relative (get-skeleton-src project-skeleton))) (os-pwd))))
-                 (project-components (list-directory (merge-pathnames
-                                                      project-src-dir
-                                                      (os-pwd))))
-                 (project-component-names))
-            ;; try to expand to files
-            (if project-components
-                (dolist (f project-components)
-                  (when (or (string-equal (pathname-type f) "lisp")
-                            (string-equal (pathname-type f) "cl"))
-                    (push (list :file (pathname-name f)) project-component-names)))
-                (setf project-component-names '((:file "fixture"))))
-            (eval
-             `(defproject ,(tools@jabs:tostr project-name)
-                :name ,project-name
-                :author ,project-author
-                :version ,project-version
-                :maintainer ,project-maintainer
-                :license ,project-license
-                :description ,project-description
-                :serial t
-                :skeleton (,(get-skeleton-name project-skeleton))
-                :components ,(reverse project-component-names)))
-            ;; (run-project (find-project (tools@jabs:tostr project-name)))
-            )))))
+ *post-init-hook*
+ (lambda ()
+   (if (file-exists-p (merge-pathnames (make-pathname :name "build" :type "jab") (os-pwd)))
+       (progn
+         (jlog:note "Project already exists. Nothing to create")
+         (terminate 0))
+       (progn
+         (load-skeleton (list *tmpl-skeleton-name*))
+         ;;
+         (let* ((project-name *tmpl-name*)
+                (project-author "John Doe <john@doe.local>")
+                (project-version *tmpl-version*)
+                (project-maintainer "John Doe <john@doe.local>")
+                (project-license "Public Domain")
+                (project-description "Personal use project")
+                (project-serial t)
+                (project-plugins '(:quicklisp@repository))
+                (project-skeleton (find-skeleton *tmpl-skeleton-name*))
+                (project-bout :default)
+                (project-src-dir
+                 (if (listp (get-skeleton-src project-skeleton))
+                     (merge-pathnames (make-pathname :directory (list :relative (car (get-skeleton-src project-skeleton)))) (os-pwd))
+                     (merge-pathnames (make-pathname :directory (list :relative (get-skeleton-src project-skeleton))) (os-pwd))))
+                (project-components (list-directory (merge-pathnames
+                                                     project-src-dir
+                                                     (os-pwd))))
+                (project-component-names))
+           ;; try to expand to files
+           (if project-components
+               (dolist (f project-components)
+                 (when (or (string-equal (pathname-type f) "lisp")
+                           (string-equal (pathname-type f) "cl"))
+                   (push (list :file (pathname-name f)) project-component-names)))
+               (setf project-component-names '((:file "fixture"))))
+           (eval
+            `(defproject ,(tools@jabs:tostr project-name)
+                 :name ,project-name
+                 :author ,project-author
+                 :version ,project-version
+                 :maintainer ,project-maintainer
+                 :license ,project-license
+                 :description ,project-description
+                 :serial t
+                 :skeleton (,(get-skeleton-name project-skeleton))
+                 :components ,(reverse project-component-names)))
+           ;; (run-project (find-project (tools@jabs:tostr project-name)))
+           )))))
 
 (bind-jabs-cli-parameter
  "tmpl-skeleton"
