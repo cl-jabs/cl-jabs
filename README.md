@@ -15,7 +15,7 @@ JABS is a project of modern build system for common lisp. Code is under active d
 
 ## Requirements
 
-* sbcl >= 1.0.52
+* sbcl >= 1.0.52 (only SBCL supported now)
 
 ## License & Autor
 | | |
