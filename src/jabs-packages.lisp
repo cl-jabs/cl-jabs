@@ -186,6 +186,7 @@ SOFTWARE.
            :*jabs-local-config-directory*
            :*jabs-local-lib-directory*
            :*jabs-local-src-directory*
+	   :+jabs-run-directory+
            ;;
            :tosymbol
            :add-hook
