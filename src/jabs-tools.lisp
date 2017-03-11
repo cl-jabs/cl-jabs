@@ -1279,6 +1279,43 @@ FASLs."
   #-sbcl(jlog:crit "os-env note implemented for this lisp")
   )
 
+;; os-ps
+
+(defun mypid ()
+  #+sbcl(sb-posix:getpid)
+  #-sbcl(jlog:crit "This lisp implementation is not supported by ``mypid''")
+  )
+
+(defun myuid ()
+  #+sbcl(sb-posix:getuid)
+  #-sbcl(jlog:crit "This lisp implementation is not supported by ``myuid''")
+  )
+
+(defun mygid ()
+  #+sbcl(sb-posix:getgid)
+  #-sbcl(jlog:crit "This lisp implementation is not supported by ``mygid''")
+  )
+
+(defun mygroup ()
+  #+sbcl(sb-posix:getgrgid (mygid))
+  #-sbcl(jlog:crit "This lisp implementation is not supported by ``mygroup''")
+  )
+
+(defun process-parent-pid (pid)
+  #+sbcl(sb-posix:getpgid pid)
+  #-sbcl(jlog:crit "This lisp implementation is not supported by ``process-parent-pid''")
+  )
+
+(defun process-status (process)
+  #+sbcl(sb-ext:process-status process)
+  #-sbcl(jlog:crit "This lisp implementation is not supported by ``process-status''")
+  )
+
+(defun process-exit-code (process)
+  #+sbcl(sb-ext:process-exit-code process)
+  #-sbcl(jlog:crit "This lisp implementation is not supported by ``process-exit-code''")
+  )
+
 (defun os-exec (program args &key
                                (input *standard-input*)
                                if-input-does-not-exist
@@ -1288,54 +1325,33 @@ FASLs."
                                (if-error-exists :error)
                                ;; (environment (os-env))
                                status-hook
-                               (detach-p t)
+                               detach-p
                                (directory (os-pwd))
                                ;; (collect-output-to-string-p nil)
                                )
   (jlog:dbg "Executing binary ``~a'' with arguments ``~a''" program args)
-  #+sbcl(sb-ext:run-program
-         program args ;; (stringify-args args)
-         ;; :env environment
-         :wait (not detach-p)
-         :search t
-         :input input
-         :output output
-         :error error
-         :if-input-does-not-exist if-input-does-not-exist
-         :if-output-exists if-output-exists
-         :if-error-exists if-error-exists
-         :status-hook status-hook
-         :directory directory
-         )
-  #-sbcl(jlog:crit "Can not exec ``~a''. Lisp implementation is not supported" program)
-  )
-
-;; os-ps
-
-(defun mypid ()
-  #+sbcl(sb-posix:getpid)
-  #-sbcl(jlog:crit "This lisp implementation is not supported by mypid")
-  )
-
-(defun myuid ()
-  #+sbcl(sb-posix:getuid)
-  #-sbcl(jlog:crit "This lisp implementation is not supported by myuid")
-  )
-
-(defun mygid ()
-  #+sbcl(sb-posix:getgid)
-  #-sbcl(jlog:crit "This lisp implementation is not supported by mygid")
-  )
-
-(defun mygroup ()
-  #+sbcl(sb-posix:getgrgid (mygid))
-  #-sbcl(jlog:crit "This lisp implementation is not supported by mygroup")
-  )
-
-(defun process-parent-pid (pid)
-  #+sbcl(sb-posix:getpgid pid)
-  #-sbcl(jlog:crit "This lisp implementation is not supported by process-parent-pid")
-  )
+  (let ((process-status))
+    #+sbcl(sb-ext:run-program
+	   program args ;; (stringify-args args)
+	   ;; :env environment
+	   :wait (not detach-p)
+	   :search t
+	   :input input
+	   :output output
+	   :error error
+	   :if-input-does-not-exist if-input-does-not-exist
+	   :if-output-exists if-output-exists
+	   :if-error-exists if-error-exists
+	   :status-hook #'(lambda (x)
+			    (progn
+			      (when (not detach-p)
+				(setf process-status (process-exit-code x)))
+			      (when status-hook
+				(funcall status-hook x))))
+	   :directory directory
+	   )
+    #-sbcl(jlog:crit "Can not exec ``~a''. Lisp implementation is not supported" program)
+    process-status))
 
 ;;;; KILL
 (defvar *signal-mapping*
