@@ -63,7 +63,11 @@ SOFTWARE.
 
 (defun find-bout (name)
   (check-type name keyword)
-  (gethash name *jabs-bout-registry*))
+  (gethash name *jabs-bout-registry*)
+  (let ((bout-file (find-bout-file name)))
+    (when bout-file
+      (parse-bout-from-file bout-file)
+      (gethash name *jabs-bout-registry*))))
 
 (defgeneric run-bout (project name &optional round)
   )
