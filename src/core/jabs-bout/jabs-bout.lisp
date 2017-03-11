@@ -122,7 +122,8 @@ SOFTWARE.
        (when (tosymbol bout)
 	 (pushnew (tosymbol bout) *jabs-bouts-to-run*)))))
 
-(process-jabs-cli-parameter "bouts")
+(add-hook *post-init-hook* #'(lambda ()
+			       (process-jabs-cli-parameter "bouts")))
 
 ;; extend 'defproject' definition with 'bout' parameter
 (bind-project-symbol

@@ -157,5 +157,7 @@ SOFTWARE.
      (dolist (bout (reverse x))
        (pushnew (tosymbol bout) *jabs-rounds-to-run*))))
 
-(process-jabs-cli-parameter "rounds")
+(add-hook *post-init-hook* #'(lambda ()
+			       (process-jabs-cli-parameter "rounds")))
+
 ;; TODO: realise hit list view for projects
