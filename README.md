@@ -13,6 +13,56 @@ JABS is a project of modern build system for common lisp. Code is under active d
 
 ## [Quickstart](https://github.com/cl-jabs/cl-jabs/wiki/quickstart)
 
+### Install
+1. Fetch from repo:
+ ```bash
+ git clone https://github.com/cl-jabs/cl-jabs.git
+ ```
+
+2. Bootstrap:
+ ```bash
+ cd cl-jabs && ./promoter build
+```
+
+3. Install system wild (optionally):
+ ```bash
+ sudo ./promoter install [--prefix=/usr/local]
+ ```
+    **NOTE:** `jab` command is your friend
+
+### Generate and prepare project
+
+So, We are ready to go
+
+1. Create your project and cd there:
+ ```bash
+ mkdir /path/to/your/source/code/my_project_name
+ # ...
+ # create files, write a code, use git, 
+ # do something, like you're developer
+ # ...
+ cd /path/to/your/source/code/my_project_name
+ ```
+
+2. Create project buildfile template
+ ```bash
+ jab --autogen-project
+ ```
+
+3. Open generated `build.jab` file and edit it at your own customs (fill free to use asdf:defsystem syntax)
+
+### Run project
+
+1. Go go go!
+
+ ```bash
+ jab
+ ```
+
+### See Also
+
+[Build and deployment process](Build-and-deployment-process)
+
 ## Requirements
 
 * sbcl >= 1.0.52 (only SBCL supported now)
