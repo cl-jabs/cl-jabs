@@ -61,13 +61,36 @@ SOFTWARE.
     (jlog:wrn "Bout, named ``~a'' already exists. Overriding" name))
   (setf (gethash name *jabs-bout-registry*) rounds))
 
+(defun find-bout-file (name)
+  (check-type name keyword)
+  (let ((bout-name (string-downcase (princ-to-string name)))
+        (bout-dirs))
+    (dolist (dir *jabs-bout-directories*)
+      (dolist (file (directory
+                     (merge-pathnames
+                      (make-pathname :name bout-name :type *jabs-bout-template-type*)
+                      dir)))
+        (when (not (null file))
+          (push file bout-dirs))))
+    (car bout-dirs)))
+
+(defun parse-bout-from-file (file)
+  "Read bout file and parse it as bout"
+  (check-type file (or string pathname))
+  (jlog:dbg "Processing bout file: ``~a''" file)
+  (let* ((exp (car (os-cat file :list)))
+         (name (car exp))
+         (rounds (cdr exp)))
+    (apply 'register-bout (cons name rounds))))
+
 (defun find-bout (name)
   (check-type name keyword)
-  (gethash name *jabs-bout-registry*)
-  (let ((bout-file (find-bout-file name)))
-    (when bout-file
-      (parse-bout-from-file bout-file)
-      (gethash name *jabs-bout-registry*))))
+  (or
+   (gethash name *jabs-bout-registry*)
+   (let ((bout-file (find-bout-file name)))
+     (when bout-file
+       (parse-bout-from-file bout-file)
+       (gethash name *jabs-bout-registry*)))))
 
 (defgeneric run-bout (project name &optional round)
   )
@@ -95,28 +118,6 @@ SOFTWARE.
 
 (defmacro defbout (name &body rounds)
   `(register-bout ,(tosymbol name) ,@rounds))
-
-(defun parse-bout-from-file (file)
-  "Read bout file and parse it as bout"
-  (check-type file (or string pathname))
-  (jlog:dbg "Processing bout file: ``~a''" file)
-  (let* ((exp (car (os-cat file :list)))
-         (name (car exp))
-         (rounds (cdr exp)))
-    (apply 'register-bout (cons name rounds))))
-
-(defun find-bout-file (name)
-  (check-type name keyword)
-  (let ((bout-name (string-downcase (princ-to-string name)))
-        (bout-dirs))
-    (dolist (dir *jabs-bout-directories*)
-      (dolist (file (directory
-                     (merge-pathnames
-                      (make-pathname :name bout-name :type *jabs-bout-template-type*)
-                      dir)))
-        (when (not (null file))
-          (push file bout-dirs))))
-    (car bout-dirs)))
 
 ;; bind CLI parameter -Dbout=...
 (bind-jabs-cli-parameter
