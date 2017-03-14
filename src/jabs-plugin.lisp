@@ -44,7 +44,7 @@ SOFTWARE.
    *jabs-source-directory*
    (merge-pathnames (make-pathname :directory '(:relative "plugins")) *jabs-share-directory*)
    (merge-pathnames (make-pathname :directory '(:relative ".jabs" "plugins")) (user-homedir-pathname))
-   (merge-pathnames (make-pathname :directory '(:relative ".jabs" "plugins")) (os-pwd))))
+   (merge-pathnames (make-pathname :directory '(:relative ".jabs" "plugins")) +jabs-run-directory+)))
 
 ;;;; full plugin names: name@type@plugin@jabs
 ;; plugin types: generic, core, repository, test etc

@@ -66,8 +66,7 @@ SOFTWARE.
   (list
    (merge-pathnames (make-pathname :directory '(:relative "skeletons")) *jabs-share-directory*)
    (merge-pathnames (make-pathname :directory '(:relative ".jabs" "skeletons")) (user-homedir-pathname))
-   (merge-pathnames (make-pathname :directory '(:relative ".jabs" "skeletons")) (os-pwd))
-   ))
+   (merge-pathnames (make-pathname :directory '(:relative ".jabs" "skeletons")) +jabs-run-directory+)))
 
 (defvar *jabs-default-skeleton-name* :default)
 (defvar *jabs-skeleton-registry* (make-hash-table))
