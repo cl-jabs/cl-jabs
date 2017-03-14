@@ -1450,3 +1450,19 @@ FASLs."
                             (car (cat-to-list (linux-proc-file (parse-integer x) "loginuid"))))
                  (parse-integer x)))
                   (list-pids))))
+
+;;;; threads
+(defmacro with-thread (&body body)
+  "Very simple and primitive threading"
+  `(if *jabs-try-parallelize*
+       #+sbcl(sb-thread:make-thread
+	      #'(lambda (standard-output)
+		  ;; thread-local dynamic binding of special variable
+		  (let ((*standard-output* standard-output))
+		    ,@body))
+	      ;; thread function argument, provided by the current thread
+	      :arguments (list *standard-output*))
+       #-sbcl(progn
+	       (jlog:wrn "Threads support is not implemented for current lisp implementation. Continue serial")
+	       ,@body)
+       ,@body))

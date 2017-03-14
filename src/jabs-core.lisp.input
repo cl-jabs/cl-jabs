@@ -58,6 +58,9 @@ SOFTWARE.
 
 (defvar *jabs-universal-delimiter* "@")
 
+(defvar *jabs-try-parallelize* nil
+  "Try to use threads where it is implemented")
+
 ;; ;; hooks
 (defvar *post-init-hook* nil
   "Run some functions without arguments after JABS initialization")
