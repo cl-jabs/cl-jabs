@@ -127,7 +127,7 @@ do_unittest()
 do_install()
 {
     ## Build jabs with correct pathnames
-    do_build $I_BINDIR $I_SRCDIR $I_SYSCONFIGDIR $I_DATAROOTDIR $I_LIBDIR
+    do_generate $I_BINDIR $I_SRCDIR $I_SYSCONFIGDIR $I_DATAROOTDIR $I_LIBDIR
     ## making destination direcotories
     mkdir -p $I_BINDIR $I_SRCDIR $I_SYSCONFIGDIR $I_DATAROOTDIR $I_LIBDIR
 
