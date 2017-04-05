@@ -126,8 +126,8 @@ do_unittest()
 
 do_install()
 {
-    ## Generate files with correct pathnames
-    do_generate $I_BINDIR $I_SRCDIR $I_SYSCONFIGDIR $I_DATAROOTDIR $I_LIBDIR
+    ## Build jabs with correct pathnames
+    do_build $I_BINDIR $I_SRCDIR $I_SYSCONFIGDIR $I_DATAROOTDIR $I_LIBDIR
     ## making destination direcotories
     mkdir -p $I_BINDIR $I_SRCDIR $I_SYSCONFIGDIR $I_DATAROOTDIR $I_LIBDIR
 
@@ -275,7 +275,11 @@ do_build()
     fi
     echo "${PURPLE}DONE${NO_COLOUR}"
 
-    do_generate $PWD/bin/ $PWD/src/ $PWD/etc/ $PWD/share/ $PWD/lib/
+    if [ ! -z "$*" ]; then
+        do_generate $@
+    else
+        do_generate $PWD/bin/ $PWD/src/ $PWD/etc/ $PWD/share/ $PWD/lib/
+    fi
     do_build_wrappers
     # echo
     # echo "You can operate now with ${CYAN}\`\`jab''${NO_COLOUR} utility from local directory, or do ${CYAN}\`\`./jab --self-install''${NO_COLOUR} to install it globally"
