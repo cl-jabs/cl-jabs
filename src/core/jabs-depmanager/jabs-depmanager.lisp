@@ -285,6 +285,8 @@ system file, than retry to find project"
 
 (defmethod load-project-dependencies ((project project))
   (dolist (v (make-project-depencencies-list project))
+    (jlog:info "Loading dependency ``~a'' for project ``~a''
+	       v (get-project-name project))
     (or
      (load-project-local-dependency (tosymbol v) project)
      (load-project-remote-dependency (tosymbol v) project)
