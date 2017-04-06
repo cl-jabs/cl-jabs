@@ -25,7 +25,9 @@ SOFTWARE.
 (dolist (v '("jabs-packages" "jabs-logger" "jabs-re" "jabs-tools" "jabs-core"))
   (load (merge-pathnames
          (make-pathname :name v :type "lisp")
-         (parse-namestring "@SRCDIR@"))))
+         ;; (parse-namestring "@SRCDIR@")
+	 (parse-namestring "src/")
+	 )))
 
 (defpackage jab
   (:use :cl :tools@jabs :jabs :re@jabs)
@@ -40,7 +42,9 @@ SOFTWARE.
                         :directory
                         '(:relative "wrappers" "jab")
                         :name "jabs-argparse" :type "lisp")
-                       (parse-namestring "@SRCDIR@")))
+                       ;; (parse-namestring "@SRCDIR@")
+		       (parse-namestring "src/")
+		       ))
 
 (defvar +version+ +jabs-version+)
 (defvar *jabs-default-argument-parser* (make-argument-parser :description "Default argument parser"))

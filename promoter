@@ -76,7 +76,7 @@ print_help()
     [ -z ${version} ] && version=$JABS_VERSION
     echo "${PURPLE}This is a \`\`${YELLOW}promoter${NO_COLOUR}\`\` ${PURPLE}script for ${CYAN}(${RED}J${NO_COLOUR}ust ${CYAN}(${RED}A${NO_COLOUR}nother ${CYAN}(${RED}B${NO_COLOUR}uild ${CYAN}(${RED}S${NO_COLOUR}ystem${CYAN}))))${NO_COLOUR}"
     echo "${PURPLE}JABS version: ${CYAN}$version${NO_COLOUR}"
-    echo "${PURPLE}Usage:\n       ${CYAN}$0${NO_COLOUR} ${GREEN}[prepare|build|test [-l|<test_module_name>]|clean]${NO_COLOUR}"
+    echo "${PURPLE}Usage:\n       ${CYAN}$0${NO_COLOUR} ${GREEN}[prepare|build|build-local|test [-l|<test_module_name>]|clean]${NO_COLOUR}"
     echo
     echo "       -l                 : list of test modules (only for \`\`test\`\` action)"
     echo "       <test_module_name> : run only selected unit test (only for \`\`test\`\` action, see \`\`-l\`\`)"
@@ -167,7 +167,9 @@ do_install()
         cp $i $dst
     done
     # binary
-    do_build_wrappers
+    if [ ! -f bin/jab ] || [ ! -f bin/jn.sh ]; then
+        do_build_wrappers
+    fi
     cp bin/* $I_BINDIR
 }
 
@@ -437,13 +439,22 @@ case $1 in
     "prepare")
 	check_sbcl || do_sbcl
 	;;
-    "build")
+    "build-local")
         check_sbcl || do_sbcl
         ret=$?
         [ $ret != 0 ] && print_step_fail && exit $ret
         print_step_done
         print_step "${PURPLE}Building${NO_COLOUR} JABS"
         do_build
+        print_step_done
+        ;;
+    "build")
+        check_sbcl || do_sbcl
+        ret=$?
+        [ $ret != 0 ] && print_step_fail && exit $ret
+        print_step_done
+        print_step "${PURPLE}Building${NO_COLOUR} JABS"
+        do_build $I_BINDIR $I_SRCDIR $I_SYSCONFIGDIR $I_DATAROOTDIR $I_LIBDIR
         print_step_done
         ;;
     *)
