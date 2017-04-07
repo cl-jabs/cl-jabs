@@ -225,4 +225,7 @@ SOFTWARE.
 	   ;;
 	   :+jabs-version+
 	   :*jabs-universal-delimiter*
+	   :define-plugin-type
+	   :filter-project-plugins-by-type
+	   :plugins-api-call-to-true
            ))

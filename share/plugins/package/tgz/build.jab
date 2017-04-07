@@ -1,0 +1,23 @@
+;;; -*- Mode: Lisp -*-
+(defpackage :tgz-system
+  (:use :cl :jabs))
+
+(in-package :tgz-system)
+
+(defplugin :tgz :package "0.0.1"
+  :author "Alexander aka 'CosmonauT' Vynnyk <cosmonaut.ok@zoho.com>"
+  :maintainer "Alexander aka 'CosmonauT' Vynnyk <cosmonaut.ok@zoho.com>"
+  :license "MIT"
+  :description "Packaging plugin"
+  :serial t
+  :skeleton (:default)
+  ;; :bout :default
+  ;; :plugins NIL
+  ;;;; Dependencies
+  :depends-on (:archive :salza2)
+  :plugins (:quicklisp@repository)
+  ;; :pathname "some/relative/path" ;; relative name to your plugin root directory (where skeleton located)
+  ;;;; Add files, mobules etc
+  :components (
+               (:file "tgz")
+))
