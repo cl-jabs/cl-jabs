@@ -1026,6 +1026,12 @@ and NIL NAME, TYPE and VERSION components"
   (check-type pathname (or string pathname))
   (list-directory (pathname-as-directory pathname)))
 
+(defun os-ls-s (file)
+  "Get file size"
+  (check-type file (or string pathname))
+  (with-open-file (stream file :element-type '(unsigned-byte 8))
+		  (file-length stream)))
+
 ;;;; Environment variables: getting them, and parsing them.
 (defun os-getenv (x)
   "Query the environment, as in C getenv.
@@ -1059,7 +1065,7 @@ use getenvp to return NIL in such a case."
   #-(or abcl allegro clasp clisp clozure cmu cormanlisp ecl gcl genera lispworks mcl mkcl sbcl scl xcl)
   (jlog:crit "~S is not supported on your implementation" 'getenv))
 
-(defsetf os-getenv (x) (val)
+(defsetf os-setenv (x) (val)
   "Set an environment variable."
   (declare (ignorable x val))
   #+allegro `(setf (sys:getenv ,x) ,val)

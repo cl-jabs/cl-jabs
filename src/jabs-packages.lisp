@@ -87,21 +87,42 @@ SOFTWARE.
            :copy-file
            :lisp-version-string
            ;;
-           :os-hostname
-           :os-find
-           :os-mkdir
-           :os-cp
-           :os-mv
-           :os-rm
-           :os-touch
-           :os-cat
-           :os-cd
-           :os-pwd
-           :os-getenv
-           :os-realpath
-           :os-env
-           :os-exec
-           :os-kill
+	   :os-hostname
+	   :os-cd
+	   :os-chdir
+	   :os-dirname
+	   :os-stat
+	   :os-stat-atime
+	   :os-stat-ctime
+	   :os-stat-dev
+	   :os-stat-gid
+	   :os-stat-ino
+	   :os-stat-mode
+	   :os-stat-mtime
+	   :os-stat-nlink
+	   :os-stat-rdev
+	   :os-stat-size
+	   :os-stat-uid
+	   :os-find
+	   :os-cat
+	   :os-pwd
+	   :os-getcwd
+	   :os-mkdir
+	   :os-mv
+	   :os-cp
+	   :os-rm
+	   :os-touch
+	   :os-ln
+	   :os-ls
+	   :os-ls-s
+	   :os-getenv
+	   :os-setenv
+	   :os-getenvp
+	   :os-architecture
+	   :os-realpath
+	   :os-env
+	   :os-exec
+	   :os-kill
            ;;
            :mypid
            :myuid
