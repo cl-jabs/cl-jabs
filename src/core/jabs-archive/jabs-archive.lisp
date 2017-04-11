@@ -22,13 +22,13 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 |#
-(defpackage package@core@plugin@jabs
+(defpackage archive@core@plugin@jabs
   (:use :cl :tools@jabs :re@jabs :jabs
 	:skeleton@core@plugin@jabs))
 
-(in-package :package@core@plugin@jabs)
+(in-package :archive@core@plugin@jabs)
 
-(make-instance 'jabs::plugin :name :package :type :core :version jabs::+jabs-version+)
+(make-instance 'jabs::plugin :name :archive :type :core :version jabs::+jabs-version+)
 
 
 
@@ -55,31 +55,31 @@ SOFTWARE.
 ;;    (license-file  :accessor get-skeleton-license-file  :initarg :license-file)
 ;;    (install-file  :accessor get-skeleton-install-file  :initarg :install-file)))
 
-(defvar *package-files-directories* '(:bin :src :conf :share :public :script))
-(defvar *package-extended-files-directories* '(:contrib :opt))
-(defvar *package-doc-files-directories* '(:doc))
-(defvar *package-readme-file* :readme-file)
-(defvar *package-license-file* :license-file)
-(defvar *package-install-file* :install-file)
+(defvar *archive-files-directories* '(:bin :src :conf :share :public :script))
+(defvar *archive-extended-files-directories* '(:contrib :opt))
+(defvar *archive-doc-files-directories* '(:doc))
+(defvar *archive-readme-file* :readme-file)
+(defvar *archive-license-file* :license-file)
+(defvar *archive-install-file* :install-file)
 
-(defvar *package-pre-script* nil)
-(defvar *package-post-script* nil)
+(defvar *archive-pre-script* nil)
+(defvar *archive-post-script* nil)
 
-(define-plugin-type :package plugin
+(define-plugin-type :archive plugin
   (let ((checker t)
-        (plugin-package-name
+        (plugin-archive-name
          (eval (append '(concat-keywords-w-delimiter *jabs-universal-delimiter*)
                        (list (get-plugin-name plugin))
                        (list (get-plugin-type plugin))
                        jabs::+jabs-plugin-namespace+))))
     ;; TODO: check for functions format (args and their types)
-    (dolist (v '(:make-package))
-      (when (not (try (symbol-function (tosymbol v plugin-package-name))))
+    (dolist (v '(:make-project-archive))
+      (when (not (try (symbol-function (tosymbol v plugin-archive-name))))
         (setf checker nil)))
     checker))
 
 ;; (bind-project-symbol
-;;  :package
+;;  :archive
 ;;  #'(lambda (x)
 ;;      (check-type x list)
 ;;      (let ((name (cadr (member :name x)))
@@ -87,18 +87,18 @@ SOFTWARE.
 ;; 	   (version (cadr (member :version x))))
 ;;        (format nil "~a ~a ~a" name types version))))
 
-(defgeneric make-project-package (project)
+(defgeneric make-project-archive (project)
   )
 
-(defmethod make-project-packages ((project project))
+(defmethod make-project-archives ((project project))
   "Make project archive(s) from target directory"
   (let ((name (project-slot-value project 'jabs::name))
         (version (project-slot-value project 'jabs::version))
         (target-dir (get-skeleton-target (find-project-skeleton project)))
-        (plugins (filter-project-plugins-by-type project :package)))
+        (plugins (filter-project-plugins-by-type project :archive)))
 
 
-    (plugins-api-call-all :make-package plugins name version target-dir)))
+    (plugins-api-call-all :make-project-archive plugins name version target-dir)))
 
 ;; (defmethod pack-project ((project project))
 ;;   "Check if project can be reachable in all accessible plugins"
@@ -107,7 +107,7 @@ SOFTWARE.
 ;;         (source (get-skeleton-target (find-project-skeleton project)))
 ;;         (plugins (filter-project-plugins-by-type project :repository)))
 ;;     (plugins-api-call-to-true
-;;      :make-package plugins name version source)))
+;;      :make-archive plugins name version source)))
 
 ;; TODO:
 ;; pack-project
@@ -116,5 +116,5 @@ SOFTWARE.
 
 ;; (defproject zzz
 ;;     :name "ZZZ"
-;;     :plugins (:tgz@package :deb@package)
-;;     :package (:name "test" :types (:deb :rpm) :version "0.1.2")
+;;     :plugins (:tgz@archive :deb@archive)
+;;     :archive (:name "test" :types (:deb :rpm) :version "0.1.2")

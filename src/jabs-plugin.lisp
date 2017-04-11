@@ -315,7 +315,9 @@ by many projects w/o requirement to set it as plugin in
  through list of all corresponding plugins"
   `(labels ((call-all (function plugins)
               (if (null plugins) nil
-                  (call-all function (cdr plugins)))))
+                  (progn
+                    (plugin-api-call function (car plugins) ,@body)
+                    (call-all function (cdr plugins))))))
 	   (call-all ,function ,plugin-names)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; /LIB

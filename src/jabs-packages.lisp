@@ -228,4 +228,5 @@ SOFTWARE.
 	   :define-plugin-type
 	   :filter-project-plugins-by-type
 	   :plugins-api-call-to-true
+     :plugins-api-call-all
            ))

@@ -1,0 +1,4 @@
+;; -*- mode: lisp -*-
+(archive :depends-on ()
+	 (jlog:info "Packaging project ``~a''" (get-project-name *jabs-current-project*))
+	 (archive-op *jabs-current-project*))
