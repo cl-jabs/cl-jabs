@@ -300,7 +300,7 @@ by many projects w/o requirement to set it as plugin in
 
 (defmacro plugins-api-call-to-true (function plugin-names &body body)
   "Makes calls in specific format: plugin-package::function <body>
- through list of all repository plugins of project in format"
+ through list of corresponding plugins before true result"
   `(labels ((call-before-true (function plugins)
               (if (null plugins) nil
                   (let ((result
@@ -309,6 +309,14 @@ by many projects w/o requirement to set it as plugin in
                      result
                      (call-before-true function (cdr plugins)))))))
      (call-before-true ,function ,plugin-names)))
+
+(defmacro plugins-api-call-all (function plugin-names &body body)
+  "Makes calls in specific format: plugin-package::function <body>
+ through list of all corresponding plugins"
+  `(labels ((call-all (function plugins)
+              (if (null plugins) nil
+                  (call-all function (cdr plugins)))))
+	   (call-all ,function ,plugin-names)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; /LIB
 ;; Register plugin types

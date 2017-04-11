@@ -78,6 +78,12 @@ SOFTWARE.
 (defmethod prepare-op ((project project))
   (jlog:err "prepare-source-op Not implemented"))
 
+(defgeneric package-op (project)
+  )
+
+(defmethod package-op ((project project))
+  (make-project-packages project))
+
 ;; + implemented
 ;; - will not be implemented
 ;; / should be implemented

@@ -6,6 +6,8 @@
   :test "."
   :share "."
   :contrib "."
+  :cache "cache"
+  :target "target"
   :readme-file "README"
   :license-file "LICENSE"
   :install-file "INSTALL")

@@ -30,6 +30,41 @@ SOFTWARE.
 
 (make-instance 'jabs::plugin :name :package :type :core :version jabs::+jabs-version+)
 
+
+
+;; (defclass skeleton ()
+;;   ((name          :accessor get-skeleton-name          :initarg :name)
+;;    (src           :accessor get-skeleton-src           :initarg :src)
+;;    (bin           :accessor get-skeleton-bin           :initarg :bin)
+;;    (lib           :accessor get-skeleton-lib           :initarg :lib)
+;;    (doc           :accessor get-skeleton-doc           :initarg :doc)
+;;    (share         :accessor get-skeleton-share         :initarg :share)
+;;    (test          :accessor get-skeleton-test          :initarg :test)
+;;    (contrib       :accessor get-skeleton-contrib       :initarg :contrib)
+;;    (conf          :accessor get-skeleton-conf          :initarg :conf)
+;;    (public        :accessor get-skeleton-public        :initarg :public)
+;;    (script        :accessor get-skeleton-script        :initarg :script)
+;;    (cache         :accessor get-skeleton-cache         :initarg :cache)
+;;    (log           :accessor get-skeleton-log           :initarg :log)
+;;    (template      :accessor get-skeleton-template      :initarg :template)
+;;    ;; other optional directories, not /opt :)
+;;    (opt           :accessor get-skeleton-opt           :initarg :opt)
+;;    (tmp           :accessor get-skeleton-tmp           :initarg :tmp)
+;;    (target        :accessor get-skeleton-target        :initarg :target)
+;;    (readme-file   :accessor get-skeleton-readme-file   :initarg :readme-file)
+;;    (license-file  :accessor get-skeleton-license-file  :initarg :license-file)
+;;    (install-file  :accessor get-skeleton-install-file  :initarg :install-file)))
+
+(defvar *package-files-directories* '(:bin :src :conf :share :public :script))
+(defvar *package-extended-files-directories* '(:contrib :opt))
+(defvar *package-doc-files-directories* '(:doc))
+(defvar *package-readme-file* :readme-file)
+(defvar *package-license-file* :license-file)
+(defvar *package-install-file* :install-file)
+
+(defvar *package-pre-script* nil)
+(defvar *package-post-script* nil)
+
 (define-plugin-type :package plugin
   (let ((checker t)
         (plugin-package-name
@@ -43,20 +78,43 @@ SOFTWARE.
         (setf checker nil)))
     checker))
 
-(bind-project-symbol
- :package
- #'(lambda (x)
-     (check-type x list)
-     (let ((name (cadr (member :name x)))
-	   (types (cadr (member :types x)))
-	   (version (cadr (member :version x))))
-       (format nil "~a ~a ~a" name types version))))
+;; (bind-project-symbol
+;;  :package
+;;  #'(lambda (x)
+;;      (check-type x list)
+;;      (let ((name (cadr (member :name x)))
+;; 	   (types (cadr (member :types x)))
+;; 	   (version (cadr (member :version x))))
+;;        (format nil "~a ~a ~a" name types version))))
 
-(defgeneric pack-project ( project name type version components)
+(defgeneric make-project-package (project)
   )
 
-(defmethod pack-project ((project project) name type version components)
-  "Check if project can be reachable in all accessible plugins"
-  (let ((plugins (filter-project-plugins-by-type project :repository)))
-    (plugins-api-call-to-true
-     :make-package plugins name type version components)))
+(defmethod make-project-packages ((project project))
+  "Make project archive(s) from target directory"
+  (let ((name (project-slot-value project 'jabs::name))
+        (version (project-slot-value project 'jabs::version))
+        (target-dir (get-skeleton-target (find-project-skeleton project)))
+        (plugins (filter-project-plugins-by-type project :package)))
+
+
+    (plugins-api-call-all :make-package plugins name version target-dir)))
+
+;; (defmethod pack-project ((project project))
+;;   "Check if project can be reachable in all accessible plugins"
+;;   (let ((name (project-slot-value project 'jabs::name))
+        ;;         (version (project-slot-value project 'jabs::version))
+;;         (source (get-skeleton-target (find-project-skeleton project)))
+;;         (plugins (filter-project-plugins-by-type project :repository)))
+;;     (plugins-api-call-to-true
+;;      :make-package plugins name version source)))
+
+;; TODO:
+;; pack-project
+;; unpack-project
+
+
+;; (defproject zzz
+;;     :name "ZZZ"
+;;     :plugins (:tgz@package :deb@package)
+;;     :package (:name "test" :types (:deb :rpm) :version "0.1.2")
