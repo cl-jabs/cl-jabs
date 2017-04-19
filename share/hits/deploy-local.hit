@@ -36,4 +36,9 @@
                             (os-cp dst-dir (merge-pathnames dst-dir target-dir) :recursive t :force t))))
                       (dolist (file (list readme-file license-file install-file))
                         (when (and file (file-exists-p file))
-                          (os-cp file (merge-pathnames file target-dir) :recursive t :force t)))))))
+                          (os-cp file (merge-pathnames file target-dir) :recursive t :force t)))
+                      ;; copying build.jab
+                      (os-cp *jabs-buildfile* (merge-pathnames
+                                               *jabs-buildfile*
+                                               (pathname-as-directory target-dir)) :recursive t :force t)
+                      ))))
