@@ -1,6 +1,6 @@
 # cl-jabs
 
-![](https://github.com/cl-jabs/cl-jabs/blob/master/share/images/JABS_64x64.png) [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE) [![Travis Build Status](https://api.travis-ci.org/cl-jabs/cl-jabs.svg?branch=master)](https://travis-ci.org/cl-jabs/cl-jabs)
+![](https://github.com/cl-jabs/cl-jabs/blob/master/share/images/JABS_64x64.png) [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE) [![Travis Build Status](https://api.travis-ci.org/cl-jabs/cl-jabs.svg?branch=master)](https://travis-ci.org/cl-jabs/cl-jabs) [![Join the chat at https://gitter.im/cl-jabs](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/cl-jabs?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 ```lisp
 (Just
   (Another
