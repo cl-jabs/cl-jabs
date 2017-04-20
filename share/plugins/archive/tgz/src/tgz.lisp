@@ -30,10 +30,10 @@ SOFTWARE.
 ;; (export '(:make-project-archive))
 
 (defun remove-car (list1 list2)
-           (cond ((null list1) list2)
-                 ((equal (car list1) (car list2))
-                  (remove-car (cdr list1) (cdr list2)))
-                 (t nil)))
+  (cond ((null list1) list2)
+        ((equal (car list1) (car list2))
+         (remove-car (cdr list1) (cdr list2)))
+        (t nil)))
 
 (defmethod pathname-convert-to-relative ((pathname pathname))
   (let ((pathname-directory (pathname-directory pathname))
