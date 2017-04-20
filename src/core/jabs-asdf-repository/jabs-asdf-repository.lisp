@@ -38,20 +38,10 @@ SOFTWARE.
 
 (in-package :asdf@repository@plugin@jabs)
 
-;; (in-package :jabs)
-
-;; (defun find-repository-project (name) +
-;; (defun load-repository-project (name) +
-;; (defun remove-repository-project (name)
-;; (defun repository-project-version (name)
-;; (defun update-repository-project-list ()
-;; (defun repository-project-dependencies (name)
-
 (defgeneric add-project-related-asdf-paths (project)
-  )
+  (:documentation "Add project-related paths to ASDF registry"))
 
 (defmethod add-project-related-asdf-paths ((project project))
-  "Add project-related paths to ASDF registry"
   (when (eq project (find-project jabs::*jabs-project-to-run*))
     (let* ((skel-name (get-project-skeleton-name project))
            (skel (or
@@ -115,4 +105,4 @@ SOFTWARE.
       (slot-value system 'asdf/system::depends-on))))
 
 ;; make asdf@repository plugin shared
-(push :asdf@repository jabs::*jabs-shared-plugin-names*)
+(share-plugin (find-plugin :asdf :repository))
