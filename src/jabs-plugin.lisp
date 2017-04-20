@@ -365,8 +365,6 @@ by many projects w/o requirement to set it as plugin in
                          (project-slot-value x 'plugins)))
             (delimiter-symbol (car (tolist *jabs-universal-delimiter*))))
         ;;
-        ;; (setf (project-slot-value x 'plugins) plugins)
-        ;;
         (dolist (plugin plugins)
           (let ((plugin-name (tosymbol (car (split delimiter-symbol (princ-to-string plugin)))))
                 (plugin-type (tosymbol (cadr (split delimiter-symbol (princ-to-string plugin))))))
