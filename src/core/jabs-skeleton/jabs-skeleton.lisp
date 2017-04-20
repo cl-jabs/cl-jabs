@@ -37,7 +37,7 @@ SOFTWARE.
           skeleton
           ;;
           get-skeleton-name
-	  get-project-skeleton-name
+          get-project-skeleton-name
           get-skeleton-src
           get-skeleton-bin
           get-skeleton-lib
@@ -60,7 +60,7 @@ SOFTWARE.
           ;;
           *jabs-default-skeleton-name*
           load-skeleton
-	  find-project-skeleton
+          find-project-skeleton
           ))
 
 (defvar *jabs-skeleton-directories*
