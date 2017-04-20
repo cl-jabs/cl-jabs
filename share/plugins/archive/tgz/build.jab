@@ -1,0 +1,16 @@
+;;; -*- Mode: Lisp -*-
+(defpackage :tgz-system
+  (:use :cl :jabs))
+
+(in-package :tgz-system)
+
+(defplugin :tgz :archive "0.0.1"
+  :author "Alexander aka 'CosmonauT' Vynnyk <cosmonaut.ok@zoho.com>"
+  :maintainer "Alexander aka 'CosmonauT' Vynnyk <cosmonaut.ok@zoho.com>"
+  :license "MIT"
+  :description "Packaging plugin"
+  :serial t
+  :skeleton (:default)
+  :bout :default
+  :depends-on (:archive :salza2)
+  :components ((:file "tgz")))

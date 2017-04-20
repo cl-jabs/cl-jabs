@@ -1,3 +1,44 @@
 ;; -*- mode: lisp -*-
-(install  :depends-on ()
-          (jlog:err "NOT IMPLEMENTED"))
+(install :depends-on ()
+	 (let* ((current-skeleton (find-project-skeleton *jabs-current-project*))
+		(target-dir (try
+			     (pathname-as-directory
+			      (parse-namestring
+			       (get-skeleton-target current-skeleton)))))
+		;;
+		(src-dir (try (get-skeleton-src current-skeleton)))
+		(bin-dir (try (get-skeleton-bin current-skeleton)))
+		(doc-dir (try (get-skeleton-doc current-skeleton)))
+		(share-dir (try (get-skeleton-share current-skeleton)))
+		(test-dir (try (get-skeleton-test current-skeleton)))
+		(contrib-dir (try (get-skeleton-contrib current-skeleton)))
+		(conf-dir (try (get-skeleton-conf current-skeleton)))
+		(script-dir (try (get-skeleton-script current-skeleton)))
+		(readme-file (try (get-skeleton-readme-file current-skeleton)))
+		(license-file (try (get-skeleton-license-file current-skeleton)))
+		(install-file (try (get-skeleton-install-file current-skeleton)))
+		;;
+		)
+	   (if (not target-dir)
+	       (jlog:wrn "Target directory for skeleton ``~a'', project ``~a'' is not set. Can not deploy locally. Skipping"
+			 (get-skeleton-name current-skeleton)
+			 (get-project-name *jabs-current-project*))
+	     ;;
+	     (progn
+	       (dolist (dir (list src-dir bin-dir doc-dir test-dir contrib-dir
+				  script-dir share-dir conf-dir))
+		 (let ((dst-dir (when dir (pathname-as-directory
+					   (or (try (parse-namestring dir))
+					       (try (parse-namestring (car dir))))))))
+		   ;; (jlog:crit "AAAA ~a" dst-dir)
+		   (when dst-dir
+		     (jlog:info "Deploying ``~a'' to ``~a''" dst-dir target-dir)
+		     (os-cp dst-dir (merge-pathnames dst-dir target-dir) :recursive t :force t))))
+	       (dolist (file (list readme-file license-file install-file))
+		 (when (and file (file-exists-p file))
+		   (os-cp file (merge-pathnames file target-dir) :recursive t :force t)))
+	       ;; copying build.jab
+	       (os-cp *jabs-buildfile* (merge-pathnames
+					*jabs-buildfile*
+					(pathname-as-directory target-dir)) :recursive t :force t)
+	       ))))

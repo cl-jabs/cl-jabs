@@ -76,7 +76,13 @@ SOFTWARE.
   )
 
 (defmethod prepare-op ((project project))
-  (jlog:err "prepare-source-op Not implemented"))
+  (jlog:err "prepare-op Not implemented"))
+
+(defgeneric archive-op (project)
+  )
+
+(defmethod archive-op ((project project))
+  (archive@core@plugin@jabs::make-project-archives project))
 
 ;; + implemented
 ;; - will not be implemented

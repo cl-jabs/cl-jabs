@@ -1,3 +1,3 @@
 ;; -*- mode: lisp -*-
-(:package
- :package)
+(:archive
+ :archive)

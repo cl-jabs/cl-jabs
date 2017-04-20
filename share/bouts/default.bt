@@ -4,7 +4,7 @@
     :initialize
     :compile
     :test
-    :package
+    :archive
     :integration-test
     :verify
     :install

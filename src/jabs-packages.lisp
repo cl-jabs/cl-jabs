@@ -87,42 +87,42 @@ SOFTWARE.
            :copy-file
            :lisp-version-string
            ;;
-	   :os-hostname
-	   :os-cd
-	   :os-chdir
-	   :os-dirname
-	   :os-stat
-	   :os-stat-atime
-	   :os-stat-ctime
-	   :os-stat-dev
-	   :os-stat-gid
-	   :os-stat-ino
-	   :os-stat-mode
-	   :os-stat-mtime
-	   :os-stat-nlink
-	   :os-stat-rdev
-	   :os-stat-size
-	   :os-stat-uid
-	   :os-find
-	   :os-cat
-	   :os-pwd
-	   :os-getcwd
-	   :os-mkdir
-	   :os-mv
-	   :os-cp
-	   :os-rm
-	   :os-touch
-	   :os-ln
-	   :os-ls
-	   :os-ls-s
-	   :os-getenv
-	   :os-setenv
-	   :os-getenvp
-	   :os-architecture
-	   :os-realpath
-	   :os-env
-	   :os-exec
-	   :os-kill
+           :os-hostname
+           :os-cd
+           :os-chdir
+           :os-dirname
+           :os-stat
+           :os-stat-atime
+           :os-stat-ctime
+           :os-stat-dev
+           :os-stat-gid
+           :os-stat-ino
+           :os-stat-mode
+           :os-stat-mtime
+           :os-stat-nlink
+           :os-stat-rdev
+           :os-stat-size
+           :os-stat-uid
+           :os-find
+           :os-cat
+           :os-pwd
+           :os-getcwd
+           :os-mkdir
+           :os-mv
+           :os-cp
+           :os-rm
+           :os-touch
+           :os-ln
+           :os-ls
+           :os-ls-s
+           :os-getenv
+           :os-setenv
+           :os-getenvp
+           :os-architecture
+           :os-realpath
+           :os-env
+           :os-exec
+           :os-kill
            ;;
            :mypid
            :myuid
@@ -207,7 +207,7 @@ SOFTWARE.
            :*jabs-local-config-directory*
            :*jabs-local-lib-directory*
            :*jabs-local-src-directory*
-	   :+jabs-run-directory+
+           :+jabs-run-directory+
            ;;
            :tosymbol
            :add-hook
@@ -222,7 +222,11 @@ SOFTWARE.
            ;;
            :with-project-to-be-run
            :share-plugin
-	   ;;
-	   :+jabs-version+
-	   :*jabs-universal-delimiter*
+           ;;
+           :+jabs-version+
+           :*jabs-universal-delimiter*
+           :define-plugin-type
+           :filter-project-plugins-by-type
+           :plugins-api-call-to-true
+           :plugins-api-call-all
            ))

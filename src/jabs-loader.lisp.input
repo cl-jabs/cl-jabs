@@ -57,8 +57,9 @@ SOFTWARE.
              "jabs-round"
              "jabs-bout"
              "jabs-test"
-             "jabs-operations"
              "jabs-doc"
+             "jabs-archive"
+             "jabs-operations"
              ))
   (load-plugin-file v :type :core :filename v :filetype "lisp"))
 (jlog:info "...Loading core plugins [ DONE ]")
