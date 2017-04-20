@@ -69,8 +69,6 @@ SOFTWARE.
 
 (defun find-repository-project (name) ;; (project project))
   (check-type name keyword)
-  ;; (or (gethash name (get-project-systems-map project))
-  ;;     (gethash name *jabs-global-systems-map*)))
   (try (asdf:find-system name)))
 
 ;;;; repository API function
