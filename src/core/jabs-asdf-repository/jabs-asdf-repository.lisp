@@ -29,14 +29,14 @@ SOFTWARE.
 
 (make-instance 'jabs::plugin :name :jabs-asdf-repository :type :core :version jabs::+jabs-version+)
 
-(defpackage asdf-repository@repository@plugin@jabs
+(defpackage asdf@repository@plugin@jabs
   (:use :cl :jabs :tools@jabs :skeleton@core@plugin@jabs))
 
 ;; HACK: we need repository plugin to interact
 ;; with it as with plugin for external repositories
-(make-instance 'jabs::plugin :name :asdf-repository :type :repository :version jabs::+jabs-version+)
+(make-instance 'jabs::plugin :name :asdf :type :repository :version jabs::+jabs-version+)
 
-(in-package :asdf-repository@repository@plugin@jabs)
+(in-package :asdf@repository@plugin@jabs)
 
 ;; (in-package :jabs)
 
@@ -81,7 +81,7 @@ SOFTWARE.
   (check-type name keyword)
   ;; (or (gethash name (get-project-systems-map project))
   ;;     (gethash name *jabs-global-systems-map*)))
-  (asdf:find-system name))
+  (try (asdf:find-system name)))
 
 ;;;; repository API function
 (defun load-repository-project (name) ;; (project project))
@@ -114,7 +114,5 @@ SOFTWARE.
     (when system
       (slot-value system 'asdf/system::depends-on))))
 
-(add-hook *post-init-hook*
-          #'(lambda ()
-              ;; HACK: TODO: refactor it!
-              (push :asdf-repository@repository jabs::*jabs-cli-plugin-names*)))
+;; make asdf@repository plugin shared
+(push :asdf@repository jabs::*jabs-shared-plugin-names*)

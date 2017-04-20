@@ -281,6 +281,7 @@ by many projects w/o requirement to set it as plugin in
                     (append
                      (project-slot-value project 'plugins)
                      *jabs-shared-plugin-names*))))))
+    (jlog:dbg "Found plugins ``~a'', type ``~a'' for project ``~a''" plugins type (get-project-name project))
     (remove-if
      #'(lambda (x) (null x))
      (mapcar #'(lambda (x)
@@ -296,6 +297,7 @@ by many projects w/o requirement to set it as plugin in
                                 (split (car (tolist *jabs-universal-delimiter*))
                                        (princ-to-string ,plugin-name)))
                         +jabs-plugin-namespace+))))
+     (jlog:dbg "Calling function ``~a'' from plugin ``~a''" ,function-name ,plugin-name)
      (funcall (tosymbol ,function-name plugin-package-name) ,@body)))
 
 (defmacro plugins-api-call-to-true (function plugin-names &body body)
@@ -362,6 +364,8 @@ by many projects w/o requirement to set it as plugin in
                          (append (project-slot-value x 'plugins) *jabs-cli-plugin-names*)
                          (project-slot-value x 'plugins)))
             (delimiter-symbol (car (tolist *jabs-universal-delimiter*))))
+        ;;
+        ;; (setf (project-slot-value x 'plugins) plugins)
         ;;
         (dolist (plugin plugins)
           (let ((plugin-name (tosymbol (car (split delimiter-symbol (princ-to-string plugin)))))

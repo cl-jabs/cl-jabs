@@ -271,7 +271,7 @@ system file, than retry to find project"
            (cond ((null all-deps)
                   (cons name collector))
                  (t
-                  (make-deps-list (car all-deps) :other-deps (cdr all-deps) :collector (cons name collector)))))))
+                  (make-deps-list (tokeyword (car all-deps)) :other-deps (cdr all-deps) :collector (cons name collector)))))))
     (remove (get-project-name project)
             (reverse (remove-duplicates (reverse (make-deps-list (get-project-name project))))))))
 

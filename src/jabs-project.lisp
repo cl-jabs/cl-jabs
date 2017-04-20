@@ -201,3 +201,13 @@ SOFTWARE.
 (defmethod project-slot-value ((project project) slot)
   "Get slot value from project class"
   (try (slot-value project slot)))
+
+(defgeneric set-project-slot-value (project slot value)
+  )
+
+(defmethod set-project-slot-value ((project project) slot value)
+  (if (not (nth-value 1 (try (slot-value project slot))))
+      (setf (slot-value project slot) value)
+      (jlog:crit "Can not set parameter ``~a'' for project ``~a''. " slot (get-project-name project))))
+
+(defsetf project-slot-value set-project-slot-value)
