@@ -94,7 +94,7 @@ Created for ASDF compatability"
 
 ;; register global projects and systems
 (add-hook *post-init-hook* #'map-global-projects-to-files)
-(add-hook *post-init-hook* #'map-global-systems-to-files)
+;; (add-hook *post-init-hook* #'map-global-systems-to-files)
 
 (defgeneric get-project-projects-map (project)
   )
@@ -187,15 +187,16 @@ system file, than retry to find project"
          (found-project-file-jab
           (when (null found-project)
             (dependency-project-reachable-locally-p name project)))
-         (found-project-file-asd
-          (when (null found-project)
-            (dependency-system-reachable-locally-p name project))))
+         ;; (found-project-file-asd
+         ;;  (when (null found-project)
+         ;;    (dependency-system-reachable-locally-p name project)))
+         )
     (or found-project
         (progn
-          (cond (found-project-file-asd
-                 ;; we need to load ASDF systems inside of :asdf package
-                 (let ((*package* (find-package :asdf)))
-                   (load found-project-file-asd)))
+          (cond ;; (found-project-file-asd
+                ;;  ;; we need to load ASDF systems inside of :asdf package
+                ;;  (let ((*package* (find-package :asdf)))
+                ;;    (load found-project-file-asd)))
                 (found-project-file-jab
                  (load found-project-file-jab)))
           ;;
@@ -204,11 +205,13 @@ system file, than retry to find project"
           (if (and (null found-project)
                    (or
                     found-project-file-jab
-                    found-project-file-asd))
+                    ;; found-project-file-asd
+                    ))
               (jlog:crit "Incorrect format of project file ``~a''"
                          (or
                           found-project-file-jab
-                          found-project-file-asd))
+                          ;; found-project-file-asd
+                          ))
               found-project)))))
 
 (defgeneric dependency-project-reachable-remotely-p (name project)
@@ -243,7 +246,7 @@ system file, than retry to find project"
 
 (defmethod dependency-project-reachable-p (name (project project))
   (or (dependency-project-reachable-locally-p name project)
-      (dependency-system-reachable-locally-p name project)
+      ;; (dependency-system-reachable-locally-p name project)
       (dependency-project-reachable-remotely-p name project)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

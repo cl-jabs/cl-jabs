@@ -37,6 +37,7 @@ SOFTWARE.
           skeleton
           ;;
           get-skeleton-name
+	  get-project-skeleton-name
           get-skeleton-src
           get-skeleton-bin
           get-skeleton-lib
