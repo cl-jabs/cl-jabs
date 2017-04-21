@@ -38,34 +38,41 @@ SOFTWARE.
 
 (in-package :asdf@repository@plugin@jabs)
 
-(defgeneric add-project-related-asdf-paths (project)
-  (:documentation "Add project-related paths to ASDF registry"))
+(defun add-project-related-asdf-paths ()
+  "Add project-related paths to ASDF registry"
+  ;; (when (eq project (find-project jabs::*jabs-project-to-run*))
+  (let* ((project (find-project *jabs-project-to-run*))
+         (skel-name (get-project-skeleton-name project))
+         (skel (or
+                (find-skeleton skel-name)
+                (and
+                 (load-skeleton skel-name)
+                 (find-skeleton skel-name))))
+         (lib (or (try (car (get-skeleton-lib skel)))
+                  (get-skeleton-lib skel)))
+         (contrib (or (try (car (get-skeleton-contrib skel)))
+                      (get-skeleton-contrib skel)))
+         (opt (get-skeleton-opt skel))
+         (local-asdf-dirs (mapcar #'(lambda (x)
+                                      (when x (merge-pathnames x (os-pwd))))
+                                  (list lib contrib opt)))
+         (local-asdf-dirs-dsl))
 
-(defmethod add-project-related-asdf-paths ((project project))
-  (when (eq project (find-project jabs::*jabs-project-to-run*))
-    (let* ((skel-name (get-project-skeleton-name project))
-           (skel (or
-                  (find-skeleton skel-name)
-                  (and
-                   (load-skeleton skel-name)
-                   (find-skeleton skel-name))))
-           (lib (or (try (car (get-skeleton-lib skel)))
-                    (get-skeleton-lib skel)))
-           (contrib (or (try (car (get-skeleton-contrib skel)))
-                        (get-skeleton-contrib skel)))
-           (opt (get-skeleton-opt skel))
-           (local-asdf-dirs (mapcar #'(lambda (x)
-                                        (when x (merge-pathnames x (os-pwd))))
-                                    (list lib contrib opt))))
+    (when local-asdf-dirs
       (dolist (dir local-asdf-dirs)
         (when dir
           (jlog:dbg "Adding directory ``~a'' to ASDF registry" dir)
-          (asdf:initialize-source-registry
-           (list :source-registry
-                 (list :directory dir)
-                 :inherit-configuration)))))))
+          (push
+           (list :tree (tostr dir))
+           local-asdf-dirs-dsl)))
+      (eval `(asdf:initialize-source-registry
+              '(:source-registry ,@local-asdf-dirs-dsl :inherit-configuration)))
+      )))
 
-(add-hook *define-project-hook* #'add-project-related-asdf-paths)
+(add-hook *define-project-hook*
+  #'(lambda (x)
+      (declare (ignore x))
+      (add-project-related-asdf-paths)))
 
 (defun find-repository-project (name) ;; (project project))
   (check-type name keyword)
@@ -74,7 +81,8 @@ SOFTWARE.
 ;;;; repository API function
 (defun load-repository-project (name) ;; (project project))
   (check-type name keyword)
-  (asdf:load-system name))
+  (when (find-repository-project name)
+    (asdf:load-system name)))
 
 (defun remove-repository-project (name)
   "Do not really works. Just clear system from preloaded registry. I don`t know, is it really needed"
@@ -92,15 +100,17 @@ SOFTWARE.
   ;; initialize default source registry
   (asdf:initialize-source-registry)
   ;; add project-related asdf paths to source registry
-  (let ((project (find-project jabs::*jabs-project-to-run*)))
-    (when project
-      (add-project-related-asdf-paths project))))
+  (add-project-related-asdf-paths))
 
 (defun repository-project-dependencies (name)
   (check-type name keyword)
   (let ((system (find-repository-project name)))
     (when system
       (slot-value system 'asdf/system::depends-on))))
+
+(defun initialize-repository (path)
+  (declare (ignore path))
+  (update-repository-project-list))
 
 ;; make asdf@repository plugin shared
 (share-plugin (find-plugin :asdf :repository))

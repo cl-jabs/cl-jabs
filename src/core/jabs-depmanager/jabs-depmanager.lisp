@@ -199,9 +199,9 @@ than retry to find project"
   )
 
 (defmethod load-project-local-dependency (name (project project))
-  (jlog:dbg "Loading project ``~a'' as local dependency for project ``~a''" name (get-project-name project))
-  (and (find-project-dependency-force-locally name project)
-       (asdf:operate 'asdf:load-op name)))
+  (when (find-project-dependency-force-locally name project)
+    (jlog:dbg "Loading project ``~a'' as local dependency for project ``~a''" name (get-project-name project))
+    (asdf:operate 'asdf:load-op name)))
 
 (defgeneric load-project-dependencies (project)
   )
@@ -209,7 +209,7 @@ than retry to find project"
 (defmethod load-project-dependencies ((project project))
   (dolist (v (make-project-depencencies-list project))
     (jlog:info "Loading dependency ``~a'' for project ``~a''"
-	       v (get-project-name project))
+               v (get-project-name project))
     (or
      (load-project-local-dependency (tosymbol v) project)
      (load-project-remote-dependency (tosymbol v) project)

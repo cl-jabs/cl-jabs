@@ -444,7 +444,7 @@ case $1 in
         ret=$?
         [ $ret != 0 ] && print_step_fail && exit $ret
         print_step_done
-        print_step "${PURPLE}Building${NO_COLOUR} JABS"
+        print_step "${PURPLE}Building${NO_COLOUR} JABS to run locally"
         do_build
         print_step_done
         ;;
