@@ -165,10 +165,14 @@ by many projects w/o requirement to set it as plugin in
 
 (defmethod share-plugin ((plugin plugin))
   "Add plugin to shared plugins"
-  (push (concat-keywords-w-delimiter *jabs-universal-delimiter*
-                            (get-plugin-name plugin)
-                            (get-plugin-type plugin))
-        *jabs-shared-plugin-names*))
+  (setf
+   *jabs-shared-plugin-names*
+   (append *jabs-shared-plugin-names*
+           (list
+            (concat-keywords-w-delimiter *jabs-universal-delimiter*
+             (get-plugin-name plugin)
+             (get-plugin-type plugin))
+           ))))
 
 (defmethod initialize-instance :after ((plugin plugin) &key)
   "Register plugin directly after initialization"
@@ -279,8 +283,10 @@ by many projects w/o requirement to set it as plugin in
                   (remove-duplicates
                    (reverse
                     (append
+                     *jabs-shared-plugin-names*
                      (project-slot-value project 'plugins)
-                     *jabs-shared-plugin-names*))))))
+                     ))))))
+    (jlog:dbg "Found plugins ``~a'', type ``~a'' for project ``~a''" plugins type (get-project-name project))
     (remove-if
      #'(lambda (x) (null x))
      (mapcar #'(lambda (x)
@@ -296,6 +302,8 @@ by many projects w/o requirement to set it as plugin in
                                 (split (car (tolist *jabs-universal-delimiter*))
                                        (princ-to-string ,plugin-name)))
                         +jabs-plugin-namespace+))))
+     (jlog:dbg "Calling API function ``~a'' from plugin ``~a''"
+               ,function-name ,plugin-name)
      (funcall (tosymbol ,function-name plugin-package-name) ,@body)))
 
 (defmacro plugins-api-call-to-true (function plugin-names &body body)

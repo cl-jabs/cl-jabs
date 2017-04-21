@@ -50,4 +50,4 @@ SOFTWARE.
   (let ((project (find-repository-project name)))
     (if project
         (mapcar #'tools@jabs:tosymbol (slot-value project (tools@jabs:tosymbol :required-systems :ql-dist)))
-        (jlog:crit "There is no project, named ``~a'' in quickslisp. Can not resolve dependencies" name))))
+        (jlog:err "There is no project, named ``~a'' in quickslisp. Can not resolve dependencies" name))))

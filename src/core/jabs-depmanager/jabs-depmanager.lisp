@@ -50,9 +50,6 @@ SOFTWARE.
 (defvar *jabs-global-projects-map* (make-hash-table)
   "Define hash with project/file keys")
 
-(defvar *jabs-global-systems-map* (make-hash-table)
-  "Define hash with system/file keys. For ASDF compatability")
-
 (defun map-global-projects-to-files ()
   "Register map with projects from global paths"
   (let ((sources
@@ -70,31 +67,8 @@ SOFTWARE.
                 (setf (gethash (tosymbol (cadr l)) *jabs-global-projects-map*) file))
               (jlog:wrn "Incorrect project format in file ``~a''. Skipping" file)))))))
 
-(defun map-global-systems-to-files ()
-  "Register map with systems from global paths
-Created for ASDF compatability"
-  (let ((sources
-         (append
-          (os-find
-           (merge-pathnames (make-pathname :directory '(:relative "lib"))
-                            *jabs-lib-directory*)
-           :extension "asd")
-	  ;; include sbcl contrib systemd
-	  #+sbcl(os-find *jabs-sbcl-lib-directory* :extension "asd")
-	  ;;
-	  )))
-    (dolist (file sources)
-      (dolist (l (os-cat file :list))
-        (when (eq (tosymbol (car l)) :defsystem)
-          (if (atom (cadr l))
-              (progn
-                (jlog:dbg "Mapping asdf system ``~a'' to file ``~a''" (tosymbol (cadr l)) file)
-                (setf (gethash (tosymbol (cadr l)) *jabs-global-systems-map*) file))
-              (jlog:wrn "Incorrect system format in file ``~a''. Skipping" file)))))))
-
-;; register global projects and systems
+;; register global projects
 (add-hook *post-init-hook* #'map-global-projects-to-files)
-(add-hook *post-init-hook* #'map-global-systems-to-files)
 
 (defgeneric get-project-projects-map (project)
   )
@@ -125,35 +99,6 @@ w\o global map"
             (cons lib (cons contrib opt)))
     hash))
 
-(defgeneric get-project-systems-map (project)
-  )
-
-(defmethod get-project-systems-map ((project project))
-  "Get asdf system names mapped to files for only for given project
-w\o global map. For ASDF back compatability"
-  (let* ((skel-name (get-project-skeleton-name project))
-         (skel (or
-                (find-skeleton skel-name)
-                (and
-                 (load-skeleton skel-name)
-                 (find-skeleton skel-name))))
-         (lib (or (try (car (get-skeleton-lib skel)))
-                  (get-skeleton-lib skel)))
-         (contrib (or (try (car (get-skeleton-contrib skel)))
-                      (get-skeleton-contrib skel)))
-         (opt (get-skeleton-opt skel))
-         (hash (make-hash-table)))
-    ;;
-    (mapcar #'(lambda (x)
-                (dolist (f
-                          (os-find (merge-pathnames (parse-namestring x) +jabs-run-directory+)
-                                   :extension "asd"))
-                  (dolist (v (os-cat f :list))
-                    (when (eq (tosymbol (car v)) :defsystem)
-                      (setf (gethash (tosymbol (cadr v)) hash) f)))))
-            (cons lib (cons contrib opt)))
-    hash))
-
 (defgeneric get-project-depends-on (project)
   )
 
@@ -168,47 +113,26 @@ w\o global map. For ASDF back compatability"
   (or (gethash name (get-project-projects-map project))
       (gethash name *jabs-global-projects-map*)))
 
-(defgeneric dependency-system-reachable-locally-p (name project)
-  )
-
-(defmethod dependency-system-reachable-locally-p (name (project project))
-  (check-type name keyword)
-  (or (gethash name (get-project-systems-map project))
-      (gethash name *jabs-global-systems-map*)))
-
 (defgeneric find-project-dependency-force-locally (name project)
   )
 
 (defmethod find-project-dependency-force-locally (name (project project))
-  "Like ``find-project'', but tries to load local project or
-system file, than retry to find project"
-  (let* ((asdf:*central-registry* nil)
-         (found-project (find-project name))
+  "Like ``find-project'', but tries to load local project file,
+than retry to find project"
+  (let* ((found-project (find-project name))
          (found-project-file-jab
           (when (null found-project)
-            (dependency-project-reachable-locally-p name project)))
-         (found-project-file-asd
-          (when (null found-project)
-            (dependency-system-reachable-locally-p name project))))
+            (dependency-project-reachable-locally-p name project))))
     (or found-project
         (progn
-          (cond (found-project-file-asd
-                 ;; we need to load ASDF systems inside of :asdf package
-                 (let ((*package* (find-package :asdf)))
-                   (load found-project-file-asd)))
-                (found-project-file-jab
-                 (load found-project-file-jab)))
+          (when found-project-file-jab
+            (load found-project-file-jab))
           ;;
           (setf found-project (find-project name))
           ;;
-          (if (and (null found-project)
-                   (or
-                    found-project-file-jab
-                    found-project-file-asd))
+          (if (and (null found-project) found-project-file-jab)
               (jlog:crit "Incorrect format of project file ``~a''"
-                         (or
-                          found-project-file-jab
-                          found-project-file-asd))
+                         found-project-file-jab)
               found-project)))))
 
 (defgeneric dependency-project-reachable-remotely-p (name project)
@@ -243,7 +167,6 @@ system file, than retry to find project"
 
 (defmethod dependency-project-reachable-p (name (project project))
   (or (dependency-project-reachable-locally-p name project)
-      (dependency-system-reachable-locally-p name project)
       (dependency-project-reachable-remotely-p name project)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -268,7 +191,7 @@ system file, than retry to find project"
            (cond ((null all-deps)
                   (cons name collector))
                  (t
-                  (make-deps-list (car all-deps) :other-deps (cdr all-deps) :collector (cons name collector)))))))
+                  (make-deps-list (tokeyword (car all-deps)) :other-deps (cdr all-deps) :collector (cons name collector)))))))
     (remove (get-project-name project)
             (reverse (remove-duplicates (reverse (make-deps-list (get-project-name project))))))))
 
@@ -276,9 +199,9 @@ system file, than retry to find project"
   )
 
 (defmethod load-project-local-dependency (name (project project))
-  (jlog:dbg "Loading project ``~a'' as local dependency for project ``~a''" name (get-project-name project))
-  (and (find-project-dependency-force-locally name project)
-       (asdf:operate 'asdf:load-op name)))
+  (when (find-project-dependency-force-locally name project)
+    (jlog:dbg "Loading project ``~a'' as local dependency for project ``~a''" name (get-project-name project))
+    (asdf:operate 'asdf:load-op name)))
 
 (defgeneric load-project-dependencies (project)
   )
@@ -286,7 +209,7 @@ system file, than retry to find project"
 (defmethod load-project-dependencies ((project project))
   (dolist (v (make-project-depencencies-list project))
     (jlog:info "Loading dependency ``~a'' for project ``~a''"
-	       v (get-project-name project))
+               v (get-project-name project))
     (or
      (load-project-local-dependency (tosymbol v) project)
      (load-project-remote-dependency (tosymbol v) project)
@@ -309,15 +232,3 @@ system file, than retry to find project"
         (jlog:dbg "Loading plugin ``~a'' dependencies"
                   (concat-keywords-w-delimiter *jabs-universal-delimiter* name type))
         (load-project-dependencies project))))
-
-;; find-project
-;; project-installed-p
-;; project-loaded-p
-;; project-status
-;; project-version
-;; install-project
-;; update-project
-;; project-dependencies
-
-;; process depends-on
-;; connect to asdf

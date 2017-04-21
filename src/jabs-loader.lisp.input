@@ -53,6 +53,7 @@ SOFTWARE.
 (dolist (v '("jabs-skeleton"
              "jabs-asdf"
              "jabs-depmanager"
+             "jabs-asdf-repository"
              "jabs-hit"
              "jabs-round"
              "jabs-bout"
