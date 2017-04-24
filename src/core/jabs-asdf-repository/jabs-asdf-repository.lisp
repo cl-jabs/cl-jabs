@@ -40,34 +40,35 @@ SOFTWARE.
 
 (defun add-project-related-asdf-paths ()
   "Add project-related paths to ASDF registry"
-  ;; (when (eq project (find-project jabs::*jabs-project-to-run*))
-  (let* ((project (find-project *jabs-project-to-run*))
-         (skel-name (get-project-skeleton-name project))
-         (skel (or
-                (find-skeleton skel-name)
-                (and
-                 (load-skeleton skel-name)
-                 (find-skeleton skel-name))))
-         (lib (or (try (car (get-skeleton-lib skel)))
-                  (get-skeleton-lib skel)))
-         (contrib (or (try (car (get-skeleton-contrib skel)))
-                      (get-skeleton-contrib skel)))
-         (opt (get-skeleton-opt skel))
-         (local-asdf-dirs (mapcar #'(lambda (x)
-                                      (when x (merge-pathnames x (os-pwd))))
-                                  (list lib contrib opt)))
-         (local-asdf-dirs-dsl))
+  (let ((project (and *jabs-project-to-run* (find-project *jabs-project-to-run*))))
+    (when project
+      (let*
+          ((skel-name (get-project-skeleton-name project))
+           (skel (or
+                  (find-skeleton skel-name)
+                  (and
+                   (load-skeleton skel-name)
+                   (find-skeleton skel-name))))
+           (lib (or (try (car (get-skeleton-lib skel)))
+                    (get-skeleton-lib skel)))
+           (contrib (or (try (car (get-skeleton-contrib skel)))
+                        (get-skeleton-contrib skel)))
+           (opt (get-skeleton-opt skel))
+           (local-asdf-dirs (mapcar #'(lambda (x)
+                                        (when x (merge-pathnames x (os-pwd))))
+                                    (list lib contrib opt)))
+           (local-asdf-dirs-dsl))
 
-    (when local-asdf-dirs
-      (dolist (dir local-asdf-dirs)
-        (when dir
-          (jlog:dbg "Adding directory ``~a'' to ASDF registry" dir)
-          (push
-           (list :tree (tostr dir))
-           local-asdf-dirs-dsl)))
-      (eval `(asdf:initialize-source-registry
-              '(:source-registry ,@local-asdf-dirs-dsl :inherit-configuration)))
-      )))
+        (when local-asdf-dirs
+          (dolist (dir local-asdf-dirs)
+            (when dir
+              (jlog:dbg "Adding directory ``~a'' to ASDF registry" dir)
+              (push
+               (list :tree (tostr dir))
+               local-asdf-dirs-dsl)))
+          (eval `(asdf:initialize-source-registry
+                  '(:source-registry ,@local-asdf-dirs-dsl :inherit-configuration)))
+          )))))
 
 (add-hook *define-project-hook*
   #'(lambda (x)

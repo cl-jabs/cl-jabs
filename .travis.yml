@@ -1,16 +1,18 @@
-language: lisp
+language: common-lisp
+sudo: required
+dist: trusty
 
 env:
   matrix:
-    - LISP=sbcl
+    - LISP=sbcl SBCL_FORCE_LOCAL=yes
     # - LISP=ccl
 
 install:
-  - sudo apt-get -y install sbcl realpath
+  - sudo apt-get -y install realpath
 
 before_script:
   - /bin/sh ./promoter build
 
 script:
-  - /bin/sh ./promoter test
+  - test -z "$(/bin/sh ./promoter test | grep FAILED)" || exit 1
   - /bin/sh ./promoter install --prefix=/tmp/fixturepath/

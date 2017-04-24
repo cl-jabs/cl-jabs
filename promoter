@@ -22,6 +22,7 @@ fi
 LIBS="asdf"
 # LIBS=""
 SBCL_URI="http://downloads.sourceforge.net/project/sbcl/sbcl/1.3.4/sbcl-1.3.4-x86-64-linux-binary.tar.bz2?r=http%3A%2F%2Fwww.sbcl.org%2Fplatform-table.html&ts=1461060178&use_mirror=tenet"
+# [ -z ${SBCL_FORCE_LOCAL} ] && SBCL_FORCE_LOCAL=""
 CCL_URL=
 
 BASE_DIR=$(dirname $(readlink -n -f $0))
@@ -318,7 +319,7 @@ case $1 in
     "test")
         ## list of test modules
         if [ x$2 = "x-l" ]; then
-            for k in `ls test/unit/*.lisp`; do
+            for k in `ls test/unit/*-test.lisp`; do
                 echo $(basename $k .lisp)
             done
             exit 0
@@ -330,7 +331,7 @@ case $1 in
 
 	print_step Preparing ${NO_COLOUR} environment to test
         ## check for sbcl binary
-        check_sbcl || do_sbcl
+	if [ -z $SBCL_FORCE_LOCAL ]; then check_sbcl || do_sbcl; else do_sbcl; fi
 	print_step_done
 
         ## building
@@ -346,7 +347,7 @@ case $1 in
             ## unit tests
 	    failed_unit_tests=no
             print_step "${PURPLE}Running ${CYAN}unit ${NO_COLOUR}tests"
-            for i in $(ls test/unit/*.lisp 2>/dev/null); do
+            for i in $(ls test/unit/*-test.lisp 2>/dev/null); do
 		echo -n "${PURPLE}Running${NO_COLOUR} test module ${CYAN}$(basename $i .lisp)${NO_COLOUR}... "
                 do_unittest $(basename $i) | grep -E 'ok [0-9]' | grep -vE '^ok' | grep -c 'not ok' >/dev/null
                 if [ $? = 0 ]; then
@@ -422,7 +423,7 @@ case $1 in
         ;;
     "install")
         shift
-        check_sbcl || do_sbcl
+	if [ -z $SBCL_FORCE_LOCAL ]; then check_sbcl || do_sbcl; else do_sbcl; fi
         ret=$?
         [ $ret != 0 ] && echo ">> ${RED}FAILED${NO_COLOUR} step">&2 && exit $ret
         print_step_done
@@ -437,10 +438,10 @@ case $1 in
         print_step_done
         ;;
     "prepare")
-	check_sbcl || do_sbcl
+	if [ -z $SBCL_FORCE_LOCAL ]; then check_sbcl || do_sbcl; else do_sbcl; fi
 	;;
     "build-local")
-        check_sbcl || do_sbcl
+	if [ -z $SBCL_FORCE_LOCAL ]; then check_sbcl || do_sbcl; else do_sbcl; fi
         ret=$?
         [ $ret != 0 ] && print_step_fail && exit $ret
         print_step_done
@@ -449,7 +450,7 @@ case $1 in
         print_step_done
         ;;
     "build")
-        check_sbcl || do_sbcl
+	if [ -z $SBCL_FORCE_LOCAL ]; then check_sbcl || do_sbcl; else do_sbcl; fi
         ret=$?
         [ $ret != 0 ] && print_step_fail && exit $ret
         print_step_done

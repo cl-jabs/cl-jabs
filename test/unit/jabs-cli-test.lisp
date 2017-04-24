@@ -41,7 +41,8 @@ SOFTWARE.
 (bind-jabs-cli-parameter "process" #'(lambda (&rest x) (declare (ignore x)) t))
 
 (deffixture bind-cli-suite (@body)
-  (let ((tools@jabs::*jabs-cli-actions* (make-hash-table :test 'equal)))
+  (let (#+sbcl(sb-ext:*posix-argv* '("sbcl" "-Dprocess=t"))
+        (tools@jabs::*jabs-cli-actions* (make-hash-table :test 'equal)))
     (bind-jabs-cli-parameter "process" #'(lambda (&rest x) (declare (ignore x)) t))
     @body))
 
