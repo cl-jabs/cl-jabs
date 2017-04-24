@@ -51,9 +51,6 @@ SOFTWARE.
 (deftest jabs-map-global-projects-to-files-test (depmanager-suite)
   (assert-equal nil (jabs::map-global-projects-to-files))) ; TODO: stub
 
-(deftest jabs-map-global-systems-to-files-test (depmanager-suite)
-  (assert-equal nil (jabs::map-global-systems-to-files))) ; TODO: stub
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defsuite filled-depmanager-suite (depmanager-suite))
@@ -76,18 +73,11 @@ SOFTWARE.
 (deftest get-project-projects-map-test (filled-depmanager-suite)
   (assert-equal 'hash-table (type-of (jabs::get-project-projects-map proj))))
 
-(deftest get-project-systems-map-test (filled-depmanager-suite)
-  (assert-equal 'hash-table (type-of (jabs::get-project-systems-map proj))))
-
 (deftest get-project-depends-on-test (filled-depmanager-suite)
   (assert-equal '(:mockdep) (jabs::get-project-depends-on proj)))
 
 (deftest dependency-project-reachable-locally-p-test (filled-depmanager-suite)
-  (assert-false (jabs::dependency-project-reachable-locally-p :test proj)) ; TODO: stub
-  )
-
-(deftest dependency-system-reachable-locally-p-test (filled-depmanager-suite)
-  (assert-false (jabs::dependency-system-reachable-locally-p :test proj))) ; TODO: stub
+  (assert-false (jabs::dependency-project-reachable-locally-p :test proj))) ; TODO: stub
 
 (deftest find-project-dependency-force-locally-test (filled-depmanager-suite)
   (assert-equal nil (jabs::find-project-dependency-force-locally :test proj))) ; TODO: stub
@@ -105,7 +95,7 @@ SOFTWARE.
   (assert-equal nil (jabs::dependency-project-reachable-p :test proj))) ; TODO: stub
 
 (deftest make-project-depencencies-list-test (filled-depmanager-suite)
-  (assert-equal nil (jabs::make-project-depencencies-list proj))) ; TODO: stub
+  (assert-equal '(:mockdep) (jabs::make-project-depencencies-list proj))) ; TODO: stub
 
 (deftest load-project-local-dependency-test (filled-depmanager-suite)
   (assert-equal nil (jabs::load-project-local-dependency :test proj))) ; TODO: stub

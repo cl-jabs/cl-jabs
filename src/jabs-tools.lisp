@@ -128,8 +128,9 @@ SOFTWARE.
                 (or
                  (try (concatenate 'string stuff))
                  (try
+                   (concatenate 'string
                    (mapcar #'(lambda (x)
-                               (character (princ-to-string x))) stuff))
+                               (character (princ-to-string x))) stuff)))
                  (princ-to-string stuff)))
                ((symbolp stuff)
                 (princ-to-string stuff))
@@ -146,7 +147,7 @@ SOFTWARE.
   (when (not (null symbol)) ;; don`t make symbol from NIL
     (if (and (stringp symbol) (string-equal "" symbol))
         nil
-        (intern (string-upcase (princ-to-string symbol)) package))))
+        (intern (string-upcase (tostr symbol)) package))))
 
 (defun tokeyword (symbol)
   (tosymbol symbol :keyword))

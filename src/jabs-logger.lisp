@@ -126,14 +126,14 @@ date - yyyy-mm-dd-hh-mm-ss-<TZ>
          (month (nth-date-value date 4 timezone))
          (year (nth-date-value date 5 timezone)))
     (loop for m from 2 to month
-          do (incf day
-                   (elt
-                    (multiple-value-list
-                     (decode-universal-time
-                      (- (encode-universal-time 0 0 0 1 m year)
-                         (* 60 60 24))))
-                    3)))
-    day))
+       do (incf day
+                (elt
+                 (multiple-value-list
+                  (decode-universal-time
+                   (- (encode-universal-time 0 0 0 1 m year)
+                      (* 60 60 24))))
+                 3)))
+    (princ-to-string day)))
 
 (defun date-get-dow (date &key timezone human-readable-p)
   "Get day-of-week"
