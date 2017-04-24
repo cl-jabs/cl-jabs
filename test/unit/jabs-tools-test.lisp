@@ -71,7 +71,7 @@ SOFTWARE.
 ;; :tostr
 (deftest tostr-test (tools-suite)
   (assert-equal "test" (tostr '(#\t #\e #\s #\t)))
-  (assert-equal "123" (tostr '(1 2 3))) ; FIXME:
+  (assert-equal "123" (tostr '(1 2 3)))
   (assert-equal "TEST" (tostr :test))
   (assert-equal "q"  (tostr #\q))
   )
@@ -87,7 +87,7 @@ SOFTWARE.
 
 ;; :concat-symbols
 (deftest concat-symbols-test (tools-suite)
-  (assert-false (concat-symbols :keyword '(#\t #\e #\s #\t))) ;; FIXME: We need to return smth like nil or error
+  (assert-eq :test (concat-symbols :keyword '(#\t #\e #\s #\t)))
   (assert-eq :test (concat-symbols :keyword #\t #\e #\s #\t))
   (assert-eq :test (concat-symbols :keyword "te" "st"))
   (assert-eq (intern "TEST" (find-package :cl-user)) (concat-symbols :cl-user "te" "st"))

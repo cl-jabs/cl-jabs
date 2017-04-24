@@ -33,7 +33,7 @@ SOFTWARE.
 (defvar *mock-msg* "")
 
 (defun check-msg (msg)
-  (when (string-contain-p *mock-msg* msg) t))
+  (string-contain-p *mock-msg* msg))
 
 (setf jlog:*log-string* "#Y-#m-#d #H:#M:#S #L: #R")
 
@@ -48,7 +48,8 @@ SOFTWARE.
   )
 
 (deffixture logger-suite (@body)
-  (let ((now 3696018717)) ; just don'tset dynamical time ;)
+  (let ((now 3696018717) ; just don'tset dynamical time ;)
+        (*log-level* "ERROR"))
     @body))
 
 (deftest check-log-string-external-symbol (logger-suite)
