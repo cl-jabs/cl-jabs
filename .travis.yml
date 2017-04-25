@@ -3,6 +3,8 @@ sudo: required
 dist: trusty
 
 env:
+  global:
+    - TZ='Europe/Kiev' 
   matrix:
     - LISP=sbcl SBCL_FORCE_LOCAL=yes
     # - LISP=ccl
@@ -11,8 +13,10 @@ install:
   - sudo apt-get -y install realpath
 
 before_script:
-  - /bin/sh ./promoter build
+  - echo 'Europe/Kiev' | sudo tee /etc/timezone
+  - sudo dpkg-reconfigure --frontend noninteractive tzdata
 
 script:
+  - /bin/sh ./promoter build
   - test -z "$(/bin/sh ./promoter test | grep FAILED)" || exit 1
   - /bin/sh ./promoter install --prefix=/tmp/fixturepath/
