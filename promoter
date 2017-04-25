@@ -264,7 +264,7 @@ do_build()
 
     echo -n "${PURPLE}Copying${NO_COLOUR} extension files to JABS directories... "
     if [ -f lib/asdf/build/asdf.lisp ]; then
-        cp lib/asdf/build/asdf.lisp src/core/jabs-asdf/
+        cp lib/asdf/build/asdf.lisp src/core/jabs-asdf-compat/
     else
         echo "${PURPLE}Build${NO_COLOUR} ASDF library ${RED}FAILED${NO_COLOUR}. There is no file ${CYAN}lib/asdf/build/asdf.lisp${NO_COLOUR}">&2
         return 1

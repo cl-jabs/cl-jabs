@@ -22,19 +22,19 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 |#
-(defpackage asdf@core@plugin@jabs
+(defpackage asdf-compat@core@plugin@jabs
   (:use :cl :tools@jabs :re@jabs :jabs
 				:skeleton@core@plugin@jabs))
 
 ;; TODO: revise https://common-lisp.net/project/asdf/asdf.html#The-defsystem-grammar
-(in-package :asdf@core@plugin@jabs)
+(in-package :asdf-compat@core@plugin@jabs)
 
 ;; load local ASDF
 (load (merge-pathnames
        (make-pathname :name "asdf" :type "lisp")
        *load-truename*))
 
-(make-instance 'jabs::plugin :name :asdf :type :core :version jabs::+jabs-version+)
+(make-instance 'jabs::plugin :name :asdf-compat :type :core :version jabs::+jabs-version+)
 
 (require 'asdf)
 
@@ -237,7 +237,7 @@ compiling asdf.lisp to a FASL and then loading it."
           `(progn
              (jlog:dbg "Special ASDF system ``~a''. Registering only system" ',name)
              (apply 'register-system-definition ',name ',options)
-	     (asdf@core@plugin@jabs::define-dummy-project ,(tools@jabs:tokeyword name)))
+	     (asdf-compat@core@plugin@jabs::define-dummy-project ,(tools@jabs:tokeyword name)))
           `(jabs::register-project
             ,(tools@jabs:tokeyword name)
             ',(append

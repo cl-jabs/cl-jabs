@@ -27,13 +27,13 @@ SOFTWARE.
 (dolist (v '("tools" "re" "core" "cli" "project" "plugin"))
   (load (make-pathname :directory '(:relative "src") :name (concatenate 'string "jabs-" v) :type "lisp")))
 
-(dolist (v '("skeleton" "asdf"))
+(dolist (v '("skeleton" "asdf-compat"))
   (eval `(load (make-pathname :directory '(:relative "src" "core"
                                            ,(concatenate 'string "jabs-" v))
                               :name ,(concatenate 'string "jabs-" v) :type "lisp"))))
 
 (defpackage asdf-test
-  (:use :cl :test-engine :clunit :jabs :asdf@core@plugin@jabs))
+  (:use :cl :test-engine :clunit :jabs :asdf-compat@core@plugin@jabs))
 
 (in-package :asdf-test)
 
@@ -67,16 +67,16 @@ SOFTWARE.
              :homepage :bug-tracker :mailto :source-control
              :serial :components :source))
   (eval `(deftest ,(intern (concatenate 'string "ASDF-SYMBOLS-CHECK-" (princ-to-string v))) (asdf-suite)
-           (assert-true (member ,v asdf@core@plugin@jabs::*asdf-symbols-list*)))))
+           (assert-true (member ,v asdf-compat@core@plugin@jabs::*asdf-symbols-list*)))))
 
 (deftest asdf-system-structure-test (asdf-suite)
-  (assert-equal 'hash-table (type-of asdf@core@plugin@jabs::*asdf-system-structures*)))
+  (assert-equal 'hash-table (type-of asdf-compat@core@plugin@jabs::*asdf-system-structures*)))
 
 ;; (defun dumb-string-hash (string) ;; FIXME: WTF
 
 (deftest asdf-fasl-pathname-test (asdf-suite)
   (let ((*jabs-source-directory* "/tmp/"))
-    (assert-equal (parse-namestring "/tmp/asdf.fasl") (asdf@core@plugin@jabs::asdf-fasl-pathname))))
+    (assert-equal (parse-namestring "/tmp/asdf.fasl") (asdf-compat@core@plugin@jabs::asdf-fasl-pathname))))
 
 ;; (defun ensure-asdf-loaded ()
 
@@ -85,7 +85,7 @@ SOFTWARE.
     (assert-equal :zzz (define-asdf-system proj))))
 
 (deftest define-dummy-project-test (asdf-suite-with-system)
-  (assert-equal :zzz (asdf@core@plugin@jabs::define-dummy-project :dummy)))
+  (assert-equal :zzz (asdf-compat@core@plugin@jabs::define-dummy-project :dummy)))
 
 ;; (defun define-dummy-project (name)
 
