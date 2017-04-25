@@ -15,7 +15,6 @@ install:
 before_script:
   - echo 'Europe/Kiev' | sudo tee /etc/timezone
   - sudo dpkg-reconfigure --frontend noninteractive tzdata
-  - sudo ntpdate ntp.ubuntu.com
 
 script:
   - /bin/sh ./promoter build
