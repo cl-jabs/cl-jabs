@@ -8,7 +8,7 @@ bin/jn.sh
 *~
 *#
 #*
-src/core/jabs-asdf/asdf.lisp
+src/core/jabs-asdf-compat/asdf.lisp
 src/jabs-core.lisp
 src/jabs-loader.lisp
 src/wrappers/jab/jab.lisp
