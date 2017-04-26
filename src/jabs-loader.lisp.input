@@ -51,6 +51,7 @@ SOFTWARE.
 ;;load core plugins
 (jlog:info "Loading core plugins")
 (dolist (v '("jabs-skeleton"
+             "jabs-component-loader"
              "jabs-asdf-compat"
              "jabs-depmanager"
              "jabs-asdf-repository"

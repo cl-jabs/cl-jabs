@@ -65,7 +65,7 @@ SOFTWARE.
              :output-files :operation-done-p :if-feature
              :in-order-to
              :homepage :bug-tracker :mailto :source-control
-             :serial :components :source))
+             :serial :source))
   (eval `(deftest ,(intern (concatenate 'string "ASDF-SYMBOLS-CHECK-" (princ-to-string v))) (asdf-suite)
            (assert-true (member ,v asdf-compat@core@plugin@jabs::*asdf-symbols-list*)))))
 
