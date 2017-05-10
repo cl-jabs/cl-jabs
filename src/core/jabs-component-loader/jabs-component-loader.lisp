@@ -33,6 +33,46 @@ SOFTWARE.
 
 (bind-project-symbol :components #'(lambda (&rest x) (declare (ignore x)) t))
 
+(defgeneric compile-project-file (project file)
+  (:documentation "Compile file from project source directory"))
+
+(defmethod compile-project-file ((project project) (file pathname))
+  (let* ((location (get-project-location project))
+         (skeleton (get-project-skeleton project))
+         (local-path (get-project-pathname project))
+         (sourcedir (merge-pathnames local-path (get-skeleton-src skeleton)))
+         (cachedir (merge-pathnames local-path (get-skeleton-cache skeleton)))
+         (file-path (merge-pathnames (merge-pathnames file sourcedir) local-path))
+         (compiled-path (merge-pathnames (merge-pathnames file cachedir) local-path))
+         (absolute-file-path (merge-pathnames file-path location))
+         (absolute-compiled-path (merge-pathnames compiled-path location)))
+    (compile-file absolute-file-path
+                  :output-file (make-pathname
+                                :directory (pathname-directory absolute-compiled-path)
+                                :name (pathname-name absolute-compiled-path)
+                                :type "fasl")
+                  :verbose (jlog:be-verbose-p)
+                  )))
+
+(defgeneric compile-project-file (project file)
+  (:documentation "Compile file from project source directory"))
+
+(defmethod load-project-file ((project project) (file pathname))
+  (let* ((location (get-project-location project))
+         (skeleton (get-project-skeleton project))
+         (local-path (get-project-pathname project))
+         (sourcedir (merge-pathnames local-path (get-skeleton-src skeleton)))
+         (cachedir (merge-pathnames local-path (get-skeleton-cache skeleton)))
+         (file-path (merge-pathnames (merge-pathnames file sourcedir) local-path))
+         (compiled-path (merge-pathnames (merge-pathnames file cachedir) local-path))
+         (absolute-file-path (merge-pathnames file-path location))
+         (absolute-compiled-path (merge-pathnames compiled-path location)))
+    (if (file-exists-p absolute-compiled-path)
+        (load absolute-compiled-path
+              :verbose (jlog:be-verbose-p))
+        (load absolute-file-path
+              :verbose (jlog:be-verbose-p)))))
+
 ;; (export
 ;;  '(find-component-loader
 ;;    run-component-loader

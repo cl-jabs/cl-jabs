@@ -331,3 +331,11 @@ date - yyyy-mm-dd-hh-mm-ss-<TZ>
 
 (defun get-stamp (&optional (stamp "STAMP"))
   (concatenate 'string (princ-to-string (get-universal-time)) "-" (princ-to-string (gensym stamp))))
+
+(defun be-verbose-p ()
+  "Answer, is loglevel accepted for verbosity output"
+  (level> *log-level* "WARNING"))
+
+(defun be-debug-p ()
+  "Answer, is loglevel accepted for verbosity output"
+  (level> *log-level* "INFO"))

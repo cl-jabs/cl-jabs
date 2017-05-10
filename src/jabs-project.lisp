@@ -83,6 +83,7 @@ SOFTWARE.
 (defclass project ()
   ((name        :accessor get-project-name        :initarg :name)
    (description :accessor get-project-description :initarg :description :initform "")
+   (location    :accessor get-project-location    :initarg :location :initform (make-pathname))
    (pathname    :accessor get-project-pathname    :initarg :pathname :initform "")))
 
 ;; do not inherit project class. TODO: is it needed?
@@ -144,14 +145,17 @@ SOFTWARE.
         (push :pathname other-instance-slots))
 	    ;;
 	    (setf project (eval
-                     `(make-instance ',name :name ',name ,@other-instance-slots)))
+                     `(make-instance ',name
+                                     :name ',name
+                                     :location ,(os-dirname (current-lisp-file-pathname))
+                                     ,@other-instance-slots)))
 	    ;; registering project
 	    (jlog:dbg "Registering project ``~a''" name)
       (when (gethash name *jabs-project-registry*)
         (jlog:wrn "Project ``~a'' already registered. Overriding" name))
       (setf (gethash name *jabs-project-registry*) project)
       (let ((*jabs-current-project* project))
-	(run-hook *define-project-hook* project))
+        (run-hook *define-project-hook* project))
       ;; return
       (jlog:info "Project ``~a'' registered" name)
       t
@@ -211,3 +215,7 @@ SOFTWARE.
       (jlog:crit "Can not set parameter ``~a'' for project ``~a''. " slot (get-project-name project))))
 
 (defsetf project-slot-value set-project-slot-value)
+
+;; bind default project symbols
+(dolist (v '(:name :description :location :pathname))
+  (bind-project-symbol v #'(lambda (&rest x) (declare (ignore x)) t)))

@@ -38,6 +38,7 @@ SOFTWARE.
           ;;
           get-skeleton-name
           get-project-skeleton-name
+          get-project-skeleton
           get-skeleton-src
           get-skeleton-bin
           get-skeleton-lib
@@ -363,6 +364,12 @@ not included to main schema (like socket or dev dir etc)"
           ((listp maybe-skeleton-name)
            (tokeyword (car maybe-skeleton-name)))
           (t (tokeyword maybe-skeleton-name)))))
+
+(defgeneric get-project-skeleton (project)
+  (:documentation "Get project skeleton"))
+
+(defmethod get-project-skeleton ((project project))
+  (find-skeleton (get-project-skeleton-name project)))
 
 (defgeneric project-skeleton-force-p (project)
   )

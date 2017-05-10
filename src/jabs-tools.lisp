@@ -1473,3 +1473,7 @@ FASLs."
 	       (jlog:wrn "Threads support is not implemented for current lisp implementation. Continue serial")
 	       ,@body)
        ,@body))
+
+(defun current-lisp-file-pathname ()
+  "Portably return the PATHNAME of the current Lisp source file being compiled or loaded"
+  (or *compile-file-pathname* *load-pathname*))

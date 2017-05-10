@@ -46,7 +46,8 @@ SOFTWARE.
            :enable-output-type
            :disable-output-type
            :make-log-string
-           :get-stamp))
+           :get-stamp
+	   :be-verbose-p))
 
 (defpackage re@jabs
   (:nicknames :jre)
@@ -188,6 +189,7 @@ SOFTWARE.
            :defun*
            :defgeneric*
            :defmethod*
+           :current-lisp-file-pathname
            ))
 
 (defpackage :jabs
