@@ -26,7 +26,7 @@ JABS is a project of modern build system for common lisp. Code is under active d
  cd cl-jabs && ./promoter build
 ```
 
-3. Install system wild (optionally):
+3. Install system-wide (optionally):
  ```bash
  sudo ./promoter install [--prefix=/usr/local]
  ```
