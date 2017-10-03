@@ -9,6 +9,8 @@
 ```
 
 ## WAT
+![](https://media.giphy.com/media/1L5YuA6wpKkNO/giphy.gif)
+
 JABS is a project of modern build system for common lisp. Code is under active development and still not ready for production usage. Please, find some documentation [here](https://github.com/cl-jabs/cl-jabs/wiki).
 
 ## [Quickstart](https://github.com/cl-jabs/cl-jabs/wiki/quickstart)
